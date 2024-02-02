@@ -1,7 +1,7 @@
 // Here, iam importing server from index.js and listening here.
 // Imports
-import app from "./index.js";
-import connectToDB from "./config/db.js";
+import app from "./src/index.js";
+import connectToDB from "./src/config/db.js";
 
 // Listening to server
 const PORT = process.env.PORT;
