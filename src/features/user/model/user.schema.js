@@ -104,7 +104,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // Middlewares
-userSchema.pre("save", async function () {
+// Hash user password before save using bcrypt library
+userSchema.pre("save", async function (next) {
   const user = this;
   if (!user.isModified("password")) {
     return next();
