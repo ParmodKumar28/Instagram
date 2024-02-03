@@ -13,10 +13,6 @@ const userSchema = new mongoose.Schema(
       min: [2, "Name should be greater than 2 characters!"],
       max: [20, "Name should be less than 20 characters!"],
     },
-    username: {
-      type: String,
-      unique: true,
-    },
     email: {
       type: String,
       unique: true,
@@ -30,17 +26,26 @@ const userSchema = new mongoose.Schema(
       },
       required: true,
     },
-    phone: {
+    username: {
       type: String,
       unique: true,
-      validate: {
-        validator: function (value) {
-          const mobileNumberRegex = /^[0-9]{10}$/;
-          return mobileNumberRegex.test(value);
-        },
-        message: "Invalid mobile number!",
-      },
     },
+    // phone: {
+    //   type: String,
+    //   sparse: true, // Allow multiple documents to have a null value for this field
+    //   validate: {
+    //     validator: function (value) {
+    //       if (value === null || value === undefined) {
+    //         // Allow null and undefined values
+    //         return true;
+    //       }
+
+    //       const mobileNumberRegex = /^[0-9]{10}$/;
+    //       return mobileNumberRegex.test(value);
+    //     },
+    //     message: "Invalid mobile number!",
+    //   },
+    // },
     password: {
       type: String,
       required: true,
