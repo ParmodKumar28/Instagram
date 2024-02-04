@@ -1,7 +1,8 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
 import { ErrorHandler } from "../../../utils/errorHandler.js";
-import { signupDb } from "../model/user.repository.js";
+import { sendToken } from "../../../utils/sendToken.js";
+import { signupDb, userByEmail } from "../model/user.repository.js";
 
 // Post SignUp function
 export const signUp = async (req, res, next) => {
@@ -21,15 +22,8 @@ export const signUp = async (req, res, next) => {
     }
     // Calling db function
     const newUser = await signupDb({ email, name, username, password });
-    if (!newUser) {
-      return next(new ErrorHandler(400, "User not created!"));
-    } else {
-      return res.status(201).json({
-        success: true,
-        msg: "user created successfully!",
-        newUser,
-      });
-    }
+    // Creating jwt token and adding to cookie
+    await sendToken(newUser, res, 200);
   } catch (error) {
     if (error.code === 11000) {
       if (error.keyPattern && error.keyPattern.username) {
@@ -50,6 +44,51 @@ export const signUp = async (req, res, next) => {
         );
       }
     }
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Post signIn
+export const signIn = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return next(
+        new ErrorHandler(400, "Please provide both email & password!")
+      );
+    }
+
+    // Checking if the credentials are correct or not
+    const user = await userByEmail(email);
+    if (!user) {
+      return next(
+        new ErrorHandler(401, "No user exist by this email register yourself!")
+      );
+    }
+    // Comparing password
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
+      return next(new ErrorHandler(401, "Wrong password!"));
+    }
+    // Generating token and sending token with response
+    await sendToken(user, res, 200);
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Logout user
+export const logout = async (req, res, next) => {
+  try {
+    // Removing token from the cookie to logout
+    res
+      .status(200)
+      .cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+      })
+      .json({ success: true, msg: "logout successful!" });
+  } catch (error) {
     return next(new ErrorHandler(400, error));
   }
 };

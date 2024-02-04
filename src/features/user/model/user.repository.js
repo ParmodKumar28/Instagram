@@ -8,3 +8,8 @@ export const signupDb = async (user) => {
   await newUser.save();
   return newUser;
 };
+
+// SignIn checking email and password with db
+export const userByEmail = async (email) => {
+  return await userModel.findOne({ email });
+};

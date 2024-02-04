@@ -8,13 +8,17 @@ import express from "express";
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
 import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware.js";
+import cookieParser from "cookie-parser";
 
 // Server
 const app = express();
 
+// Parsing cookies
+app.use(cookieParser());
+
 // Parsing data
-app.use(express.urlencoded({ extended: true })); 
-app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Default route
 app.get("/", (req, res, next) => {

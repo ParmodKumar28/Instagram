@@ -2,6 +2,8 @@
 // Imports
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema(
   {
@@ -30,22 +32,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
-    // phone: {
-    //   type: String,
-    //   sparse: true, // Allow multiple documents to have a null value for this field
-    //   validate: {
-    //     validator: function (value) {
-    //       if (value === null || value === undefined) {
-    //         // Allow null and undefined values
-    //         return true;
-    //       }
+    phone: {
+      type: String,
+      sparse: true, // Allow multiple documents to have a null value for this field
+      validate: {
+        validator: function (value) {
+          if (value === null || value === undefined) {
+            // Allow null and undefined values
+            return true;
+          }
 
-    //       const mobileNumberRegex = /^[0-9]{10}$/;
-    //       return mobileNumberRegex.test(value);
-    //     },
-    //     message: "Invalid mobile number!",
-    //   },
-    // },
+          const mobileNumberRegex = /^[0-9]{10}$/;
+          return mobileNumberRegex.test(value);
+        },
+        message: "Invalid mobile number!",
+      },
+    },
     password: {
       type: String,
       required: true,
@@ -104,6 +106,8 @@ const userSchema = new mongoose.Schema(
         ref: "Reel",
       },
     ],
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
   { timestamps: true }
 );
@@ -124,6 +128,32 @@ userSchema.pre("save", async function (next) {
     return next(error);
   }
 });
+
+// JWT Token
+userSchema.methods.getJWTToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_Secret, {
+    expiresIn: process.env.JWT_Expire,
+  });
+};
+
+// user password compare
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+// Generate resetPasswordToken
+userSchema.methods.getResetPasswordToken = async function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  // hashing and updating user resetPasswordToken
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
 
 // Creating model
 const userModel = mongoose.model("User", userSchema);

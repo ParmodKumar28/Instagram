@@ -1,7 +1,8 @@
 // Creating router for the user here
 // Imports
 import express from "express";
-import { signUp } from "../controller/user.controller.js";
+import { logout, signIn, signUp } from "../controller/user.controller.js";
+import { auth } from "../../../middlewares/auth.js";
 
 // Router
 const userRouter = express.Router();
@@ -10,6 +11,12 @@ const userRouter = express.Router();
 
 // Register new user
 userRouter.post("/signup", signUp);
+
+// Signing in
+userRouter.post("/signin", signIn);
+
+// Logout user
+userRouter.get("/logout", auth, logout);
 
 // Exporting Router
 export default userRouter;
