@@ -1,8 +1,16 @@
 // Creating router for the user here
 // Imports
 import express from "express";
-import { logout, signIn, signUp, updateUserProfile } from "../controller/user.controller.js";
+import {
+  addProfilePic,
+  logout,
+  signIn,
+  signUp,
+  updateUserProfile,
+  userData,
+} from "../controller/user.controller.js";
 import { auth } from "../../../middlewares/auth.js";
+import upload from "../../../middlewares/file-upload.js";
 
 // Router
 const userRouter = express.Router();
@@ -20,6 +28,17 @@ userRouter.get("/logout", auth, logout);
 
 // Updating user
 userRouter.put("/update-profile", auth, updateUserProfile);
+
+// Upload profile pic
+userRouter.post(
+  "/upload-profile-pic",
+  auth,
+  upload.single("profilePic"),
+  addProfilePic
+);
+
+// Getting user data
+userRouter.get("/user-data", auth, userData);
 
 // Exporting Router
 export default userRouter;

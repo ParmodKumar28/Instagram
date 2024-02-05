@@ -8,7 +8,7 @@ import crypto from "crypto";
 const userSchema = new mongoose.Schema(
   {
     profilePic: {
-      type: Buffer,
+      type: String
     },
     name: {
       type: String,

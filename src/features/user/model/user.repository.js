@@ -21,3 +21,8 @@ export const updateUserDb = async (updatedData, userId) => {
     runValidators: true
   });
 }
+
+// Getting single user data from db
+export const getUserDataDb = async (userId) => {
+  return await UserModel.findById(userId);
+}

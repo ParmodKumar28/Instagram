@@ -1,9 +1,9 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
-import mongoose from "mongoose";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
+  getUserDataDb,
   signupDb,
   updateUserDb,
   userByEmail,
@@ -102,20 +102,59 @@ export const logout = async (req, res, next) => {
 export const updateUserProfile = async (req, res, next) => {
   try {
     const updatedData = req.body;
-    if (!updatedData) {
+
+    // Check if the updatedData object is empty
+    if (Object.keys(updatedData).length === 0) {
       return next(new ErrorHandler(400, "Please provide data to update!"));
     }
+
     const userId = req.user._id;
     const updatedUser = await updateUserDb(updatedData, userId);
-    if (!updateUserDb) {
-      return next(
-        new ErrorHandler(400, "User data not updated no user exist by this id.")
-      );
+
+    if (!updatedUser) {
+      return next(new ErrorHandler(404, "User not found or data not updated."));
     }
+
     return res
       .status(201)
       .json({ success: true, updatedUser, msg: "User data updated!" });
   } catch (error) {
-    return next(new ErrorHandler(400, error));
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Upload profile pic
+export const addProfilePic = async (req, res, next) => {
+  try {
+    const user = req.user;
+    user.profilePic = req.file.path;
+    console.log(req.file);
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Get user data
+export const userData = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    if (!userId) {
+      return next(new ErrorHandler(404, "User id not recieved!"));
+    }
+    const user = await getUserDataDb(userId);
+    if (!user) {
+      return next(new ErrorHandler(404, "No user found by this id!"));
+    }
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
   }
 };
