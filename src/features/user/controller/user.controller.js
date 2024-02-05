@@ -1,8 +1,13 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
+import mongoose from "mongoose";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
-import { signupDb, userByEmail } from "../model/user.repository.js";
+import {
+  signupDb,
+  updateUserDb,
+  userByEmail,
+} from "../model/user.repository.js";
 
 // Post SignUp function
 export const signUp = async (req, res, next) => {
@@ -88,6 +93,28 @@ export const logout = async (req, res, next) => {
         httpOnly: true,
       })
       .json({ success: true, msg: "logout successful!" });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Update profile user
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const updatedData = req.body;
+    if (!updatedData) {
+      return next(new ErrorHandler(400, "Please provide data to update!"));
+    }
+    const userId = req.user._id;
+    const updatedUser = await updateUserDb(updatedData, userId);
+    if (!updateUserDb) {
+      return next(
+        new ErrorHandler(400, "User data not updated no user exist by this id.")
+      );
+    }
+    return res
+      .status(201)
+      .json({ success: true, updatedUser, msg: "User data updated!" });
   } catch (error) {
     return next(new ErrorHandler(400, error));
   }

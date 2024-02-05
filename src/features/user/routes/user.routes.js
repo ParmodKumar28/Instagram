@@ -1,7 +1,7 @@
 // Creating router for the user here
 // Imports
 import express from "express";
-import { logout, signIn, signUp } from "../controller/user.controller.js";
+import { logout, signIn, signUp, updateUserProfile } from "../controller/user.controller.js";
 import { auth } from "../../../middlewares/auth.js";
 
 // Router
@@ -17,6 +17,9 @@ userRouter.post("/signin", signIn);
 
 // Logout user
 userRouter.get("/logout", auth, logout);
+
+// Updating user
+userRouter.put("/update-profile", auth, updateUserProfile);
 
 // Exporting Router
 export default userRouter;
