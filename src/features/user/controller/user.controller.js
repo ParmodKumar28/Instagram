@@ -5,11 +5,12 @@ import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
+  deleteUserDb,
   findUserForPasswordResetDb,
   getUserDataDb,
   signupDb,
   updateUserDb,
-  userByEmail,
+  userByEmailDb,
 } from "../model/user.repository.js";
 import crypto from "crypto";
 
@@ -70,7 +71,7 @@ export const signIn = async (req, res, next) => {
     }
 
     // Checking if the credentials are correct or not
-    const user = await userByEmail(email);
+    const user = await userByEmailDb(email);
     if (!user) {
       return next(
         new ErrorHandler(401, "No user exist by this email register yourself!")
@@ -178,7 +179,7 @@ export const forgotPasswordOtp = async (req, res, next) => {
       );
     }
 
-    const user = await userByEmail(email);
+    const user = await userByEmailDb(email);
     if (!user) {
       return next(
         new ErrorHandler(
@@ -272,6 +273,26 @@ export const updatePassword = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, msg: "Password updated successfully!" });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Deleting user account
+export const deleteAccount = async (req, res, next) => {
+  try {
+    const deletedUser = await deleteUserDb(req.user._id);
+    if (!deletedUser) {
+      return next(
+        new ErrorHandler(
+          400,
+          "User account not deleted or not user found by this id!"
+        )
+      );
+    }
+    return res
+      .status(200)
+      .json({ success: true, msg: "Account deleted successfully!" });
   } catch (error) {
     return next(new ErrorHandler(400, error.message));
   }

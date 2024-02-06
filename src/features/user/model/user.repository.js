@@ -10,7 +10,7 @@ export const signupDb = async (user) => {
 };
 
 // SignIn checking email and password with db
-export const userByEmail = async (email) => {
+export const userByEmailDb = async (email) => {
   return await UserModel.findOne({ email });
 };
 
@@ -33,4 +33,9 @@ export const findUserForPasswordResetDb = async (hashedToken) => {
     resetPasswordToken: hashedToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
+};
+
+// Deleting user
+export const deleteUserDb = async (userId) => {
+  return await UserModel.findByIdAndDelete(userId);
 };

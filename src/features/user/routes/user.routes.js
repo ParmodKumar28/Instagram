@@ -3,6 +3,7 @@
 import express from "express";
 import {
   addProfilePic,
+  deleteAccount,
   forgotPasswordOtp,
   logout,
   resetPassword,
@@ -51,6 +52,9 @@ userRouter.put("/reset-password", resetPassword);
 
 // Update password
 userRouter.put("/update-password", auth, updatePassword);
+
+// Delete account
+userRouter.delete("/delete-account", auth, deleteAccount);
 
 // Exporting Router
 export default userRouter;
