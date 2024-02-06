@@ -3,7 +3,9 @@
 import express from "express";
 import {
   addProfilePic,
+  forgotPasswordOtp,
   logout,
+  resetPassword,
   signIn,
   signUp,
   updateUserProfile,
@@ -39,6 +41,12 @@ userRouter.post(
 
 // Getting user data
 userRouter.get("/user-data", auth, userData);
+
+// Otp for password reset
+userRouter.get("/forgot-password-otp", forgotPasswordOtp);
+
+// Reset password
+userRouter.put("/reset-password", resetPassword);
 
 // Exporting Router
 export default userRouter;

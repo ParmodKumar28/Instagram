@@ -18,11 +18,19 @@ export const userByEmail = async (email) => {
 export const updateUserDb = async (updatedData, userId) => {
   return await UserModel.findByIdAndUpdate(userId, updatedData, {
     new: true,
-    runValidators: true
+    runValidators: true,
   });
-}
+};
 
 // Getting single user data from db
 export const getUserDataDb = async (userId) => {
   return await UserModel.findById(userId);
-}
+};
+
+// Find user for password reset by hashed token
+export const findUserForPasswordRestDb = async (hashedToken) => {
+  return await UserModel.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+};

@@ -59,7 +59,7 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
 <body>
     <div class="container">
         <div style="text-align: center; padding-bottom: 20px;">
-            <img src="https://i.pinimg.com/originals/f5/69/73/f5697354991d1dc325f9f85019d3ee0a.jpg" alt="Instagram" style="width: 150px;">
+            <img src="https://pbs.twimg.com/profile_images/1526231349354303489/3Bg-2ZsT_400x400.jpg" alt="Instagram" style="width: 150px;">
         </div>
         <div>
             <h1>Welcome to Instagram!</h1>

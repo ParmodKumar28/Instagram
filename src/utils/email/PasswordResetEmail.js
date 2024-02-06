@@ -2,23 +2,28 @@
 // Imports
 import nodemailer from "nodemailer";
 
-export const sendResetPasswordMail = async (receiverMail, userName) => {
-    try {
-        // Creating transporter
-        const transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE,
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD,
-            },
-        });
+export const sendResetPasswordMail = async (
+  receiverMail,
+  userName,
+  token,
+  resetPasswordUrl
+) => {
+  try {
+    // Creating transporter
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
 
-        // Mail options
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: receiverMail,
-            subject: "OTP for password reset!",
-            html: `
+    // Mail options
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: receiverMail,
+      subject: "OTP for password reset!",
+      html: `
       <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,13 +73,13 @@ export const sendResetPasswordMail = async (receiverMail, userName) => {
 <body>
     <div class="container">
         <div style="text-align: center; padding-bottom: 20px;">
-            <img src="https://i.pinimg.com/originals/f5/69/73/f5697354991d1dc325f9f85019d3ee0a.jpg" alt="Instagram" style="width: 150px;">
+            <img src="https://pbs.twimg.com/profile_images/1526231349354303489/3Bg-2ZsT_400x400.jpg" alt="Instagram" style="width: 150px;">
         </div>
         <div>
             <h1>Password Reset</h1>
             <p>Dear ${userName},</p>
             <p>We received a request to reset your password for your Instagram account. Click the button below to reset your password:</p>
-            <p><a href="[Reset Link]" class="btn">Reset Password</a></p>
+            <p><a href=${resetPasswordUrl} class="btn">Reset Password</a> ${token}</p>
             <p>If you did not request a password reset, you can ignore this email. Your password will not be changed.</p>
             <p>Thank you,<br>The Instagram Team</p>
         </div>
@@ -82,17 +87,17 @@ export const sendResetPasswordMail = async (receiverMail, userName) => {
 </body>
 </html>
 `,
-        };
+    };
 
-        // Sending mail
-        await transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log();
-            } else {
-                console.log(`Welcome Email Sent: ${info.response}`);
-            }
-        });
-    } catch (error) {
-        console.log(error);
-    }
+    // Sending mail
+    await transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log();
+      } else {
+        console.log(`Welcome Email Sent: ${info.response}`);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };

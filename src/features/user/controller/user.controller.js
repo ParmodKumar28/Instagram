@@ -1,14 +1,17 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
+import { sendResetPasswordMail } from "../../../utils/email/PasswordResetEmail.js";
 import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
+  findUserForPasswordRestDb,
   getUserDataDb,
   signupDb,
   updateUserDb,
   userByEmail,
 } from "../model/user.repository.js";
+import crypto from "crypto";
 
 // Post SignUp function
 export const signUp = async (req, res, next) => {
@@ -157,6 +160,82 @@ export const userData = async (req, res, next) => {
       success: true,
       user,
     });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Forgot password otp sending
+export const forgotPasswordOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return next(
+        new ErrorHandler(
+          400,
+          "Please, provide registered email to receive otp!"
+        )
+      );
+    }
+
+    const user = await userByEmail(email);
+    if (!user) {
+      return next(
+        new ErrorHandler(
+          400,
+          "No user registered with this email, please provide valid email!"
+        )
+      );
+    } else {
+      // Creating otp and saving to user
+      const resetToken = await user.getResetPasswordToken();
+      await user.save();
+      const resetPasswordUrl = "http://localhost:8000/api/user/reset-password";
+
+      // Sending email
+      await sendResetPasswordMail(
+        email,
+        user.name,
+        resetToken,
+        resetPasswordUrl
+      );
+      res.status(200).json({ success: true, msg: "Reset mail sent!" });
+    }
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Reset password
+export const resetPassword = async (req, res, next) => {
+  try {
+    const  {resetToken} = req.body;
+    if (!resetToken) {
+      return next(new ErrorHandler(400, "Please give otp token!"));
+    }
+    // Creating token hash to compare with token stored on user
+    const hashedToken = await crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // Finding user based on the hashed token in db
+    const user = await findUserForPasswordRestDb(hashedToken);
+    if (!user || user.resetPasswordExpire < Date.now()) {
+      return next(new ErrorHandler(400, "Token is expired or invalid!"));
+    }
+
+    const { password, confirmPassword } = req.body;
+    if (password !== confirmPassword) {
+      return next(
+        new ErrorHandler(400, "Password and confirm password don't match!")
+      );
+    }
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    res.status(200).json({ success: true, msg: "Password reset successful!" });
   } catch (error) {
     return next(new ErrorHandler(400, error.message));
   }
