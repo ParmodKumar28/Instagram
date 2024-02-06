@@ -28,7 +28,7 @@ export const getUserDataDb = async (userId) => {
 };
 
 // Find user for password reset by hashed token
-export const findUserForPasswordRestDb = async (hashedToken) => {
+export const findUserForPasswordResetDb = async (hashedToken) => {
   return await UserModel.findOne({
     resetPasswordToken: hashedToken,
     resetPasswordExpire: { $gt: Date.now() },

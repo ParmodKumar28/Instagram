@@ -5,7 +5,7 @@ import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
-  findUserForPasswordRestDb,
+  findUserForPasswordResetDb,
   getUserDataDb,
   signupDb,
   updateUserDb,
@@ -209,7 +209,7 @@ export const forgotPasswordOtp = async (req, res, next) => {
 // Reset password
 export const resetPassword = async (req, res, next) => {
   try {
-    const  {resetToken} = req.body;
+    const { resetToken } = req.body;
     if (!resetToken) {
       return next(new ErrorHandler(400, "Please give otp token!"));
     }
@@ -220,7 +220,7 @@ export const resetPassword = async (req, res, next) => {
       .digest("hex");
 
     // Finding user based on the hashed token in db
-    const user = await findUserForPasswordRestDb(hashedToken);
+    const user = await findUserForPasswordResetDb(hashedToken);
     if (!user || user.resetPasswordExpire < Date.now()) {
       return next(new ErrorHandler(400, "Token is expired or invalid!"));
     }
@@ -236,6 +236,42 @@ export const resetPassword = async (req, res, next) => {
     user.resetPasswordExpire = undefined;
     await user.save();
     res.status(200).json({ success: true, msg: "Password reset successful!" });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Update password
+export const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return next(
+        new ErrorHandler(
+          400,
+          "Please provide current password and new and confirm password!"
+        )
+      );
+    }
+    const user = await getUserDataDb(req.user._id);
+    // Comparing current password here if matches then updating password
+    const passwordMatch = await user.comparePassword(currentPassword);
+    if (!passwordMatch) {
+      return next(
+        new ErrorHandler(400, "Current password doesn't match enter valid!")
+      );
+    }
+    if (newPassword !== confirmPassword) {
+      return next(
+        new ErrorHandler(400, "new password and confirm password do not match!")
+      );
+    }
+    // Updating password in the db
+    user.password = newPassword;
+    await user.save();
+    return res
+      .status(200)
+      .json({ success: true, msg: "Password updated successfully!" });
   } catch (error) {
     return next(new ErrorHandler(400, error.message));
   }

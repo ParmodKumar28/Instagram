@@ -8,6 +8,7 @@ import {
   resetPassword,
   signIn,
   signUp,
+  updatePassword,
   updateUserProfile,
   userData,
 } from "../controller/user.controller.js";
@@ -47,6 +48,9 @@ userRouter.get("/forgot-password-otp", forgotPasswordOtp);
 
 // Reset password
 userRouter.put("/reset-password", resetPassword);
+
+// Update password
+userRouter.put("/update-password", auth, updatePassword);
 
 // Exporting Router
 export default userRouter;
