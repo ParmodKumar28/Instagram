@@ -1,5 +1,6 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
+import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
@@ -29,6 +30,8 @@ export const signUp = async (req, res, next) => {
     const newUser = await signupDb({ email, name, username, password });
     // Creating jwt token and adding to cookie
     await sendToken(newUser, res, 200);
+    // Sending welcome email
+    await sendWelcomeMail(email, name);
   } catch (error) {
     if (error.code === 11000) {
       if (error.keyPattern && error.keyPattern.username) {
