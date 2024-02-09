@@ -8,7 +8,7 @@ import crypto from "crypto";
 const userSchema = new mongoose.Schema(
   {
     profilePic: {
-      type: String
+      type: String,
     },
     name: {
       type: String,
@@ -78,31 +78,31 @@ const userSchema = new mongoose.Schema(
     },
     following: [
       {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     followers: [
       {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     posts: [
       {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
       },
     ],
     stories: [
       {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Story",
       },
     ],
     reels: [
       {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Reel",
       },
     ],

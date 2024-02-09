@@ -1,0 +1,1 @@
+// Creating here user controller to handle communication between routes and the model/database
