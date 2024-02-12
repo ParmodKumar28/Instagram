@@ -9,7 +9,7 @@ import {
   getAllPosts,
   getPost,
   getUserPosts,
-  updatePost,
+  updatePost, 
 } from "../controller/posts.controller.js";
 
 // Router
