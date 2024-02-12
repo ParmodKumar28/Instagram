@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
 import postsRouter from "./features/posts/routes/posts.routes.js";
+import likesRouter from "./features/likes/routes/likes.routes.js";
 
 // Server
 const app = express();
@@ -29,7 +30,10 @@ app.get("/", (req, res, next) => {
 // Routes
 // User routes
 app.use("/api/user", userRouter);
+// Post routes
 app.use("/api/post", postsRouter);
+// Like routes
+app.use("/api/like", likesRouter);
 
 // Not existing route
 app.use((req, res, next) => {

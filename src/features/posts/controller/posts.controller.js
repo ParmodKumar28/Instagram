@@ -122,7 +122,7 @@ export const getUserPosts = async (req, res, next) => {
       return next(new ErrorHandler(400, "Enter user id please!"));
     }
     const posts = await getUserPostsDb(userId);
-    if (Object.keys(posts).length === 0) {
+    if (posts.length === 0) {
       return next(
         new ErrorHandler(400, "No posts found please create some post's!")
       );
@@ -141,7 +141,7 @@ export const getUserPosts = async (req, res, next) => {
 export const getAllPosts = async (req, res, next) => {
   try {
     const posts = await getAllPostsDb();
-    if (Object.keys(posts).length === 0) {
+    if (posts.length === 0) {
       return next(new ErrorHandler(400, "No post's found!"));
       ss;
     }
