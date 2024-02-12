@@ -10,7 +10,7 @@ const likesSchema = new mongoose.Schema({
   },
   likeable: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "on_model",
+    refPath: "on_model",
   },
   on_model: {
     type: String,

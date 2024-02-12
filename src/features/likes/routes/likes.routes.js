@@ -1,8 +1,8 @@
 // Like's routes is here
 // Imports
 import express from "express";
-import { auth } from "../../../middlewares/auth";
-import { getLikes, toggleLike } from "../controller/likes.controller";
+import { auth } from "../../../middlewares/auth.js";
+import { getLikes, toggleLike } from "../controller/likes.controller.js";
 
 // Creating router
 const likesRouter = express.Router();

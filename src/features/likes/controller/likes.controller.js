@@ -1,13 +1,14 @@
 // Like's controller is here for routes and database/model communication function's
 // Imports
-import { getLikesDb, toggleLikeDb } from "../model/likes.repository";
+import { ErrorHandler } from "../../../utils/errorHandler.js";
+import { getLikesDb, toggleLikeDb } from "../model/likes.repository.js";
 
 // Get likes on post or comment here
 export const getLikes = async (req, res, next) => {
   try {
     const id = req.params.id;
     const type = req.body.type;
-    if (type != "Post" || type != "Comment") {
+    if (type != "Post" && type != "Comment") {
       return next(
         new ErrorHandler(
           400,
@@ -41,17 +42,18 @@ export const getLikes = async (req, res, next) => {
 // Adding or toggling like here on post or comment here
 export const toggleLike = async (req, res, next) => {
   try {
-    const userId = req.user_id;
+    const { user } = req;
+    const userId = user._id;
     const id = req.params.id;
     const type = req.query.type;
     if (!userId) {
       return next(new ErrorHandler(400, "Enter userId or Login!"));
     }
-    if (type != "Post" || type != "Comment") {
+    if (type != "Post" && type != "Comment") {
       return next(
         new ErrorHandler(
           400,
-          "Enter a valid type ie 'Post' or 'Comment' in body!"
+          "Enter a valid type ie 'Post' or 'Comment' in query!"
         )
       );
     }

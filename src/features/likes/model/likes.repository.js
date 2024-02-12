@@ -1,9 +1,10 @@
 // Like's repository is here for handling database function's
 // Imports
 import { ObjectId } from "mongodb";
-import PostModel from "../../posts/model/posts.schema";
-import LikeModel from "./likes.schema";
-import { ErrorHandler } from "../../../utils/errorHandler";
+import PostModel from "../../posts/model/posts.schema.js";
+import LikeModel from "./likes.schema.js";
+import { ErrorHandler } from "../../../utils/errorHandler.js";
+import CommentModel from "../../comments/model/comment.schema.js";
 
 // Getting like's on comment or post from database
 export const getLikesDb = async (id, type) => {
@@ -11,7 +12,7 @@ export const getLikesDb = async (id, type) => {
     let likeable;
     if (type == "Post") {
       likeable = await PostModel.findById(id);
-    } else {
+    } else if (type === "Comment") {
       likeable = await CommentModel.findById(id);
     }
 
@@ -26,7 +27,7 @@ export const getLikesDb = async (id, type) => {
       likeable: new ObjectId(id),
       on_model: type,
     })
-      .populate({ path: "User", select: "name email _id" })
+      .populate({ path: "user", select: "name email _id" })
       .populate("likeable");
 
     if (likes.length === 0) {
@@ -46,16 +47,17 @@ export const getLikesDb = async (id, type) => {
 export const toggleLikeDb = async (userId, likeableId, type) => {
   try {
     let likeable;
-    if (type == "Post") {
+    if (type === "Post") {
       likeable = await PostModel.findById(likeableId);
-    } else {
+    } else if (type === "Comment") {
       likeable = await CommentModel.findById(likeableId);
     }
+    console.log(likeable);
 
     if (!likeable) {
       throw new ErrorHandler(
         400,
-        `There are no like's on this ${type.toLowerCase()}.`
+        `No ${type.toLowerCase()} found with this ID`
       );
     }
 
@@ -74,21 +76,21 @@ export const toggleLikeDb = async (userId, likeableId, type) => {
         // Removing like from the post or comment array of likes
         likeable.likes.splice(index, 1);
         await likeable.save();
-        return { message: "Like removed" };
-      } else {
-        const newLike = new LikeModel({
-          user: new ObjectId(userId),
-          likeable: new ObjectId(likeable),
-          on_model: type,
-        });
+      }
+      return { message: "Like removed" };
+    } else {
+      const newLike = new LikeModel({
+        user: new ObjectId(userId),
+        likeable: new ObjectId(likeable),
+        on_model: type,
+      });
 
-        const liked = await newLike.save();
-        if (liked) {
-          // Add like to the post or comment array of likes
-          likeable.likes.push(newLike._id);
-          await likeable.save();
-          return { message: "Like added" };
-        }
+      const liked = await newLike.save();
+      if (liked) {
+        // Add like to the post or comment array of likes
+        likeable.likes.push(newLike._id);
+        await likeable.save();
+        return { message: "Like added" };
       }
     }
   } catch (error) {
