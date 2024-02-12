@@ -87,7 +87,7 @@ export const toggleLikeDb = async (userId, likeableId, type) => {
           // Add like to the post or comment array of likes
           likeable.likes.push(newLike._id);
           await likeable.save();
-          return { mesage: "Like added" };
+          return { message: "Like added" };
         }
       }
     }
