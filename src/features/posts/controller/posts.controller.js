@@ -2,13 +2,20 @@
 // Imports
 
 import { ErrorHandler } from "../../../utils/errorHandler.js";
-import { createPostDb, deletePostDb } from "../model/posts.repository.js";
+import {
+  createPostDb,
+  deletePostDb,
+  getAllPostsDb,
+  getPostDb,
+  getUserPostsDb,
+  updatePostDb,
+} from "../model/posts.repository.js";
 
 // Create new post
 export const createPost = async (req, res, next) => {
   try {
     const postData = req.body;
-    if (!postData) {
+    if (Object.keys(postData).length === 0) {
       return next(
         new ErrorHandler(400, "Please add post data to create new post!")
       );
@@ -53,6 +60,95 @@ export const deletePost = async (req, res, next) => {
       succes: true,
       msg: "Post deleted!",
       deletedPost: deletedPost,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Updating post
+export const updatePost = async (req, res, next) => {
+  try {
+    const postId = req.params.postId;
+    if (!postId) {
+      return next(new ErrorHandler(400, "Enter postId in the params!"));
+    }
+    const postData = req.body;
+    if (Object.keys(postData).length === 0) {
+      return next(new ErrorHandler(400, "Provide fields you want to update!"));
+    }
+    const updatedPost = await updatePostDb(postId, req.user._id, postData);
+    if (!updatedPost) {
+      return next(
+        new ErrorHandler(400, "Post not updated something went wrong!")
+      );
+    }
+    return res.status(200).json({
+      succes: true,
+      msg: "Post updated!",
+      updatedPost: updatedPost,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Getting single post by id
+export const getPost = async (req, res, next) => {
+  try {
+    const postId = req.params.postId;
+    if (!postId) {
+      return next(new ErrorHandler(400, "Enter postId in the params!"));
+    }
+    const post = await getPostDb(postId);
+    if (!post) {
+      return next(new ErrorHandler(400, "No post found by this id!"));
+    }
+    return res.status(200).json({
+      success: true,
+      msg: "Post found successfully!",
+      post: post,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Getting user posts
+export const getUserPosts = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    if (!userId) {
+      return next(new ErrorHandler(400, "Enter user id please!"));
+    }
+    const posts = await getUserPostsDb(userId);
+    if (Object.keys(posts).length === 0) {
+      return next(
+        new ErrorHandler(400, "No posts found please create some post's!")
+      );
+    }
+    return res.status(200).json({
+      success: true,
+      msg: "Post's found successfully!",
+      posts: posts,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Getting all posts
+export const getAllPosts = async (req, res, next) => {
+  try {
+    const posts = await getAllPostsDb();
+    if (Object.keys(posts).length === 0) {
+      return next(new ErrorHandler(400, "No post's found!"));
+      ss;
+    }
+    return res.status(200).json({
+      success: true,
+      msg: "Post's found successfully!",
+      posts: posts,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

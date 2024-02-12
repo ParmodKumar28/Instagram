@@ -4,11 +4,12 @@ import "./dotenv.js";
 
 // Imports
 import express from "express";
+import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware.js";
+import cookieParser from "cookie-parser";
 
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
-import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware.js";
-import cookieParser from "cookie-parser";
+import postsRouter from "./features/posts/routes/posts.routes.js";
 
 // Server
 const app = express();
@@ -28,6 +29,7 @@ app.get("/", (req, res, next) => {
 // Routes
 // User routes
 app.use("/api/user", userRouter);
+app.use("/api/post", postsRouter);
 
 // Not existing route
 app.use((req, res, next) => {

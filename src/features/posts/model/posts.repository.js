@@ -37,3 +37,52 @@ export const deletePostDb = async (postId, user) => {
     throw error;
   }
 };
+
+// Updating the post data in the db
+export const updatePostDb = async (postId, user, postData) => {
+  try {
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      throw new ErrorHandler(400, "No post found by this id!");
+    }
+    // Validating user
+    if (!post.user.equals(user)) {
+      throw new ErrorHandler(400, "You cannot update other's post!");
+    }
+    return await PostModel.findByIdAndUpdate(postId, postData, {
+      runValidators: true,
+      new: true,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Getting post by id from the database
+export const getPostDb = async (postId) => {
+  try {
+    return await PostModel.findById(postId);
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Getting user posts from the database
+export const getUserPostsDb = async (user) => {
+  try {
+    return await PostModel.find({ user: user });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Getting all posts from the db in latest to older form
+export const getAllPostsDb = async () => {
+  try {
+    return await PostModel.find({})
+      .sort({ createdAt: 1 })
+      .populate("user", "_id name");
+  } catch (error) {
+    throw error;
+  }
+};
