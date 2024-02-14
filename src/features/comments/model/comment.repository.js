@@ -34,16 +34,13 @@ export const addCommentDb = async (postId, userId, comment) => {
 };
 
 // Removing comment on post from database
-export const removeCommentDb = async (commentId, postId, user) => {
+export const removeCommentDb = async (commentId, user) => {
   try {
-    const post = await PostModel.findById(postId);
-    if (!post) {
-      throw new ErrorHandler(400, "No post found by this id to add comment!");
-    }
     const comment = await CommentModel.findById(commentId);
     if (!comment) {
       throw new ErrorHandler(400, "No comment found by this id!");
     }
+    const post = comment.post;
     if (!comment.user.equals(user)) {
       throw new ErrorHandler(400, "You cannot delete other's comment!");
     }
@@ -51,7 +48,45 @@ export const removeCommentDb = async (commentId, postId, user) => {
     // Removing comment from post comment's array
     const commentIndex = post.comments.indexOf(new ObjectId(commentId));
     post.comments.splice(commentIndex, 1);
-    post.save();
+    await post.save();
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Updating a comment on a post
+export const updateCommentDb = async (commentId, user, updatedComment) => {
+  try {
+    const comment = await CommentModel.findById(commentId);
+    if (!comment) {
+      throw new ErrorHandler(400, "No comment found by this id!");
+    }
+    if (!comment.user.equals(user)) {
+      throw new ErrorHandler(400, "You cannot update other's comment!");
+    }
+    return await CommentModel.findByIdAndUpdate(commentId, updatedComment, {
+      runValidators: true,
+      new: true,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get comment's on a post
+export const getCommentsDb = async (postId) => {
+  try {
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      throw new ErrorHandler(400, "No post found by this id to add comment!");
+    }
+    const comments = await CommentModel.find({
+      post: new ObjectId(postId),
+    }).populate("user", "name email _id");
+    if (comments.length === 0) {
+      throw new ErrorHandler(400, "No comments on this post");
+    }
+    return comments;
   } catch (error) {
     throw error;
   }
