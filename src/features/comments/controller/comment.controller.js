@@ -103,7 +103,7 @@ export const deleteComment = async (req, res, next) => {
     if (!commentId) {
       return next(new ErrorHandler(400, "Please enter commentId in params!"));
     }
-    const deletedComment = await removeCommentDb(commentId, postId, userId);
+    const deletedComment = await removeCommentDb(commentId, userId);
     if (!deletedComment) {
       return next(
         new ErrorHandler(400, "Comment not deleted something went wrong!")

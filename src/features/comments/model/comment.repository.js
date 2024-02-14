@@ -40,7 +40,8 @@ export const removeCommentDb = async (commentId, user) => {
     if (!comment) {
       throw new ErrorHandler(400, "No comment found by this id!");
     }
-    const post = comment.post;
+    const postId = comment.post;
+    const post = await PostModel.findById(postId);
     if (!comment.user.equals(user)) {
       throw new ErrorHandler(400, "You cannot delete other's comment!");
     }
@@ -49,6 +50,7 @@ export const removeCommentDb = async (commentId, user) => {
     const commentIndex = post.comments.indexOf(new ObjectId(commentId));
     post.comments.splice(commentIndex, 1);
     await post.save();
+    return deletedComment;
   } catch (error) {
     throw error;
   }
@@ -64,10 +66,14 @@ export const updateCommentDb = async (commentId, user, updatedComment) => {
     if (!comment.user.equals(user)) {
       throw new ErrorHandler(400, "You cannot update other's comment!");
     }
-    return await CommentModel.findByIdAndUpdate(commentId, updatedComment, {
-      runValidators: true,
-      new: true,
-    });
+    return await CommentModel.findByIdAndUpdate(
+      commentId,
+      { content: updatedComment },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
   } catch (error) {
     throw error;
   }
@@ -83,9 +89,6 @@ export const getCommentsDb = async (postId) => {
     const comments = await CommentModel.find({
       post: new ObjectId(postId),
     }).populate("user", "name email _id");
-    if (comments.length === 0) {
-      throw new ErrorHandler(400, "No comments on this post");
-    }
     return comments;
   } catch (error) {
     throw error;
