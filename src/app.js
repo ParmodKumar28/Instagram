@@ -4,7 +4,7 @@ import "./dotenv.js";
 
 // Imports
 import express from "express";
-import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware.js";
+import { errorHandlerMiddleware, handleUncaughtError } from "./middlewares/errorHandlerMiddleware.js";
 import cookieParser from "cookie-parser";
 
 // Routers imported
@@ -48,6 +48,8 @@ app.use((req, res, next) => {
 
 // Error handler middleware
 app.use(errorHandlerMiddleware);
+
+app.use(handleUncaughtError);
 
 // Exporting server
 export default app;

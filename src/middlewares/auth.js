@@ -9,7 +9,7 @@ export const auth = async (req, res, next) => {
   if (!token) {
     return next(new ErrorHandler(401, "Login to access this route!"));
   }
-
+  // Fetching payload from token or user
   const decodedData = await jwt.verify(token, process.env.JWT_Secret);
   req.user = await userModel.findById(decodedData.id).select("-password");
   next();

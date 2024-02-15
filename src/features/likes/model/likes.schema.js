@@ -17,7 +17,7 @@ const likesSchema = new mongoose.Schema({
     enum: ["Post", "Comment"],
     required: true,
   },
-});
+}, {timestamps: true});
 
 // Like model
 const LikeModel = mongoose.model("Like", likesSchema);
