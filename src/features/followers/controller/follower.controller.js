@@ -1,9 +1,9 @@
 // Creating here follower's controller to handle communication between routes and the model/database
 // Imports
-import { ObjectId } from "mongodb";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
   acceptRequestDb,
+  removeFollowerDb,
   toggleSendRequestDb,
   unfollowDb,
 } from "../model/follower.repository.js";
@@ -69,6 +69,30 @@ export const unfollowUser = async (req, res, next) => {
     if (!response) {
       return next(
         new ErrorHandler(400, "Follow not added somtehing went wrong!")
+      );
+    }
+    return res.status(200).json({
+      success: true,
+      msg: response,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Remove follower
+export const removeFollower = async (req, res, next) => {
+  try {
+    const { follower } = req.params;
+    if (!follower) {
+      return next(
+        new ErrorHandler(400, "Please, enter follower id in params!")
+      );
+    }
+    const response = await removeFollowerDb(req.user, follower);
+    if (!response) {
+      return next(
+        new ErrorHandler(400, "Request not accepted somtehing went wrong!")
       );
     }
     return res.status(200).json({

@@ -1,8 +1,10 @@
+// Import necessary modules and utilities
 import { ObjectId } from "mongodb";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import UserModel from "../../user/model/user.schema.js";
 import FollowerModel from "./follower.schema.js";
 
+// Function to handle toggling of sending follow requests
 export const toggleSendRequestDb = async (user, following) => {
   try {
     // Check if the user is trying to follow itself
@@ -22,8 +24,8 @@ export const toggleSendRequestDb = async (user, following) => {
       throw new ErrorHandler(400, "You are already following this user!");
     }
 
+    // If the user's account type is public, immediately follow
     if (user.accountType === "public") {
-      // If the user's account type is public, immediately follow
       followerUser.followers.push(user._id);
       await followerUser.save();
       user.following.push(following);
@@ -67,8 +69,10 @@ export const toggleSendRequestDb = async (user, following) => {
   }
 };
 
+// Function to accept a follow request
 export const acceptRequestDb = async (user, follower) => {
   try {
+    // Check if the follower exists
     const followerUser = await UserModel.findById(follower);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
@@ -81,8 +85,8 @@ export const acceptRequestDb = async (user, follower) => {
         following: user,
         status: "pending",
       },
-      { $set: { status: "accepted" } }, // Use $set to update only the 'status' field
-      { new: true } // Return the updated document
+      { $set: { status: "accepted" } },
+      { new: true }
     );
 
     if (!updatedFollower) {
@@ -104,12 +108,23 @@ export const acceptRequestDb = async (user, follower) => {
   }
 };
 
+// Function to unfollow a user
 export const unfollowDb = async (user, following) => {
   try {
     // Check if the user being followed exists
     const followingUser = await UserModel.findById(following);
     if (!followingUser) {
       throw new ErrorHandler(400, "No user found by this id!");
+    }
+
+    // Check if there's an existing relationship between the user and the follower
+    const isFollowing = await FollowerModel.findOne({
+      follower: user._id,
+      following: following,
+    });
+
+    if (!isFollowing) {
+      throw new ErrorHandler(400, "You are not following this user!");
     }
 
     // Find and delete the corresponding entry in the FollowerModel
@@ -138,28 +153,48 @@ export const unfollowDb = async (user, following) => {
   }
 };
 
-export const removeFollower = async (user, follower) => {
+// Function to remove a follower
+export const removeFollowerDb = async (user, follower) => {
   try {
+    // Check if the follower exists
     const followerUser = await UserModel.findById(follower);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    await FollowerModel.findOneAndDelete({
-      follower: new ObjectId(follower),
-      following: new ObjectId(user._id),
+    // Check if there's an accepted follower relationship between the user and the follower
+    const isFollower = await FollowerModel.findOne({
+      follower: follower,
+      following: user._id,
       status: "accepted",
     });
 
-    const index = user.followers.indexOf(new ObjectId(follower));
-    user.followers.splice(index, 1);
-    await user.save();
+    if (!isFollower) {
+      throw new ErrorHandler(400, "No follower found to remove!");
+    }
 
-    const index2 = followerUser.following.indexOf(new ObjectId(user._id));
-    followerUser.following.splice(index2, 1);
-    await followerUser.save();
+    // Find and delete the corresponding entry in the FollowerModel
+    await FollowerModel.findOneAndDelete({
+      follower: follower,
+      following: user._id,
+      status: "accepted",
+    });
 
-    return "follower removed!";
+    // Remove the follower from the 'followers' array of the current user
+    const index = user.followers.indexOf(follower);
+    if (index !== -1) {
+      user.followers.splice(index, 1);
+      await user.save();
+    }
+
+    // Remove the current user from the 'following' array of the follower
+    const index2 = followerUser.following.indexOf(user._id);
+    if (index2 !== -1) {
+      followerUser.following.splice(index2, 1);
+      await followerUser.save();
+    }
+
+    return "Follower removed!";
   } catch (error) {
     throw error;
   }
