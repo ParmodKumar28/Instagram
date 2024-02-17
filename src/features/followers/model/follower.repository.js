@@ -5,36 +5,62 @@ import FollowerModel from "./follower.schema.js";
 
 export const toggleSendRequestDb = async (user, following) => {
   try {
+    // Check if the user is trying to follow itself
+    if (following.toString() === user._id.toString()) {
+      throw new ErrorHandler(400, "User cannot follow itself!");
+    }
+
+    // Check if the user being followed exists
     const followerUser = await UserModel.findById(following);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    const isPending = await FollowerModel.findOne({
-      follower: user,
-      following: following,
-      status: "pending",
-    });
+    // Check if the user is already followed
+    const isAlreadyFollowed = followerUser.followers.includes(user._id);
+    if (isAlreadyFollowed) {
+      throw new ErrorHandler(400, "You are already following this user!");
+    }
 
-    if (isPending) {
-      await FollowerModel.findOneAndDelete({
-        follower: user,
+    if (user.accountType === "public") {
+      // If the user's account type is public, immediately follow
+      followerUser.followers.push(user._id);
+      await followerUser.save();
+      user.following.push(following);
+      await user.save();
+      return "Followed successfully!";
+    } else {
+      // If the user's account type is private, handle follow requests
+      const isPending = await FollowerModel.findOne({
+        follower: user._id,
         following: following,
         status: "pending",
       });
-      const index = followerUser.requests.indexOf(user._id);
-      followerUser.requests.splice(index, 1);
-      await followerUser.save();
-      return "request cancelled!";
-    } else {
-      const sendRequest = new FollowerModel({
-        follower: user,
-        following: following,
-      });
-      await sendRequest.save();
-      followerUser.requests.push(user._id);
-      await followerUser.save();
-      return "request sent!";
+
+      if (isPending) {
+        // If a pending request already exists, cancel it
+        await FollowerModel.findOneAndDelete({
+          follower: user._id,
+          following: following,
+          status: "pending",
+        });
+        const index = followerUser.requests.indexOf(user._id);
+        if (index !== -1) {
+          followerUser.requests.splice(index, 1);
+          await followerUser.save();
+        }
+        return "Request cancelled!";
+      } else {
+        // If no pending request exists, send a new request
+        const sendRequest = new FollowerModel({
+          follower: user._id,
+          following: following,
+        });
+        await sendRequest.save();
+        followerUser.requests.push(user._id);
+        await followerUser.save();
+        return "Request sent!";
+      }
     }
   } catch (error) {
     throw error;
@@ -48,14 +74,23 @@ export const acceptRequestDb = async (user, follower) => {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    await FollowerModel.findOneAndUpdate(
+    // Update the document in FollowerModel
+    const updatedFollower = await FollowerModel.findOneAndUpdate(
       {
         follower: follower,
         following: user,
         status: "pending",
       },
-      { status: "accepted" } 
+      { $set: { status: "accepted" } }, // Use $set to update only the 'status' field
+      { new: true } // Return the updated document
     );
+
+    if (!updatedFollower) {
+      throw new ErrorHandler(
+        400,
+        "No pending request found for this user and follower."
+      );
+    }
 
     // Add to both follow and following arrays
     user.followers.push(new ObjectId(follower));
@@ -63,7 +98,7 @@ export const acceptRequestDb = async (user, follower) => {
     await user.save();
     await followerUser.save();
 
-    return "request accepted!";
+    return "Request accepted!";
   } catch (error) {
     throw error;
   }

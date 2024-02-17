@@ -4,7 +4,10 @@ import "./dotenv.js";
 
 // Imports
 import express from "express";
-import { errorHandlerMiddleware, handleUncaughtError } from "./middlewares/errorHandlerMiddleware.js";
+import {
+  errorHandlerMiddleware,
+  handleUncaughtError,
+} from "./middlewares/errorHandlerMiddleware.js";
 import cookieParser from "cookie-parser";
 
 // Routers imported
@@ -12,6 +15,7 @@ import userRouter from "./features/user/routes/user.routes.js";
 import postsRouter from "./features/posts/routes/posts.routes.js";
 import likesRouter from "./features/likes/routes/likes.routes.js";
 import commentsRouter from "./features/comments/routes/comment.routes.js";
+import followersRouter from "./features/followers/routes/follower.routes.js";
 
 // Server
 const app = express();
@@ -37,6 +41,8 @@ app.use("/api/post", postsRouter);
 app.use("/api/like", likesRouter);
 // Comment's routes
 app.use("/api/comment", commentsRouter);
+// Follower's routes
+app.use("/api/follower", followersRouter);
 
 // Not existing route
 app.use((req, res, next) => {
