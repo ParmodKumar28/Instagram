@@ -19,9 +19,9 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
       to: receiverMail,
       subject: "Welcome, on the Instagram app:)",
       html: `
-      <!DOCTYPE html>
-<html lang="en">
-<head>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Instagram</title>
@@ -39,7 +39,7 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
             padding: 20px;
             background-color: #ffffff;
         }
-
+    
         img {
             max-width: 100%;
             height: auto;
