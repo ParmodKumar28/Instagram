@@ -106,25 +106,33 @@ export const acceptRequestDb = async (user, follower) => {
 
 export const unfollowDb = async (user, following) => {
   try {
+    // Check if the user being followed exists
     const followingUser = await UserModel.findById(following);
     if (!followingUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
+    // Find and delete the corresponding entry in the FollowerModel
     await FollowerModel.findOneAndDelete({
-      follower: new ObjectId(user._id),
-      following: new ObjectId(following),
+      follower: user._id,
+      following: following,
     });
 
-    const index = user.following.indexOf(new ObjectId(following));
-    user.following.splice(index, 1);
-    await user.save();
+    // Remove the user being followed from the 'following' array of the current user
+    const index = user.following.indexOf(following);
+    if (index !== -1) {
+      user.following.splice(index, 1);
+      await user.save();
+    }
 
-    const index2 = followingUser.followers.indexOf(new ObjectId(user._id));
-    followingUser.followers.splice(index2, 1);
-    await followingUser.save();
+    // Remove the current user from the 'followers' array of the user being followed
+    const index2 = followingUser.followers.indexOf(user._id);
+    if (index2 !== -1) {
+      followingUser.followers.splice(index2, 1);
+      await followingUser.save();
+    }
 
-    return "user unfollowed!";
+    return "User unfollowed!";
   } catch (error) {
     throw error;
   }
