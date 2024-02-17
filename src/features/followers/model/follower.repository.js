@@ -25,7 +25,7 @@ export const toggleSendRequestDb = async (user, following) => {
     }
 
     // If the user's account type is public, immediately follow
-    if (user.accountType === "public") {
+    if (followerUser.accountType === "public") {
       followerUser.followers.push(user._id);
       await followerUser.save();
       user.following.push(following);
