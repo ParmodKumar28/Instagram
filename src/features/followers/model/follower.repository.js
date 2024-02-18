@@ -221,10 +221,29 @@ export const getRequestsDb = async (userId) => {
 // Get followers
 export const getFollowersDb = async (userId) => {
   try {
-    
+    const followers = await FollowerModel.find({
+      following: new ObjectId(userId),
+      status: "accepted",
+    })
+      .select("follower createdAt")
+      .populate("follower", "name email id");
+    return followers;
   } catch (error) {
-    
+    throw error;
   }
-}
+};
 
 // Get following's
+export const getFollowing = async (userId) => {
+  try {
+    const following = await FollowerModel.find({
+      follower: new ObjectId(userId),
+      status: "accepted",
+    })
+      .select("following createdAt")
+      .populate("following", "name email id");
+    return following;
+  } catch (error) {
+    throw error;
+  }
+};

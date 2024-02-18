@@ -4,6 +4,7 @@ import { request } from "express";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
   acceptRequestDb,
+  getFollowersDb,
   getRequestsDb,
   removeFollowerDb,
   toggleSendRequestDb,
@@ -113,6 +114,19 @@ export const getRequests = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       requests: requests,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get followers
+export const getFollowers = async (req, res, next) => {
+  try {
+    const followers = await getFollowersDb(req.user._id);
+    return res.status(200).json({
+      success: true,
+      followers: followers,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));
