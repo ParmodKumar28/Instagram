@@ -1,11 +1,12 @@
 // Creating here follower's controller to handle communication between routes and the model/database
 // Imports
-import { request } from "express";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
   acceptRequestDb,
   getFollowersDb,
   getRequestsDb,
+  getfollowingDb,
+  rejectRequestDb,
   removeFollowerDb,
   toggleSendRequestDb,
   unfollowDb,
@@ -59,6 +60,30 @@ export const acceptRequest = async (req, res, next) => {
   }
 };
 
+// Reject request
+export const rejectRequest = async (req, res, next) => {
+  try {
+    const { follower } = req.params;
+    if (!follower) {
+      return next(
+        new ErrorHandler(400, "Please, enter follower id in params!")
+      );
+    }
+    const response = await rejectRequestDb(req.user, follower);
+    if (!response) {
+      return next(
+        new ErrorHandler(400, "Request not rejected somtehing went wrong!")
+      );
+    }
+    return res.status(200).json({
+      success: true,
+      msg: response,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
 // Unfollow user
 export const unfollowUser = async (req, res, next) => {
   try {
@@ -71,7 +96,7 @@ export const unfollowUser = async (req, res, next) => {
     const response = await unfollowDb(req.user, following);
     if (!response) {
       return next(
-        new ErrorHandler(400, "Follow not added somtehing went wrong!")
+        new ErrorHandler(400, "Unfollow failed somtehing went wrong!")
       );
     }
     return res.status(200).json({
@@ -95,7 +120,7 @@ export const removeFollower = async (req, res, next) => {
     const response = await removeFollowerDb(req.user, follower);
     if (!response) {
       return next(
-        new ErrorHandler(400, "Request not accepted somtehing went wrong!")
+        new ErrorHandler(400, "Follower not removed somtehing went wrong!")
       );
     }
     return res.status(200).json({
@@ -127,6 +152,19 @@ export const getFollowers = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       followers: followers,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get following
+export const getFollowing = async (req, res, next) => {
+  try {
+    const following = await getfollowingDb(req.user._id);
+    return res.status(200).json({
+      success: true,
+      following: following,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

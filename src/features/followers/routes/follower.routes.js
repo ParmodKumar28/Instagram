@@ -5,7 +5,9 @@ import { auth } from "../../../middlewares/auth.js";
 import {
   acceptRequest,
   getFollowers,
+  getFollowing,
   getRequests,
+  rejectRequest,
   removeFollower,
   toggleFollow,
   unfollowUser,
@@ -21,6 +23,9 @@ followersRouter.get("/follow/:following", auth, toggleFollow);
 // Accept request
 followersRouter.get("/accept-request/:follower", auth, acceptRequest);
 
+// Reject request
+followersRouter.get("/reject-request/:follower", auth, rejectRequest);
+
 // Unfollow user
 followersRouter.get("/unfollow/:following", auth, unfollowUser);
 
@@ -32,6 +37,9 @@ followersRouter.get("/requests", auth, getRequests);
 
 // Get follower's
 followersRouter.get("/followers", auth, getFollowers);
+
+// Get following's
+followersRouter.get("/following", auth, getFollowing);
 
 // Exporting like router
 export default followersRouter;

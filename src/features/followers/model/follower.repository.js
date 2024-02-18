@@ -26,6 +26,12 @@ export const toggleSendRequestDb = async (user, following) => {
 
     // If the user's account type is public, immediately follow
     if (followerUser.accountType === "public") {
+      const sendRequest = new FollowerModel({
+        follower: user._id,
+        following: following,
+        status: "accepted",
+      });
+      await sendRequest.save();
       followerUser.followers.push(user._id);
       await followerUser.save();
       user.following.push(following);
@@ -106,6 +112,45 @@ export const acceptRequestDb = async (user, follower) => {
     await followerUser.save();
 
     return "Request accepted!";
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Reject request of a user in the db
+export const rejectRequestDb = async (user, follower) => {
+  try {
+    // Check if the follower exists
+    const followerUser = await UserModel.findById(follower);
+    if (!followerUser) {
+      throw new ErrorHandler(400, "No user found by this id!");
+    }
+
+    // Rejected
+    const rejectedRequest = await FollowerModel.findOneAndUpdate(
+      {
+        follower: new ObjectId(follower),
+        following: new ObjectId(user._id),
+        status: "pending",
+      },
+      {
+        $set: {
+          status: "rejected",
+        },
+      },
+      { new: true }
+    );
+
+    // If not request exist here
+    if (!rejectedRequest) {
+      throw new ErrorHandler(400, "No request found by this follower id!");
+    } else {
+      // Remvoing request from user request's array after rejecting request here
+      const requestIndex = user.requests.indexOf(new ObjectId(follower));
+      user.requests.splice(requestIndex, 1);
+      await user.save();
+      return "request rejected!";
+    }
   } catch (error) {
     throw error;
   }
@@ -234,7 +279,7 @@ export const getFollowersDb = async (userId) => {
 };
 
 // Get following's
-export const getFollowing = async (userId) => {
+export const getfollowingDb = async (userId) => {
   try {
     const following = await FollowerModel.find({
       follower: new ObjectId(userId),
