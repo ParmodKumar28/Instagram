@@ -4,6 +4,7 @@ import express from "express";
 import { auth } from "../../../middlewares/auth.js";
 import {
   acceptRequest,
+  getRequests,
   removeFollower,
   toggleFollow,
   unfollowUser,
@@ -24,6 +25,9 @@ followersRouter.get("/unfollow/:following", auth, unfollowUser);
 
 // Remove follower
 followersRouter.get("/remove-follower/:follower", auth, removeFollower);
+
+// Get request's
+followersRouter.get("/requests", auth, getRequests);
 
 // Exporting like router
 export default followersRouter;

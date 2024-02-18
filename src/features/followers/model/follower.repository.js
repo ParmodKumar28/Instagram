@@ -98,6 +98,9 @@ export const acceptRequestDb = async (user, follower) => {
 
     // Add to both follow and following arrays
     user.followers.push(new ObjectId(follower));
+    // After accepting request removing from the request here
+    const requestIndex = user.requests.indexOf(new ObjectId(follower));
+    user.requests.splice(requestIndex, 1);
     followerUser.following.push(new ObjectId(user._id));
     await user.save();
     await followerUser.save();
@@ -199,3 +202,29 @@ export const removeFollowerDb = async (user, follower) => {
     throw error;
   }
 };
+
+// Get requests from database
+export const getRequestsDb = async (userId) => {
+  try {
+    const requests = await FollowerModel.find({
+      following: new ObjectId(userId),
+      status: "pending",
+    })
+      .select("follower createdAt")
+      .populate("follower", "name email id");
+    return requests;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get followers
+export const getFollowersDb = async (userId) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
+
+// Get following's

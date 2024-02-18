@@ -1,8 +1,10 @@
 // Creating here follower's controller to handle communication between routes and the model/database
 // Imports
+import { request } from "express";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
   acceptRequestDb,
+  getRequestsDb,
   removeFollowerDb,
   toggleSendRequestDb,
   unfollowDb,
@@ -98,6 +100,19 @@ export const removeFollower = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       msg: response,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get request's
+export const getRequests = async (req, res, next) => {
+  try {
+    const requests = await getRequestsDb(req.user._id);
+    return res.status(200).json({
+      success: true,
+      requests: requests,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));
