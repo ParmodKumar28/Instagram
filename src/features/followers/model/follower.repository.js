@@ -251,6 +251,7 @@ export const removeFollowerDb = async (user, follower) => {
 // Get requests from database
 export const getRequestsDb = async (userId) => {
   try {
+    // Getting user follow request's here
     const requests = await FollowerModel.find({
       following: new ObjectId(userId),
       status: "pending",
@@ -266,6 +267,7 @@ export const getRequestsDb = async (userId) => {
 // Get followers
 export const getFollowersDb = async (userId) => {
   try {
+    // Getting user follower's here
     const followers = await FollowerModel.find({
       following: new ObjectId(userId),
       status: "accepted",
@@ -281,6 +283,7 @@ export const getFollowersDb = async (userId) => {
 // Get following's
 export const getfollowingDb = async (userId) => {
   try {
+    // Getting user following here
     const following = await FollowerModel.find({
       follower: new ObjectId(userId),
       status: "accepted",

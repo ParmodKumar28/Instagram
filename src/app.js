@@ -9,6 +9,7 @@ import {
   handleUncaughtError,
 } from "./middlewares/errorHandlerMiddleware.js";
 import cookieParser from "cookie-parser";
+import { v2 as cloudinary } from "cloudinary";
 
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
@@ -26,6 +27,13 @@ app.use(cookieParser());
 // Parsing data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Configuring cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
 
 // Default route
 app.get("/", (req, res, next) => {
