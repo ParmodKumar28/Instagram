@@ -2,6 +2,7 @@
 // Imports
 import { createBrowserRouter } from "react-router-dom";
 import SignUp from "./Components/Signup/Signup";
+import Login from "./Components/Login/Login";
 
 const App = () => {
   // Creating router
@@ -11,7 +12,8 @@ const App = () => {
   // ])
   return (
     <>
-      <SignUp />
+      {/* <SignUp /> */}
+      <Login />
     </>
   )
 }
