@@ -24,7 +24,12 @@ export const updateUserDb = async (updatedData, userId) => {
 
 // Getting single user data from db
 export const getUserDataDb = async (userId) => {
-  return await UserModel.findById(userId);
+  return await UserModel.findById(userId)
+    .select("-password")
+    .populate("requests", "name username profilePic")
+    .populate("followers", "name username profilePic")
+    .populate("following", "name username profilePic")
+    .populate("posts");
 };
 
 // Find user for password reset by hashed token

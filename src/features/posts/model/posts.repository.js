@@ -61,7 +61,27 @@ export const updatePostDb = async (postId, user, postData) => {
 // Getting post by id from the database
 export const getPostDb = async (postId) => {
   try {
-    return await PostModel.findById(postId);
+    return await PostModel.findById(postId)
+      .populate("user", "name username profilePic")
+      .populate({
+        path: "tags",
+        select: "name username profilePic",
+        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes",
+        populate: {
+          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
+          select: "name username profilePic",
+          model: "User",
+        },
+      });
   } catch (error) {
     throw error;
   }
@@ -70,7 +90,27 @@ export const getPostDb = async (postId) => {
 // Getting user posts from the database
 export const getUserPostsDb = async (user) => {
   try {
-    return await PostModel.find({ user: user });
+    return await PostModel.find({ user: user })
+      .populate("user", "name username profilePic")
+      .populate({
+        path: "tags",
+        select: "name username profilePic",
+        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes",
+        populate: {
+          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
+          select: "name username profilePic",
+          model: "User",
+        },
+      });
   } catch (error) {
     throw error;
   }
@@ -80,8 +120,27 @@ export const getUserPostsDb = async (user) => {
 export const getAllPostsDb = async () => {
   try {
     return await PostModel.find({})
-      .sort({ createdAt: 1 })
-      .populate("user", "_id name");
+      .sort({ createdAt: -1 }) // Sort in descending order to get latest posts first
+      .populate("user", "name username profilePic")
+      .populate({
+        path: "tags",
+        select: "name username profilePic",
+        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes",
+        populate: {
+          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
+          select: "name username profilePic",
+          model: "User",
+        },
+      });
   } catch (error) {
     throw error;
   }

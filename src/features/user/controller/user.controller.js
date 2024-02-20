@@ -1,6 +1,5 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
-import { log } from "console";
 import uploadCloudinary from "../../../utils/cloudinary.js";
 import { sendResetPasswordMail } from "../../../utils/email/PasswordResetEmail.js";
 import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
