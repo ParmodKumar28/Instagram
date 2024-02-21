@@ -81,7 +81,7 @@ export default function ForgotPassword() {
                 {/* Back to login */}
                 <div className="border-2 w-full mt-20 h-12 flex justify-center items-center active:scale-95 transition-all select-none">
                     <IoArrowBack className="text-2xl me-2 text-gray-800 font-medium" />
-                    <button className="text-gray-800 font-medium " type="button">
+                    <button className="text-gray-800 font-medium hover:text-gray-500 transition-all" type="button">
                         {" "}
                         Back to Login
                     </button>
