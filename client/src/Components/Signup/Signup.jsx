@@ -1,5 +1,8 @@
 // Imports
 import styles from "./Signup.module.css";
+import { FaFacebookSquare } from "react-icons/fa";
+import iphone from "../../assets/Iphone.png";
+
 
 // Signup login component is here
 export default function SignUp() {
@@ -7,12 +10,13 @@ export default function SignUp() {
     return (
         <>
             {/* Main */}
-            <main className="flex justify-center" id={styles.mainContainer}>
+            <main className="flex justify-center items-center" id={styles.mainContainer}>
                 {/* Iphone Instagram image visible starts sm width */}
-                <div className="hidden md:inline-block" id={styles.ImageContainer}>
+                <div className="hidden md:inline-block mx-20 mb-28" id={styles.ImageContainer}>
                     <img
-                        className=""
-                        src="https://www.pngitem.com/pimgs/m/299-2998371_iphone-instagram-png-transparent-png.png"
+                        className="max-w-2xl drop-shadow-2xl"
+                        src={iphone}
+                        // src="https://www.pngitem.com/pimgs/m/299-2998371_iphone-instagram-png-transparent-png.png"
                         alt="Image"
                     />
                 </div>
@@ -20,20 +24,32 @@ export default function SignUp() {
 
                 {/* Form container */}
                 <div>
-                    <div className="w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border-2">
-                        <h1 className="text-[3.2rem] mb-5">Instagram</h1>
+                    <div className="w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border">
+                        {/* Branding Here */}
+                        <h1 className="text-[3.2rem] mb-5" style={{ fontFamily: "Pacifico" }}>Instagram</h1>
+
+                        {/* Details */}
                         <p className="text-center mb-2 font-medium text-gray-500">
                             Sign up to see photos and videos from your friends.
                         </p>
-                        <button
-                            className="bg-sky-500 text-white font-medium rounded-lg mt-2 py-1.5 w-full hover:bg-blue-600"
-                            type="button"
-                        >
-                            Log in with Facebook
-                        </button>
-                        <p className="my-2 text-[1rem] font-medium text-gray-500">OR</p>
+
+                        {/* Login with facebook */}
+                        <div className="flex items-center gap-2 bg-sky-500 text-white p-2 rounded-md w-full justify-center">
+                            <FaFacebookSquare className="text-2xl" />
+                            <p className="font-medium">Log in With Facebook</p>
+                        </div>
+
+                        {/* OR */}
+                        <div className="my-4 flex items-center gap-2 w-full">
+                            <span className="w-1/2 border-t-2"></span>
+                            <p className="font-medium text-gray-500 mx-2">OR</p>
+                            <span className="w-1/2 border-t-2"></span>
+                        </div>
+                        {/* OR Ends */}
+
                         {/* Form */}
                         <form className="flex flex-col items-center">
+                            {/* Email Input */}
                             <input
                                 className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                                 type="email"
@@ -41,6 +57,7 @@ export default function SignUp() {
                                 required
                                 placeholder="Email address"
                             />
+                            {/* Full Name Input */}
                             <input
                                 className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                                 type="text"
@@ -48,6 +65,7 @@ export default function SignUp() {
                                 required
                                 placeholder="Full Name"
                             />
+                            {/* Username Input */}
                             <input
                                 className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                                 type="text"
@@ -55,6 +73,7 @@ export default function SignUp() {
                                 required
                                 placeholder="Username"
                             />
+                            {/* Password Input */}
                             <input
                                 className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                                 type="text"
@@ -62,6 +81,8 @@ export default function SignUp() {
                                 required
                                 placeholder="Password"
                             />
+
+                            {/* Privacy Policy */}
                             <p className="text-xs text-gray-500 text-center my-2">
                                 People who use our service may have uploaded your contact
                                 information to Instagram.{" "}
@@ -71,10 +92,12 @@ export default function SignUp() {
                                 By signing up, you agree to our{" "}
                                 <a className="text-blue-900 cursor-pointer">
                                     Terms, Privacy Policy
-                                </a>
-                                and
+                                </a> {" "}
+                                and {" "}
                                 <a className="text-blue-900 cursor-pointer">Cookies Policy.</a>
                             </p>
+
+                            {/* Signup Button */}
                             <button
                                 className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
                                 type="submit"
@@ -85,9 +108,8 @@ export default function SignUp() {
                         {/* Form ends */}
                     </div>
 
-
                     {/* Have an account */}
-                    <div className="text-center w-[22rem] sm:border-2 mx-auto my-5 py-4">
+                    <div className="text-center w-[22rem] sm:border mx-auto my-5 py-4">
                         <p className="text-base">
                             Have an account?{" "}
                             <a className="text-sky-500 font-medium cursor-pointer"> Log in</a>
@@ -115,10 +137,13 @@ export default function SignUp() {
 
                 </div>
                 {/* Form container */}
+
             </main>
+            {/* Main conatiner ends */}
 
             {/* Footer */}
             <footer className="py-10 flex flex-col gap-2 items-center text-sm text-gray-500 w-auto">
+                {/* Links */}
                 <div className="flex gap-4 flex-wrap justify-center">
                     <span className="cursor-pointer hover:underline">Meta</span>
                     <span className="cursor-pointer hover:underline">About</span>
@@ -134,6 +159,7 @@ export default function SignUp() {
                     <span className="cursor-pointer hover:underline">Contact uploading and non-users</span>
                     <span className="cursor-pointer hover:underline">Meta Verified</span>
                 </div>
+                {/* Language and copyright */}
                 <div className="flex gap-4 flex-wrap justify-center">
                     <span>English (UK)</span>
                     <span>© 2024 Instagram from Meta</span>

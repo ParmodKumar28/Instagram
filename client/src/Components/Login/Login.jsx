@@ -8,7 +8,7 @@ export default function Login() {
         <>
             {/* Form container */}
             <div className="w-[22rem] flex flex-col px-8 py-6 justify-center items-center mx-auto mt-10 sm:border-2">
-                <h1 className="text-[3.2rem] mb-5">Instagram</h1>
+                <h1 className="text-[3.2rem] mb-5" style={{ fontFamily: "Oleo Script" }}>Instagram</h1>
                 {/* Form */}
                 <form className="flex flex-col items-center w-full">
                     <input
@@ -31,7 +31,15 @@ export default function Login() {
                     >
                         Login
                     </button>
-                    <p className="my-2 text-[1rem] font-medium text-gray-500">OR</p>
+
+                    {/* OR */}
+                    <div className="my-4 flex items-center gap-2 w-full">
+                        <span className="w-1/2 border-t-2"></span>
+                        <p className="font-medium text-gray-500 mx-2">OR</p>
+                        <span className="w-1/2 border-t-2"></span>
+                    </div>
+                    {/* OR Ends */}
+
 
                     <div className="flex items-center gap-2">
                         <img className="h-5" src="https://cdn-icons-png.flaticon.com/128/733/733547.png" alt="facebook" />
