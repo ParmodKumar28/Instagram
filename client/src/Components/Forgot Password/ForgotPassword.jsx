@@ -2,11 +2,21 @@
 import { useState } from "react";
 import { CiLock } from "react-icons/ci";
 import { IoArrowBack } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 // Component for the forgot password
 export default function ForgotPassword() {
     // States
     const [email, setEmail] = useState("");
+
+    // Handler's
+    const sendEmailHandler = (e) => {
+        // Preventing default behaviour of submit here
+        e.preventDefault();
+
+        // Clear field's
+        setEmail("");
+    }
 
     // Returning JSX
     return (
@@ -58,9 +68,12 @@ export default function ForgotPassword() {
                             } text-white rounded-md py-1 px-2 w-full transition-all`}
                         type="submit"
                         disabled={!email ? true : false}
+                        onClick={(e) => sendEmailHandler(e)}
                     >
                         Send Login Link
                     </button>
+                    {/* Send email Button end's */}
+
                     <p className="text-sm text-blue-800 mb-4">
                         Can&apos;t reset your password ?
                     </p>
@@ -74,19 +87,26 @@ export default function ForgotPassword() {
                     <span className="w-1/2 border-t-2 me-4"></span>
                 </div>
                 {/* OR Ends */}
-                <p className="text-gray-800 font-medium mb-2 hover:text-gray-600 cursor-pointer">
+
+                {/* Link to the sign-up page */}
+                <Link to={"/sign-up"} className="text-gray-800 font-medium mb-2 hover:text-gray-600 cursor-pointer">
                     Create New Account
-                </p>
+                </Link>
+                {/* Link to the sign-up page end's */}
 
                 {/* Back to login */}
                 <div className="border-2 w-full mt-20 h-12 flex justify-center items-center active:scale-95 transition-all select-none">
                     <IoArrowBack className="text-2xl me-2 text-gray-800 font-medium" />
-                    <button className="text-gray-800 font-medium hover:text-gray-500 transition-all" type="button">
-                        {" "}
-                        Back to Login
-                    </button>
+                    {/* Link to login page */}
+                    <Link to={"/login"}>
+                        <button className="text-gray-800 font-medium hover:text-gray-500 transition-all" type="button">
+                            {" "}
+                            Back to Login
+                        </button>
+                    </Link>
+
                 </div>
-                {/* Back to login ends */}
+                {/* Back to login end's */}
             </div>
         </div>
     );

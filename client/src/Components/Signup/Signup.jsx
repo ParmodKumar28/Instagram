@@ -2,10 +2,30 @@
 import styles from "./Signup.module.css";
 import { FaFacebookSquare } from "react-icons/fa";
 import iphone from "../../assets/Iphone.png";
-import iphone2 from "../../assets/Iphone2.png";
+// import iphone2 from "../../assets/Iphone2.png";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 
 // Signup login component is here
 export default function SignUp() {
+    // States
+    const [email, setEmail] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+
+    // Handler's
+    const handleSignUp = (e) => {
+        // Preventing default behaviour of submit here
+        e.preventDefault();
+
+        // Clear field's
+        setEmail("");
+        setFullName("");
+        setUsername("");
+        setPassword("");
+    };
+
     // Returning JSX
     return (
         <>
@@ -26,7 +46,7 @@ export default function SignUp() {
                         alt="Image"
                     />
                 </div>
-                {/* Iphone instagram image eds */}
+                {/* Iphone instagram image end's */}
 
                 {/* Form container */}
                 <div>
@@ -38,17 +58,20 @@ export default function SignUp() {
                         >
                             Instagram
                         </h1>
+                        {/* Branding End's Here */}
 
                         {/* Details */}
                         <p className="text-center mb-2 font-medium text-gray-500">
                             Sign up to see photos and videos from your friends.
                         </p>
+                        {/* Details end's */}
 
                         {/* Login with facebook */}
                         <div className="flex items-center gap-2 bg-sky-500 text-white p-2 rounded-md w-full justify-center">
                             <FaFacebookSquare className="text-2xl" />
                             <p className="font-medium">Log in With Facebook</p>
                         </div>
+                        {/* Login with facebook end's */}
 
                         {/* OR */}
                         <div className="my-4 flex items-center gap-2 w-full">
@@ -67,6 +90,8 @@ export default function SignUp() {
                                 name="email"
                                 required
                                 placeholder="Email address"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                             {/* Full Name Input */}
                             <input
@@ -75,6 +100,8 @@ export default function SignUp() {
                                 name="name"
                                 required
                                 placeholder="Full Name"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
                             />
                             {/* Username Input */}
                             <input
@@ -83,14 +110,18 @@ export default function SignUp() {
                                 name="username"
                                 required
                                 placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                             />
                             {/* Password Input */}
                             <input
                                 className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
-                                type="text"
+                                type="password"
                                 name="password"
                                 required
                                 placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
 
                             {/* Privacy Policy */}
@@ -107,14 +138,17 @@ export default function SignUp() {
                                 and{" "}
                                 <a className="text-blue-900 cursor-pointer">Cookies Policy.</a>
                             </p>
+                            {/* Privacy Policy End's*/}
 
                             {/* Signup Button */}
                             <button
                                 className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
                                 type="submit"
+                                onClick={(e) => handleSignUp(e)}
                             >
                                 Sign Up
                             </button>
+                            {/* Signup Button End's */}
                         </form>
                         {/* Form ends */}
                     </div>
@@ -123,7 +157,13 @@ export default function SignUp() {
                     <div className="text-center w-[22rem] sm:border mx-auto my-5 py-4 rounded-lg shadow-lg">
                         <p className="text-base">
                             Have an account?{" "}
-                            <a className="text-sky-500 font-medium cursor-pointer"> Log in</a>
+                            <Link
+                                to={"/login"}
+                                className="text-sky-500 font-medium cursor-pointer"
+                            >
+                                {" "}
+                                Log in
+                            </Link>
                         </p>
                     </div>
                     {/* Have an account ends */}
@@ -144,11 +184,11 @@ export default function SignUp() {
                             />
                         </div>
                     </div>
-                    {/* Download App ends */}
+                    {/* Download App end's */}
                 </div>
                 {/* Form container */}
             </main>
-            {/* Main conatiner ends */}
+            {/* Main conatiner end's */}
 
             {/* Footer */}
             <footer className="py-10 flex flex-col gap-2 items-center text-sm text-gray-500 w-auto">
@@ -175,6 +215,7 @@ export default function SignUp() {
                     <span>English (UK)</span>
                     <span>© 2024 Instagram from Meta</span>
                 </div>
+                {/* Language and copyright end's */}
             </footer>
             {/* Footer ends */}
         </>

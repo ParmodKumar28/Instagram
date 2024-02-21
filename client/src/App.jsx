@@ -1,22 +1,30 @@
 // JSX Component for App parent component includes routes
 // Imports
-// import { createBrowserRouter } from "react-router-dom";
-import SignUp from "./Components/Signup/Signup";
-import Login from "./Components/Login/Login";
-import ForgotPassword from "./Components/Forgot Password/ForgotPassword";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+
+// Components Imports
+import RegisterPage from "./Pages/App/Register Page/Register-Page";
+import LoginPage from "./Pages/App/Login Page/Login-Page";
+import ForgotPasswordPage from "./Pages/App/Forgot-Password Page/Forgot-Password-Page";
+
+// Css imports
 import "./App.css";
 
+
+// Function App component this is a parent component here
 const App = () => {
   // Creating router
-  // const router = createBrowserRouter([
-  //   {
-  //   }
-  // ])
+  const router = createBrowserRouter([
+    { path: "/sign-up", element: <RegisterPage /> },
+    { path: "Login", element: <LoginPage /> },
+    { path: "forgot-password", element: <ForgotPasswordPage /> }
+  ]);
+
+  // Returning JSX
   return (
     <>
-      {/* <SignUp /> */}
-      {/* <Login /> */}
-      <ForgotPassword />
+      {/* Router */}
+      <RouterProvider router={router} />
     </>
   )
 }

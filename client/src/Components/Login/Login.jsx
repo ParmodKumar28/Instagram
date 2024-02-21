@@ -1,8 +1,24 @@
 // Imports
 // import styles from "../Login/Login.module.css";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 // Login component is here
 export default function Login() {
+    // States
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    // Handler's
+    const handleLogin = (e) => {
+        // Preventing default behaviour of submit here
+        e.preventDefault();
+
+        // Clear field's
+        setEmail("");
+        setPassword("");
+    };
+
     // Returning JSX
     return (
         <>
@@ -19,6 +35,8 @@ export default function Login() {
                         name="email"
                         required
                         placeholder="Email address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
 
                     {/* Password Input */}
@@ -28,15 +46,19 @@ export default function Login() {
                         name="password"
                         required
                         placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
                     {/* Login Button */}
                     <button
                         className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
                         type="submit"
+                        onClick={(e) => handleLogin(e)}
                     >
                         Login
                     </button>
+                    {/* Login Button End's */}
 
                     {/* OR */}
                     <div className="my-4 flex items-center gap-2 w-full">
@@ -46,12 +68,16 @@ export default function Login() {
                     </div>
                     {/* OR Ends */}
 
-
+                    {/* Login with facebook */}
                     <div className="flex items-center gap-2">
                         <img className="h-5" src="https://cdn-icons-png.flaticon.com/128/733/733547.png" alt="facebook" />
                         <p className="text-[#385185] font-medium">Log in With Facebook</p>
                     </div>
-                    <p className="text-[#385185] text-sm my-4">Forgotten your password?</p>
+                    {/* Login with facebook end's */}
+
+                    {/* Link To Forgot password */}
+                    <Link to={"/forgot-password"} className="text-[#385185] text-sm my-4">Forgotten your password?</Link>
+                    {/*  */}
 
                 </form>
                 {/* Form ends */}
@@ -62,10 +88,11 @@ export default function Login() {
             <div className="text-center w-[22rem] mx-auto my-5 py-4 sm:border rounded-lg shadow-lg">
                 <p className="text-base">
                     Dont&apos;t have an account?
-                    <a className="text-sky-500 font-medium cursor-pointer"> Sign Up</a>
+                    {/* Link to sign-up page */}
+                    <Link to={"/sign-up"} className="text-sky-500 font-medium cursor-pointer"> Sign Up</Link>
                 </p>
             </div>
-            {/* Have an account ends */}
+            {/* Have an account end's */}
 
             {/* Download App */}
             <div className="mx-auto my-2 w-[22rem] flex flex-col items-center gap-5">
@@ -83,7 +110,7 @@ export default function Login() {
                     />
                 </div>
             </div>
-            {/* Download App ends */}
+            {/* Download App end's */}
 
             {/* Footer */}
             <footer className="py-10 flex flex-col gap-2 items-center text-sm text-gray-500 w-auto">
