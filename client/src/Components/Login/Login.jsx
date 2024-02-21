@@ -7,10 +7,12 @@ export default function Login() {
     return (
         <>
             {/* Form container */}
-            <div className="w-[22rem] flex flex-col px-8 py-6 justify-center items-center mx-auto mt-10 sm:border-2">
-                <h1 className="text-[3.2rem] mb-5" style={{ fontFamily: "Oleo Script" }}>Instagram</h1>
+            <div className="w-[22rem] flex flex-col px-8 py-6 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg">
+                {/* Logo Instgram */}
+                <h1 className="text-[3.2rem] mb-5 text-gray-800" style={{ fontFamily: "Lobster Two" }}>Instagram</h1>
                 {/* Form */}
                 <form className="flex flex-col items-center w-full">
+                    {/* Input Email */}
                     <input
                         className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                         type="email"
@@ -18,13 +20,17 @@ export default function Login() {
                         required
                         placeholder="Email address"
                     />
+
+                    {/* Password Input */}
                     <input
                         className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
-                        type="text"
+                        type="password"
                         name="password"
                         required
                         placeholder="Password"
                     />
+
+                    {/* Login Button */}
                     <button
                         className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
                         type="submit"
@@ -53,7 +59,7 @@ export default function Login() {
 
 
             {/* Don't have an account */}
-            <div className="text-center w-[22rem] sm:border-2 mx-auto my-5 py-4">
+            <div className="text-center w-[22rem] mx-auto my-5 py-4 sm:border rounded-lg shadow-lg">
                 <p className="text-base">
                     Dont&apos;t have an account?
                     <a className="text-sky-500 font-medium cursor-pointer"> Sign Up</a>

@@ -4,6 +4,7 @@
 import SignUp from "./Components/Signup/Signup";
 import Login from "./Components/Login/Login";
 import ForgotPassword from "./Components/Forgot Password/ForgotPassword";
+import "./App.css";
 
 const App = () => {
   // Creating router
@@ -13,9 +14,9 @@ const App = () => {
   // ])
   return (
     <>
-      <SignUp />
+      {/* <SignUp /> */}
       {/* <Login /> */}
-      {/* <ForgotPassword /> */}
+      <ForgotPassword />
     </>
   )
 }

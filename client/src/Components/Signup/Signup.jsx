@@ -2,7 +2,7 @@
 import styles from "./Signup.module.css";
 import { FaFacebookSquare } from "react-icons/fa";
 import iphone from "../../assets/Iphone.png";
-
+import iphone2 from "../../assets/Iphone2.png";
 
 // Signup login component is here
 export default function SignUp() {
@@ -10,9 +10,15 @@ export default function SignUp() {
     return (
         <>
             {/* Main */}
-            <main className="flex justify-center items-center" id={styles.mainContainer}>
+            <main
+                className="flex justify-center items-center"
+                id={styles.mainContainer}
+            >
                 {/* Iphone Instagram image visible starts sm width */}
-                <div className="hidden md:inline-block mx-20 mb-28" id={styles.ImageContainer}>
+                <div
+                    className="hidden md:inline-block mx-20 mb-28 slide-right"
+                    id={styles.ImageContainer}
+                >
                     <img
                         className="max-w-2xl drop-shadow-2xl"
                         src={iphone}
@@ -24,9 +30,14 @@ export default function SignUp() {
 
                 {/* Form container */}
                 <div>
-                    <div className="w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border">
+                    <div className="w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg">
                         {/* Branding Here */}
-                        <h1 className="text-[3.2rem] mb-5" style={{ fontFamily: "Pacifico" }}>Instagram</h1>
+                        <h1
+                            className="text-[3.2rem] mb-5 text-gray-800"
+                            style={{ fontFamily: "Lobster Two" }}
+                        >
+                            Instagram
+                        </h1>
 
                         {/* Details */}
                         <p className="text-center mb-2 font-medium text-gray-500">
@@ -92,8 +103,8 @@ export default function SignUp() {
                                 By signing up, you agree to our{" "}
                                 <a className="text-blue-900 cursor-pointer">
                                     Terms, Privacy Policy
-                                </a> {" "}
-                                and {" "}
+                                </a>{" "}
+                                and{" "}
                                 <a className="text-blue-900 cursor-pointer">Cookies Policy.</a>
                             </p>
 
@@ -109,7 +120,7 @@ export default function SignUp() {
                     </div>
 
                     {/* Have an account */}
-                    <div className="text-center w-[22rem] sm:border mx-auto my-5 py-4">
+                    <div className="text-center w-[22rem] sm:border mx-auto my-5 py-4 rounded-lg shadow-lg">
                         <p className="text-base">
                             Have an account?{" "}
                             <a className="text-sky-500 font-medium cursor-pointer"> Log in</a>
@@ -134,10 +145,8 @@ export default function SignUp() {
                         </div>
                     </div>
                     {/* Download App ends */}
-
                 </div>
                 {/* Form container */}
-
             </main>
             {/* Main conatiner ends */}
 
@@ -156,7 +165,9 @@ export default function SignUp() {
                     <span className="cursor-pointer hover:underline">Locations</span>
                     <span className="cursor-pointer hover:underline">Instagram Lite</span>
                     <span className="cursor-pointer hover:underline">Threads</span>
-                    <span className="cursor-pointer hover:underline">Contact uploading and non-users</span>
+                    <span className="cursor-pointer hover:underline">
+                        Contact uploading and non-users
+                    </span>
                     <span className="cursor-pointer hover:underline">Meta Verified</span>
                 </div>
                 {/* Language and copyright */}
