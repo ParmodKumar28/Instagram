@@ -23,10 +23,10 @@ export default function ForgotPassword() {
         // Main container
         <div id="forgotPasswordContainer">
             {/* Nav */}
-            <nav className="flex border-b h-16 items-center">
+            <nav className="flex border-b h-16 items-center px-10 sm:px-32">
                 {/* Logo */}
                 <Link to={"/sign-up"}
-                    className="text-black text-2xl ms-60 font-bold"
+                    className="text-black text-2xl font-bold"
                     style={{ fontFamily: "Lobster Two" }}
                 >
                     Instagram
@@ -37,7 +37,7 @@ export default function ForgotPassword() {
 
             {/* Form container */}
             <div
-                className="mx-auto my-5 w-96 sm:border sm:border-gray-300 flex flex-col items-center rounded-lg shadow-lg"
+                className="mx-auto my-5 w-[22rem] sm:w-96 sm:border sm:border-gray-300 flex flex-col items-center rounded-lg shadow-lg"
                 id="formContainer"
             >
                 {/* Lock icon */}
@@ -46,15 +46,15 @@ export default function ForgotPassword() {
                 </div>
                 {/*  */}
 
-                <p className="font-medium my-2 w-80 text-center">
+                <p className="font-medium my-2 w-72 sm:w-80 text-center">
                     Trouble with logging in?
                 </p>
-                <p className=" text-center text-gray-500 w-80">
+                <p className=" text-center text-gray-500 w-72 sm:w-80">
                     Enter your email address we&apos;ll send you a link to get back into
                     your account.
                 </p>
                 {/* Form starts */}
-                <form className="my-2 flex flex-col items-center w-80">
+                <form className="my-2 flex flex-col items-center w-72 sm:w-80">
                     <input
                         className="border py-1 px-2 w-full my-2 focus:outline-slate-400 bg-slate-50 rounded h-10"
                         type="text"
