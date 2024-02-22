@@ -9,6 +9,7 @@ import ForgotPasswordPage from "./Pages/App/Forgot-Password Page/Forgot-Password
 
 // Css imports
 import "./App.css";
+import ResetPasswordPage from "./Pages/App/Reset Password Page/Reset-Password-Page";
 
 
 // Function App component this is a parent component here
@@ -17,7 +18,8 @@ const App = () => {
   const router = createBrowserRouter([
     { path: "/sign-up", element: <RegisterPage /> },
     { path: "Login", element: <LoginPage /> },
-    { path: "forgot-password", element: <ForgotPasswordPage /> }
+    { path: "forgot-password", element: <ForgotPasswordPage /> },
+    { path: "reset-password", element: <ResetPasswordPage /> }
   ]);
 
   // Returning JSX

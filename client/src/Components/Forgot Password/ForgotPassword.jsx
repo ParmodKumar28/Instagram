@@ -24,12 +24,14 @@ export default function ForgotPassword() {
         <div id="forgotPasswordContainer">
             {/* Nav */}
             <nav className="flex border-b h-16 items-center">
-                <p
-                    className="text-black text-xl ms-60 font-bold"
+                {/* Logo */}
+                <Link to={"/sign-up"}
+                    className="text-black text-2xl ms-60 font-bold"
                     style={{ fontFamily: "Lobster Two" }}
                 >
                     Instagram
-                </p>
+                </Link>
+                {/* Logo end's */}
             </nav>
             {/* Nav Ends */}
 
