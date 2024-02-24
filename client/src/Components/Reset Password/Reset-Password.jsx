@@ -35,14 +35,14 @@ function ResetPassword() {
                 <div className="flex gap-4">
                     {/* Login button */}
                     <Link to={"/sign-up"}>
-                        <button className="bg-sky-500 font-medium px-2 py-1 rounded-md w-20 text-white text-base">
+                        <button className="bg-sky-500 font-medium hover:bg-sky-400 px-2 py-1 rounded-md w-20 text-white text-base">
                             Log in
                         </button>
                     </Link>
                     {/* Login button end's */}
 
                     {/* Sign up button */}
-                    <button className="text-sky-600 font-medium text-base">
+                    <button className="text-sky-600 font-medium text-base hover:text-sky-400">
                         <Link to={"/sign-up"}>
                             Sign up
                         </Link>
