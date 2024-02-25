@@ -10,6 +10,7 @@ import {
 } from "./middlewares/errorHandlerMiddleware.js";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
+import cors from "cors";
 
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
@@ -20,6 +21,9 @@ import followersRouter from "./features/followers/routes/follower.routes.js";
 
 // Server
 const app = express();
+
+// Setting up cors
+app.use(cors());
 
 // Parsing cookies
 app.use(cookieParser());

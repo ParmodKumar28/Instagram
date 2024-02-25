@@ -5,6 +5,8 @@ import iphone from "../../assets/Iphone.png";
 // import iphone2 from "../../assets/Iphone2.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { signUpAsync } from "../../Redux/Reducer/usersReducer";
 
 // Signup login component is here
 export default function SignUp() {
@@ -14,10 +16,15 @@ export default function SignUp() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    // Dispatcher
+    const dispatch = useDispatch();
+
     // Handler's
     const handleSignUp = (e) => {
         // Preventing default behaviour of submit here
         e.preventDefault();
+        // Dispatching action to the user reducer
+        dispatch(signUpAsync({ email, fullName, username, password }));
 
         // Clear field's
         setEmail("");
