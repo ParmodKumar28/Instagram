@@ -3,7 +3,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Provider } from 'react-redux';
 import store from "./Redux/store";
-import { ToastContainer } from 'react-toastify';
+import { Flip, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Components Imports
@@ -34,7 +34,7 @@ const App = () => {
         <RouterProvider router={router} />
       </Provider>
       {/* Notifications */}
-      <ToastContainer />
+      <ToastContainer autoClose={1000} transition={Flip} />
     </>
   )
 }

@@ -5,8 +5,8 @@ import iphone from "../../assets/Iphone.png";
 // import iphone2 from "../../assets/Iphone2.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { signUpAsync } from "../../Redux/Reducer/usersReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { signUpAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
 
 // Signup login component is here
 export default function SignUp() {
@@ -15,6 +15,9 @@ export default function SignUp() {
     const [fullName, setFullName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    // States from the user's reducer here
+    const { loading } = useSelector(usersSelector);
 
     // Dispatcher
     const dispatch = useDispatch();
@@ -149,12 +152,17 @@ export default function SignUp() {
 
                             {/* Signup Button */}
                             <button
-                                className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
+                                className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium  hover:bg-sky-600 transition-all"
                                 type="submit"
                                 onClick={(e) => handleSignUp(e)}
                             >
-                                Sign Up
+                                {loading ? (
+                                    "loading . . . "
+                                ) : (
+                                    "Sign Up"
+                                )}
                             </button>
+
                             {/* Signup Button End's */}
                         </form>
                         {/* Form ends */}
@@ -166,7 +174,7 @@ export default function SignUp() {
                             Have an account?{" "}
                             <Link
                                 to={"/login"}
-                                className="text-sky-500 font-medium cursor-pointer"
+                                className="text-sky-500 font-medium cursor-pointer hover:text-sky-600 transition-all"
                             >
                                 {" "}
                                 Log in
