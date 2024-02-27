@@ -40,7 +40,8 @@ const INITIAL_STATE = {
   isSignIn: false,
   token: "",
   signedUser: {},
-  loading: false,
+  signUpLoading: false,
+  loginLoading: false,
 };
 
 // Slice
@@ -50,10 +51,10 @@ const usersSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(signUpAsync.pending, (state, action) => {
-      state.loading = true;
+      state.signUpLoading = true;
     });
     builder.addCase(signUpAsync.fulfilled, (state, action) => {
-      state.loading = false;
+      state.signUpLoading = false;
       state.isSignIn = true;
       state.token = action.payload.token;
       state.signedUser = action.payload.user;
@@ -62,7 +63,7 @@ const usersSlice = createSlice({
       toast.success("Signed In!");
     });
     builder.addCase(signUpAsync.rejected, (state, action) => {
-      state.loading = false; // Set loading to false in case of rejection
+      state.signUpLoading = false; // Set signUpLoading to false in case of rejection
     });
   },
 });

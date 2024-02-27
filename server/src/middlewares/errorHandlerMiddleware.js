@@ -1,7 +1,7 @@
 // Creating middleware for handling errors here.
 export const errorHandlerMiddleware = (err, req, res, next) => {
   // Log the error here first for better approach
-  console.log(err);
+  // console.log(err);
   err.message = err.message || "Internal server error!";
   err.statusCode = err.statusCode || 500;
   res.status(err.statusCode).json({

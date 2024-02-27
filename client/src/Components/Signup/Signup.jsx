@@ -1,12 +1,14 @@
 // Imports
 import styles from "./Signup.module.css";
-import { FaFacebookSquare } from "react-icons/fa";
+import { FaEye, FaFacebookSquare } from "react-icons/fa";
 import iphone from "../../assets/Iphone.png";
 // import iphone2 from "../../assets/Iphone2.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signUpAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
+import { ClipLoader } from "react-spinners";
+import { RiEyeCloseFill } from "react-icons/ri";
 
 // Signup login component is here
 export default function SignUp() {
@@ -15,9 +17,10 @@ export default function SignUp() {
     const [fullName, setFullName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     // States from the user's reducer here
-    const { loading } = useSelector(usersSelector);
+    const { signUpLoading } = useSelector(usersSelector);
 
     // Dispatcher
     const dispatch = useDispatch();
@@ -124,15 +127,28 @@ export default function SignUp() {
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                             {/* Password Input */}
-                            <input
-                                className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
-                                type="password"
-                                name="password"
-                                required
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                            <div className="w-full" style={{ position: 'relative' }}>
+                                {/* Input */}
+                                <input
+                                    className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    required
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                {/* Input ends */}
+
+                                {/* Eye icons  */}
+                                <span
+                                    style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', cursor: 'pointer' }}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <FaEye className="text-xl" /> : <RiEyeCloseFill className="text-xl" />}
+                                </span>
+                                {/* Eye Icons ends */}
+                            </div>
 
                             {/* Privacy Policy */}
                             <p className="text-xs text-gray-500 text-center my-2">
@@ -156,14 +172,14 @@ export default function SignUp() {
                                 type="submit"
                                 onClick={(e) => handleSignUp(e)}
                             >
-                                {loading ? (
-                                    "loading . . . "
+                                {signUpLoading ? (
+                                    <ClipLoader color={"#ffffff"} loading={true} size={20} />
                                 ) : (
                                     "Sign Up"
                                 )}
                             </button>
-
                             {/* Signup Button End's */}
+
                         </form>
                         {/* Form ends */}
                     </div>

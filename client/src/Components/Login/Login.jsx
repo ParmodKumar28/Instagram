@@ -1,13 +1,25 @@
 // Imports
 // import styles from "../Login/Login.module.css";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { usersSelector } from "../../Redux/Reducer/usersReducer";
+import { ClipLoader } from "react-spinners";
+import { RiEyeCloseFill } from "react-icons/ri";
+import { FaEye } from "react-icons/fa";
 
 // Login component is here
 export default function Login() {
     // States
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+    // States from the user's reducer here
+    const { loginLoading } = useSelector(usersSelector);
+
+    // Dispatcher
+    const dispatch = useDispatch();
 
     // Handler's
     const handleLogin = (e) => {
@@ -40,23 +52,40 @@ export default function Login() {
                     />
 
                     {/* Password Input */}
-                    <input
-                        className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
-                        type="password"
-                        name="password"
-                        required
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="w-full" style={{ position: 'relative' }}>
+                        {/* Input */}
+                        <input
+                            className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            required
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        {/* Input ends */}
+
+                        {/* Eye icons  */}
+                        <span
+                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', cursor: 'pointer' }}
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEye className="text-xl" /> : <RiEyeCloseFill className="text-xl" />}
+                        </span>
+                        {/* Eye Icons ends */}
+                    </div>
 
                     {/* Login Button */}
                     <button
-                        className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium"
+                        className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium hover:bg-sky-600"
                         type="submit"
                         onClick={(e) => handleLogin(e)}
                     >
-                        Login
+                        {loginLoading ? (
+                            <ClipLoader color={"#ffffff"} loading={true} size={20} />
+                        ) : (
+                            "Login"
+                        )}
                     </button>
                     {/* Login Button End's */}
 
