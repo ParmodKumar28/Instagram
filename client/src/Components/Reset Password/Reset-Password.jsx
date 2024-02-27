@@ -1,5 +1,7 @@
 // Imports
 import { useState } from "react";
+import { FaEye } from "react-icons/fa";
+import { RiEyeCloseFill } from "react-icons/ri";
 import { Link } from "react-router-dom";
 
 // Component for the reset password here
@@ -7,6 +9,7 @@ function ResetPassword() {
     // States
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     // Handler's
     const resetPasswordHandler = (e) => {
@@ -71,26 +74,52 @@ function ResetPassword() {
                 {/* Form starts */}
                 <form className="my-2 flex flex-col items-center w-72">
                     {/* New Password */}
-                    <input
-                        className="border py-1 px-2 w-full my-4 focus:outline-slate-400 bg-slate-50 rounded h-12"
-                        type="password"
-                        name="newPassword"
-                        required={true}
-                        placeholder="New Password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                    />
+                    <div className="w-full" style={{ position: 'relative' }}>
+                        {/* Input */}
+                        <input
+                            className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
+                            type={showPassword ? "text" : "password"}
+                            name="newPassword"
+                            required={true}
+                            placeholder="New Password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        {/* Input ends */}
+
+                        {/* Eye icons  */}
+                        <span
+                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', cursor: 'pointer' }}
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEye className="text-xl" /> : <RiEyeCloseFill className="text-xl" />}
+                        </span>
+                        {/* Eye Icons ends */}
+                    </div>
 
                     {/* Confirm Password */}
-                    <input
-                        className="border py-1 px-2 w-full my-4 focus:outline-slate-400 bg-slate-50 rounded h-12"
-                        type="password"
-                        name="confirmPassword"
-                        required={true}
-                        placeholder="New Password Again"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
+                    <div className="w-full" style={{ position: 'relative' }}>
+                        {/* Input */}
+                        <input
+                            className="border py-1 px-2 w-full my-4 focus:outline-slate-400 bg-slate-50 rounded h-12"
+                            type={showPassword ? "text" : "password"}
+                            name="confirmPassword"
+                            required={true}
+                            placeholder="New Password Again"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        {/* Input ends */}
+
+                        {/* Eye icons  */}
+                        <span
+                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', cursor: 'pointer' }}
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <FaEye className="text-xl" /> : <RiEyeCloseFill className="text-xl" />}
+                        </span>
+                        {/* Eye Icons ends */}
+                    </div>
 
                     {/* Rest Password Button */}
                     <button

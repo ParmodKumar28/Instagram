@@ -23,7 +23,12 @@ import followersRouter from "./features/followers/routes/follower.routes.js";
 const app = express();
 
 // Setting up cors
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Replace with your frontend origin
+    credentials: true, // Allow credentials (cookies)
+  })
+);
 
 // Parsing cookies
 app.use(cookieParser());

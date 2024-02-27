@@ -8,6 +8,7 @@ export const sendToken = async (user, res, statusCode) => {
       Date.now() + process.env.COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    sameSite: "none",
   };
 
   // Sending response and setting token to cookie

@@ -11,6 +11,8 @@ import RegisterPage from "./Pages/App/Register Page/Register-Page";
 import LoginPage from "./Pages/App/Login Page/Login-Page";
 import ForgotPasswordPage from "./Pages/App/Forgot-Password Page/Forgot-Password-Page";
 import ResetPasswordPage from "./Pages/App/Reset Password Page/Reset-Password-Page";
+import HomePage from "./Pages/App/Home Page/Home-Page";
+import ProtectedRoute from "./Pages/Misc/Protected Routes/ProtectedRoute";
 
 // Css imports
 import "./App.css";
@@ -22,7 +24,8 @@ const App = () => {
     { path: "/sign-up", element: <RegisterPage /> },
     { path: "Login", element: <LoginPage /> },
     { path: "forgot-password", element: <ForgotPasswordPage /> },
-    { path: "reset-password", element: <ResetPasswordPage /> }
+    { path: "reset-password", element: <ResetPasswordPage /> },
+    { path: "/", element: <ProtectedRoute><HomePage /></ProtectedRoute> }
   ]);
 
   // Returning JSX
@@ -40,4 +43,4 @@ const App = () => {
 }
 
 // Exporting App
-export default App
+export default App;

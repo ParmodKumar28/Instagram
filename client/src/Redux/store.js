@@ -7,6 +7,7 @@ import { usersReducer } from "./Reducer/usersReducer";
 
 // Store
 const store = configureStore({
+  // Reducer's
   reducer: {
     usersReducer,
   },

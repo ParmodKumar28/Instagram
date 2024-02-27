@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { usersSelector } from "../../Redux/Reducer/usersReducer";
+import { loginAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
 import { ClipLoader } from "react-spinners";
 import { RiEyeCloseFill } from "react-icons/ri";
 import { FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 // Login component is here
 export default function Login() {
@@ -18,6 +19,9 @@ export default function Login() {
     // States from the user's reducer here
     const { loginLoading } = useSelector(usersSelector);
 
+    // Navigator
+    const navigate = useNavigate();
+
     // Dispatcher
     const dispatch = useDispatch();
 
@@ -25,6 +29,12 @@ export default function Login() {
     const handleLogin = (e) => {
         // Preventing default behaviour of submit here
         e.preventDefault();
+
+        // Dispatching loginAsync thunk here
+        dispatch(loginAsync({ email, password }));
+
+        // Navigating to the home page after login here
+        navigate("/");
 
         // Clear field's
         setEmail("");
