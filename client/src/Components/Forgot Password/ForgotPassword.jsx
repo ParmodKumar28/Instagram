@@ -2,17 +2,24 @@
 import { useState } from "react";
 import { CiLock } from "react-icons/ci";
 import { IoArrowBack } from "react-icons/io5";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { forgotPasswordOtpAsync } from "../../Redux/Reducer/usersReducer";
 
 // Component for the forgot password
 export default function ForgotPassword() {
     // States
     const [email, setEmail] = useState("");
 
+    // Dispatcher
+    const dispatch = useDispatch();
+
     // Handler's
     const sendEmailHandler = (e) => {
         // Preventing default behaviour of submit here
         e.preventDefault();
+        // Dispatching action here
+        dispatch(forgotPasswordOtpAsync({ email }));
 
         // Clear field's
         setEmail("");

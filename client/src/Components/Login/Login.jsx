@@ -129,7 +129,7 @@ export default function Login() {
                 <p className="text-base">
                     Dont&apos;t have an account?
                     {/* Link to sign-up page */}
-                    <Link to={"/sign-up"} className="text-sky-500 font-medium cursor-pointer"> Sign Up</Link>
+                    <Link to={"/sign-up"} className="text-sky-500 font-medium cursor-pointer select-none"> Sign Up</Link>
                 </p>
             </div>
             {/* Have an account end's */}

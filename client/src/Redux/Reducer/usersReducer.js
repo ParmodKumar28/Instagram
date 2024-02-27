@@ -93,9 +93,7 @@ export const logoutAsync = createAsyncThunk("users/logout", async () => {
 export const userDataAsync = createAsyncThunk("users/details", async () => {
   try {
     // Sending request to the server
-    const response = await axios.get(`${BASE_URL_USERS}/user-data`, {
-      withCredentials: true,
-    });
+    const response = await axios.get(`${BASE_URL_USERS}/user-data`);
     // If response is ok then return repsonse.data
     if (response.statusText === "OK") {
       return response.data;
@@ -110,6 +108,62 @@ export const userDataAsync = createAsyncThunk("users/details", async () => {
     throw error;
   }
 });
+// Get user details end's
+
+// Forgot password otp
+export const forgotPasswordOtpAsync = createAsyncThunk(
+  "users/forgotPassword",
+  async ({ email }) => {
+    try {
+      // Sending request to the server
+      const response = await axios.post(
+        `${BASE_URL_USERS}/forgot-password-otp`,
+        { email }
+      );
+      // If response is ok then return repsonse.data
+      if (response.statusText === "OK") {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+// Forgot password otp end's
+
+// Reset password start's
+export const resetPasswordAsync = createAsyncThunk(
+  "users/reset-password",
+  async ({ newPassword, confirmPassword, otp }) => {
+    try {
+      // Sending request to the server
+      const response = await axios.put(`${BASE_URL_USERS}/reset-password`, {
+        password: newPassword,
+        confirmPassword: confirmPassword,
+        resetToken: otp,
+      });
+      // If response is ok then return repsonse.data
+      if (response.statusText === "OK") {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+// Reset password start's end's
 
 // Initial State
 const INITIAL_STATE = {
@@ -210,6 +264,32 @@ const usersSlice = createSlice({
     // When rejected
     builder.addCase(logoutAsync.rejected, (state, action) => {});
     // logoutAsync thunk extra reducer's end's here
+
+    // Forgot password thunks extra reducer's
+    // When pending
+    builder.addCase(forgotPasswordOtpAsync.pending, (state, action) => {});
+
+    // When fulfilled
+    builder.addCase(forgotPasswordOtpAsync.fulfilled, (state, action) => {
+      toast.success(action.payload.msg);
+    });
+
+    // When rejected
+    builder.addCase(forgotPasswordOtpAsync.rejected, (state, action) => {});
+    // Forgot password thunks extra reducer's end's
+
+    // Reset password thunks extra reducer's
+    // When pending
+    builder.addCase(resetPasswordAsync.pending, (state, action) => {});
+
+    // When fulfilled
+    builder.addCase(resetPasswordAsync.fulfilled, (state, action) => {
+      toast.success(action.payload.msg);
+    });
+
+    // When rejected
+    builder.addCase(resetPasswordAsync.rejected, (state, action) => {});
+    // Reset password thunks extra reducer's end's
   },
 });
 

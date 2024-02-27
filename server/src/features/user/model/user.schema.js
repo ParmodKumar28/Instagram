@@ -149,15 +149,21 @@ userSchema.methods.comparePassword = async function (password) {
 
 // Generate resetPasswordToken
 userSchema.methods.getResetPasswordToken = async function () {
-  const resetToken = crypto.randomBytes(20).toString("hex");
+  // Generate a random six-digit number
+  const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // hashing and updating user resetPasswordToken
-  this.resetPasswordToken = crypto
+  // Hash the resetToken using sha256
+  const hashedResetToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
-  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  // Update user's resetPasswordToken
+  this.resetPasswordToken = hashedResetToken;
+
+  // Set expiration time
+  this.resetPasswordExpire = Date.now() + 5 * 60 * 1000;
+
   return resetToken;
 };
 

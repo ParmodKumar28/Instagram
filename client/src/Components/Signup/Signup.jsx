@@ -158,7 +158,7 @@ export default function SignUp() {
                             </div>
 
                             {/* Privacy Policy */}
-                            <p className="text-xs text-gray-500 text-center my-2">
+                            <p className="text-xs text-gray-500 text-center my-2 select-none">
                                 People who use our service may have uploaded your contact
                                 information to Instagram.{" "}
                                 <span className="text-blue-900 cursor-pointer">Learn more</span>

@@ -2,23 +2,39 @@
 import { useState } from "react";
 import { FaEye } from "react-icons/fa";
 import { RiEyeCloseFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { resetPasswordAsync } from "../../Redux/Reducer/usersReducer";
 
 // Component for the reset password here
 function ResetPassword() {
     // States
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [otp, setOtp] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Dispatcher
+    const dispatch = useDispatch();
+
+    // Navigator
+    const navigate = useNavigate();
 
     // Handler's
     const resetPasswordHandler = (e) => {
         // Preventing default behaviour of submit here
         e.preventDefault();
 
+        // Dispatching action and if password reset then navigate to login page
+        dispatch(resetPasswordAsync({ newPassword, confirmPassword, otp }))
+            .then(() => {
+                navigate("/login");
+            });
+
         // Clear field's
         setNewPassword("");
         setConfirmPassword("");
+        setOtp(null);
     }
 
     // Returning JSX
@@ -73,6 +89,16 @@ function ResetPassword() {
 
                 {/* Form starts */}
                 <form className="my-2 flex flex-col items-center w-72">
+                    {/* Otp Input */}
+                    <input type="text"
+                        className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
+                        name="otp"
+                        placeholder="Enter otp"
+                        required={true}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                    />
+
                     {/* New Password */}
                     <div className="w-full" style={{ position: 'relative' }}>
                         {/* Input */}
@@ -101,7 +127,7 @@ function ResetPassword() {
                     <div className="w-full" style={{ position: 'relative' }}>
                         {/* Input */}
                         <input
-                            className="border py-1 px-2 w-full my-4 focus:outline-slate-400 bg-slate-50 rounded h-12"
+                            className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
                             type={showPassword ? "text" : "password"}
                             name="confirmPassword"
                             required={true}

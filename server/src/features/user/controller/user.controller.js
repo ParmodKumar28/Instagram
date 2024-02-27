@@ -208,7 +208,7 @@ export const forgotPasswordOtp = async (req, res, next) => {
       // Creating otp and saving to user
       const resetToken = await user.getResetPasswordToken();
       await user.save();
-      const resetPasswordUrl = "http://localhost:8000/api/user/reset-password";
+      const resetPasswordUrl = "http://localhost:5173/reset-password";
 
       // Sending email
       await sendResetPasswordMail(
@@ -231,6 +231,7 @@ export const resetPassword = async (req, res, next) => {
     if (!resetToken) {
       return next(new ErrorHandler(400, "Please give otp token!"));
     }
+    
     // Creating token hash to compare with token stored on user
     const hashedToken = await crypto
       .createHash("sha256")

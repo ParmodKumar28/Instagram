@@ -45,7 +45,7 @@ userRouter.post(
 userRouter.get("/user-data", auth, userData);
 
 // Otp for password reset
-userRouter.get("/forgot-password-otp", forgotPasswordOtp);
+userRouter.post("/forgot-password-otp", forgotPasswordOtp);
 
 // Reset password
 userRouter.put("/reset-password", resetPassword);
