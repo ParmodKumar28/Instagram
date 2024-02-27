@@ -31,10 +31,11 @@ export default function Login() {
         e.preventDefault();
 
         // Dispatching loginAsync thunk here
-        dispatch(loginAsync({ email, password }));
-
-        // Navigating to the home page after login here
-        navigate("/");
+        dispatch(loginAsync({ email, password }))
+            .then(() => {
+                // Navigating to the home page after login here
+                navigate("/");
+            });
 
         // Clear field's
         setEmail("");
@@ -87,7 +88,7 @@ export default function Login() {
 
                     {/* Login Button */}
                     <button
-                        className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium hover:bg-sky-600"
+                        className="bg-sky-400 w-full text-white rounded-lg my-2 p-1 font-medium hover:bg-sky-600 select-none"
                         type="submit"
                         onClick={(e) => handleLogin(e)}
                     >

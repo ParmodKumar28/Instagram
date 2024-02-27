@@ -3,7 +3,7 @@ import styles from "./Signup.module.css";
 import { FaEye, FaFacebookSquare } from "react-icons/fa";
 import iphone from "../../assets/Iphone.png";
 // import iphone2 from "../../assets/Iphone2.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signUpAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
@@ -25,12 +25,19 @@ export default function SignUp() {
     // Dispatcher
     const dispatch = useDispatch();
 
+    // Navigator
+    const navigate = useNavigate();
+
     // Handler's
     const handleSignUp = (e) => {
         // Preventing default behaviour of submit here
         e.preventDefault();
         // Dispatching action to the user reducer
-        dispatch(signUpAsync({ email, fullName, username, password }));
+        dispatch(signUpAsync({ email, fullName, username, password }))
+            .then(() => {
+                // Navigating to the home page after login here
+                navigate("/");
+            });
 
         // Clear field's
         setEmail("");

@@ -68,6 +68,27 @@ export const loginAsync = createAsyncThunk(
 );
 // Login ends
 
+// Logout start's
+export const logoutAsync = createAsyncThunk("users/logout", async () => {
+  try {
+    // Sending request to the server
+    const response = await axios.get(`${BASE_URL_USERS}/logout`);
+    // If response is ok then return repsonse.data
+    if (response.statusText === "OK") {
+      return response.data;
+    }
+  } catch (error) {
+    console.log(error);
+    if (error.response && error.response.data && error.response.data.error) {
+      toast.error(error.response.data.error); // Display the error message in a toast
+    } else {
+      toast.error("An error occurred. Please try again later.");
+    }
+    throw error;
+  }
+});
+// Logout end's
+
 // Get user details
 export const userDataAsync = createAsyncThunk("users/details", async () => {
   try {
@@ -124,6 +145,7 @@ const usersSlice = createSlice({
       state.isSignIn = true;
       state.token = action.payload.token;
       state.signedUser = action.payload.user;
+      Cookies.set("token", action.payload.token); // Storing fresh token to cooke
       Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
       toast.success("Signed In!"); // Showing notification
     });
@@ -146,6 +168,7 @@ const usersSlice = createSlice({
       state.token = action.payload.token;
       state.signedUser = action.payload.user;
       state.isSignIn = true;
+      Cookies.set("token", action.payload.token); // Storing fresh token to cooke
       Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
       toast.success("Login Successful!");
     });
@@ -168,6 +191,25 @@ const usersSlice = createSlice({
     // When rejected
     builder.addCase(userDataAsync.rejected, (state, action) => {});
     // Get userDataAsync ends
+
+    // logoutAsync thunk extra reducer's start's here
+    // When pending
+    builder.addCase(logoutAsync.pending, (state, action) => {});
+
+    // When fulfilled
+    builder.addCase(logoutAsync.fulfilled, (state, action) => {
+      // Setting state
+      Cookies.remove("isSignIn"); //Removing isSignin from cookie
+      state.isSignIn = false;
+      state.signedUser = {};
+      state.token = "";
+      console.log(action.payload);
+      toast.success("Logout Successful!"); // Toast notification
+    });
+
+    // When rejected
+    builder.addCase(logoutAsync.rejected, (state, action) => {});
+    // logoutAsync thunk extra reducer's end's here
   },
 });
 
