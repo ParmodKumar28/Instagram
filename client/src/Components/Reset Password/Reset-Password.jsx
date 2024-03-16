@@ -26,10 +26,7 @@ function ResetPassword() {
         e.preventDefault();
 
         // Dispatching action and if password reset then navigate to login page
-        dispatch(resetPasswordAsync({ newPassword, confirmPassword, otp }))
-            .then(() => {
-                navigate("/login");
-            });
+        dispatch(resetPasswordAsync({ newPassword, confirmPassword, otp }));
 
         // Clear field's
         setNewPassword("");
@@ -150,7 +147,7 @@ function ResetPassword() {
                     {/* Rest Password Button */}
                     <button
                         className={`my-4 ${(!newPassword || !confirmPassword) || (newPassword !== confirmPassword) ? "bg-sky-200" : "bg-sky-500"
-                            } text-white rounded-md py-1 px-2 w-full transition-all h-12`}
+                            } text-white rounded-md py-1 px-2 w-full transition-all h-12 select-none`}
                         type="submit"
                         disabled={(!newPassword || !confirmPassword) || (newPassword !== confirmPassword) ? true : false}
                         onClick={(e) => resetPasswordHandler(e)}

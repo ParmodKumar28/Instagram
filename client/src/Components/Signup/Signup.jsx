@@ -34,10 +34,9 @@ export default function SignUp() {
         e.preventDefault();
         // Dispatching action to the user reducer
         dispatch(signUpAsync({ email, fullName, username, password }))
-            .then(() => {
-                // Navigating to the home page after login here
-                navigate("/");
-            });
+
+        // Navigating to the home page after login here
+        // navigate("/");
 
         // Clear field's
         setEmail("");
@@ -87,7 +86,7 @@ export default function SignUp() {
                         {/* Details end's */}
 
                         {/* Login with facebook */}
-                        <div className="flex items-center gap-2 bg-sky-500 text-white p-2 rounded-md w-full justify-center">
+                        <div className="flex items-center gap-2 bg-sky-500 text-white p-2 rounded-md w-full justify-center select-none">
                             <FaFacebookSquare className="text-2xl" />
                             <p className="font-medium">Log in With Facebook</p>
                         </div>

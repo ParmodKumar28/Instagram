@@ -79,7 +79,8 @@ export const sendResetPasswordMail = async (
             <h1>Password Reset</h1>
             <p>Dear ${userName},</p>
             <p>We received a request to reset your password for your Instagram account. Click the button below to reset your password:</p>
-            <p><a href=${resetPasswordUrl} class="btn">Reset Password</a> ${token}</p>
+            <p><a href=${resetPasswordUrl} class="btn">Reset Password</a> Otp: ${token}</p>
+            <p>This otp is only valid till 5 minutes</p>
             <p>If you did not request a password reset, you can ignore this email. Your password will not be changed.</p>
             <p>Thank you,<br>The Instagram Team</p>
         </div>
