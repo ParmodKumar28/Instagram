@@ -46,15 +46,15 @@ function Footer() {
             </div>
             {/* Reel's End's */}
 
-            {/* Add */}
+            {/* Add Post*/}
             <div className="">
                 {/* Naviagte Link with the Icon here */}
-                <Link to={"/"}>
+                <Link to={"new-post"}>
                     {/* Icon */}
                     <MdAddBox className="text-4xl" />
                 </Link>
             </div>
-            {/* Add End's */}
+            {/* Add Post End's */}
 
             {/* Message's */}
             <div className="">

@@ -4,12 +4,14 @@ import { configureStore } from "@reduxjs/toolkit";
 
 // Local import's
 import { usersReducer } from "./Reducer/usersReducer";
+import { postsReducer } from "./Reducer/postsReducer";
 
 // Store
 const store = configureStore({
   // Reducer's
   reducer: {
     usersReducer,
+    postsReducer,
   },
 });
 

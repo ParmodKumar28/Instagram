@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { logoutAsync, userDataAsync } from "../../../Redux/Reducer/usersReducer";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Footer from "../../../Components/Footer/Footer";
 import Header from "../../../Components/Header/Header";
 
@@ -27,8 +27,7 @@ function HomePage() {
     return (
         <>
             <Header />
-            <h1>Welcome To Instagram</h1>
-            <button onClick={() => { dispatch(logoutAsync()); navigate("/login") }}>Logout</button>
+            <Outlet />
             <Footer />
         </>
     )

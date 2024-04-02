@@ -16,16 +16,28 @@ import ProtectedRoute from "./Pages/Misc/Protected Routes/ProtectedRoute";
 
 // Css imports
 import "./App.css";
+import PostForm from "./Components/Post Form/PostForm";
+import Footer from "./Components/Footer/Footer";
+import Home from "./Components/Home/Home";
 
 // Function App component this is a parent component here
 const App = () => {
   // Creating router
   const router = createBrowserRouter([
     { path: "/sign-up", element: <RegisterPage /> },
-    { path: "Login", element: <LoginPage /> },
-    { path: "forgot-password", element: <ForgotPasswordPage /> },
-    { path: "reset-password", element: <ResetPasswordPage /> },
-    { path: "/", element: <ProtectedRoute><HomePage /></ProtectedRoute> }
+    { path: "/login", element: <LoginPage /> },
+    { path: "/forgot-password", element: <ForgotPasswordPage /> },
+    { path: "/reset-password", element: <ResetPasswordPage /> },
+    {
+      path: "/",
+      element: <ProtectedRoute><HomePage /></ProtectedRoute>,
+      children: [
+        {
+          index: true, element: <Home />
+        },
+        { path: "new-post", element: <PostForm /> }
+      ]
+    }
   ]);
 
   // Returning JSX
@@ -37,7 +49,7 @@ const App = () => {
         <RouterProvider router={router} />
       </Provider>
       {/* Notifications */}
-      <ToastContainer autoClose={1000} transition={Flip} />
+      <ToastContainer autoClose={2000} transition={Flip} />
     </>
   )
 }
