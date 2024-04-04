@@ -55,7 +55,7 @@ function PostForm() {
                         htmlFor="media"
                         className="block text-gray-700 text-sm font-bold mb-2"
                     >
-                        media:
+                        Media:
                     </label>
                     {/* media label end's */}
 

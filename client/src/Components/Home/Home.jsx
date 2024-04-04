@@ -2,6 +2,7 @@
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutAsync } from "../../Redux/Reducer/usersReducer";
+import PostsList from "../Post's List/Post's-List";
 
 // Component to show home data like posts
 function Home() {
@@ -13,7 +14,7 @@ function Home() {
     // Returning Jsx
     return (
         <>
-            <div>Home</div>
+            <PostsList />
             <button onClick={() => { dispatch(logoutAsync()); navigate("/login") }}>Logout</button>
         </>
     )

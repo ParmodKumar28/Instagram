@@ -15,7 +15,7 @@ function Footer() {
     // Returning JSx
     return (
         // Footer container div
-        <div className="py-7 h-10 w-full flex justify-evenly items-center border-2 fixed bottom-0" id="footerContainer">
+        <div className="py-7 h-10 w-full flex justify-evenly items-center border-2 fixed bottom-0 bg-white" id="footerContainer">
             {/* Home */}
             <div className="">
                 {/* Naviagte Link with the Icon here */}

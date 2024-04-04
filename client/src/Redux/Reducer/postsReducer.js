@@ -14,7 +14,7 @@ axios.defaults.withCredentials = true;
 // Create new post start's here
 export const createPostAsync = createAsyncThunk(
   "posts/create",
-  async (formData) => {
+  async (formData, { dispatch }) => {
     try {
       console.log(formData);
       const response = await axios.post(
@@ -23,6 +23,7 @@ export const createPostAsync = createAsyncThunk(
       );
       // If response is ok then return repsonse.data
       if (response.statusText === "OK") {
+        dispatch(fetchPostsAsync());
         return response.data;
       }
     } catch (error) {
@@ -38,10 +39,31 @@ export const createPostAsync = createAsyncThunk(
 );
 // Create new post end's here
 
+// Fetch post's
+export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
+  try {
+    const response = await axios.get(`${BASE_URL_POSTS}/all-posts`);
+    // If response is ok then return repsonse.data
+    if (response.statusText === "OK") {
+      return response.data;
+    }
+  } catch (error) {
+    console.log(error);
+    if (error.response && error.response.data && error.response.data.error) {
+      toast.error(error.response.data.error); // Display the error message in a toast
+    } else {
+      toast.error("An error occurred. Please try again later.");
+    }
+    throw error; // Throw the error to trigger the rejected case
+  }
+});
+// Fetch post's end's
+
 // Initial State
 const INITIAL_STATE = {
   postsLoading: true,
   addPostLoad: false,
+  posts: [],
 };
 
 // Slice
@@ -75,6 +97,26 @@ const postsSlice = createSlice({
       state.addPostLoad = false;
     });
     // Create post rejected state extra reducer end's here
+
+    // Fetch post's pending state start's
+    builder.addCase(fetchPostsAsync.pending, (state, action) => {
+      state.postsLoading = true;
+    });
+    // Fetch post's pending state end's
+
+    // Fetch post's fulfilled state start's
+    builder.addCase(fetchPostsAsync.fulfilled, (state, action) => {
+      state.postsLoading = false;
+      console.log(action.payload.posts);
+      state.posts = action.payload.posts;
+    });
+    // Fetch post's fulfilled state end's
+
+    // Fetch post's rejected state start's
+    builder.addCase(fetchPostsAsync.rejected, (state, action) => {
+      state.postsLoading = false;
+    });
+    // Fetch post's rejected state end's
   },
 });
 
