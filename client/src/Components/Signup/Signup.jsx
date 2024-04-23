@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { signUpAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
 import { ClipLoader } from "react-spinners";
 import { RiEyeCloseFill } from "react-icons/ri";
+import Cookies from "js-cookie";
 
 // Signup login component is here
 export default function SignUp() {
@@ -30,19 +31,27 @@ export default function SignUp() {
 
     // Handler's
     const handleSignUp = (e) => {
-        // Preventing default behaviour of submit here
-        e.preventDefault();
-        // Dispatching action to the user reducer
-        dispatch(signUpAsync({ email, fullName, username, password }))
+        try {
+            // Preventing default behaviour of submit here
+            e.preventDefault();
+            // Dispatching action to the user reducer
+            dispatch(signUpAsync({ email, fullName, username, password }))
 
-        // Navigating to the home page after login here
-        // navigate("/");
+            // Clear field's
+            setEmail("");
+            setFullName("");
+            setUsername("");
+            setPassword("");
 
-        // Clear field's
-        setEmail("");
-        setFullName("");
-        setUsername("");
-        setPassword("");
+            // Redirect to home page after successful login
+            if (Cookies.get("isSignIn")) {
+                navigate("/");
+            }
+
+        } catch (error) {
+            console.error("SignUp failed:", error);
+        }
+
     };
 
     // Returning JSX

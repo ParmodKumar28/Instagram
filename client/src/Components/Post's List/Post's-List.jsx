@@ -1,5 +1,4 @@
 // Imports
-
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPostsAsync, postsSelector } from "../../Redux/Reducer/postsReducer";
 import { useEffect } from "react";

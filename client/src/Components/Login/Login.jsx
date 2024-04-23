@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 import { RiEyeCloseFill } from "react-icons/ri";
 import { FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 // Login component is here
 export default function Login() {
@@ -26,21 +27,28 @@ export default function Login() {
     const dispatch = useDispatch();
 
     // Handler's
-    const handleLogin = (e) => {
-        // Preventing default behaviour of submit here
-        e.preventDefault();
+    // Handler's
+    const handleLogin = async (e) => {
+        try {
+            // Preventing default behaviour of submit here
+            e.preventDefault();
 
-        // Dispatching loginAsync thunk here
-        dispatch(loginAsync({ email, password }))
-            .then(() => {
-                // Navigating to the home page after login here
+            // Dispatching loginAsync thunk here
+            await dispatch(loginAsync({ email, password }));
+
+            // Clear fields
+            setEmail("");
+            setPassword("");
+
+            // Redirect to home page after successful login
+            if (Cookies.get("isSignIn")) {
                 navigate("/");
-            });
-
-        // Clear field's
-        setEmail("");
-        setPassword("");
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
     };
+    
 
     // Returning JSX
     return (
