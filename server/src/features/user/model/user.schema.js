@@ -9,6 +9,8 @@ const userSchema = new mongoose.Schema(
   {
     profilePic: {
       type: String,
+      default:
+        "https://w7.pngwing.com/pngs/893/183/png-transparent-user-avatar-profile-person-man-people-account-instagram-icon.png",
     },
     name: {
       type: String,

@@ -1,4 +1,4 @@
-// Import's
+// Imports
 import { useState } from "react";
 import { createPostAsync, postsSelector } from "../../Redux/Reducer/postsReducer";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +13,7 @@ function PostForm() {
 
     // State's from post's reducer
     const { addPostLoad } = useSelector(postsSelector);
+
     // Dispatcher
     const dispatch = useDispatch();
 
@@ -47,38 +48,32 @@ function PostForm() {
             {/* Heading End's */}
 
             {/* Form start's */}
-            <form className="w-full max-w-lg" onSubmit={(event) => handleSubmit(event)}>
-                {/* media uploader container */}
+            <form className="w-full max-w-lg">
+                {/* Media uploader container */}
                 <div className="mb-4">
-                    {/* media label */}
-                    <label
-                        htmlFor="media"
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                    >
+                    {/* Media label */}
+                    <label htmlFor="media" className="block text-gray-700 text-sm font-semibold mb-2">
                         Media:
                     </label>
-                    {/* media label end's */}
+                    {/* Media label end's */}
 
-                    {/* media file input */}
+                    {/* Media file input */}
                     <input
                         type="file"
                         id="media"
-                        onChange={(event) => handlemediaUpload(event)}
+                        onChange={handlemediaUpload}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         required
                     />
-                    {/* media file input end's */}
+                    {/* Media file input end's */}
                 </div>
-                {/* media uploader container end's */}
+                {/* Media uploader container end's */}
 
                 {/* Content container */}
                 <div className="mb-4">
                     {/* Content label */}
-                    <label
-                        htmlFor="content"
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                    >
-                        Content:
+                    <label htmlFor="caption" className="block text-gray-700 text-sm font-semibold mb-2">
+                        Caption:
                     </label>
                     {/* Content label end's */}
 
@@ -98,17 +93,13 @@ function PostForm() {
                 {/* Location container */}
                 <div className="mb-4">
                     {/* Location label */}
-                    <label
-                        htmlFor="location"
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                    >
+                    <label htmlFor="location" className="block text-gray-700 text-sm font-semibold mb-2">
                         Location:
                     </label>
                     {/* Location label end's */}
 
                     {/* Location input */}
                     <input
-                        name="location"
                         type="text"
                         id="location"
                         value={location}
@@ -124,14 +115,14 @@ function PostForm() {
                     {/* Submit button */}
                     <button
                         type="submit"
+                        onClick={handleSubmit}
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline min-w-52"
                     >
-                        {addPostLoad ? (<ClipLoader color={"#ffffff"} loading={true} size={20} />) : ("Add Post")}
+                        {addPostLoad ? <ClipLoader color={"#ffffff"} loading={true} size={20} /> : "Add Post"}
                     </button>
                     {/* Submit button end's */}
                 </div>
                 {/* Submit button container end's */}
-
             </form>
             {/* Form start's */}
         </div>

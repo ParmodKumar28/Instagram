@@ -1,34 +1,39 @@
-// Imports
-import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH } from 'react-icons/fa'; // Import icons from react-icons library
+import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH, FaRegPaperPlane } from 'react-icons/fa';
 
 // Post component
 function Post({ post }) {
     return (
-        <div className="m-auto mb-5 max-w-sm bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
-            <div className="flex items-center p-4">
-                <img className="w-10 h-10 rounded-full" src={post.user.profilePicture || "https://static.vecteezy.com/system/resources/previews/005/005/788/original/user-icon-in-trendy-flat-style-isolated-on-grey-background-user-symbol-for-your-web-site-design-logo-app-ui-illustration-eps10-free-vector.jpg"} alt="User" />
-                <p className="ml-4 text-sm font-semibold">{post.user.username}</p>
-                <button className="ml-auto text-gray-700">
+            <div className="flex items-center justify-between p-4">
+                <div className="flex items-center">
+                    <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
+                    <p className="text-sm font-semibold">{post.user.username}</p>
+                </div>
+                <button className="text-gray-700">
                     <FaEllipsisH className="w-6 h-6" />
                 </button>
             </div>
 
             {/* Post image */}
-            <img className="w-full h-auto" src={post.media || "https://via.placeholder.com/500"} alt="Post" />
+            {post.media && (
+                <img className="w-full" src={post.media} alt="Post" />
+            )}
 
             {/* Post actions */}
             <div className="flex justify-between p-4">
-                {/* Like icon */}
-                <button className="text-gray-700">
-                    <FaHeart className="w-6 h-6" />
-                    <span className="ml-2 text-sm">{post.likes.length}</span>
-                </button>
-                {/* Comment icon */}
-                <button className="text-gray-700">
-                    <FaRegComment className="w-6 h-6" />
-                    <span className="ml-2 text-sm">{post.comments.length}</span>
-                </button>
+                {/* Like, Comment, Share */}
+                <div className="flex items-center">
+                    <button className="text-gray-700">
+                        <FaHeart className="w-6 h-6" />
+                    </button>
+                    <button className="text-gray-700 ml-4">
+                        <FaRegComment className="w-6 h-6" />
+                    </button>
+                    <button className="text-gray-700 ml-4">
+                        <FaRegPaperPlane className="w-6 h-6" />
+                    </button>
+                </div>
                 {/* Bookmark icon */}
                 <button className="text-gray-700">
                     <FaRegBookmark className="w-6 h-6" />
@@ -36,14 +41,16 @@ function Post({ post }) {
             </div>
 
             {/* Post content */}
-            <div className="p-4">
+            <div className="px-4 pb-2">
                 {/* Post caption */}
                 <p className="text-gray-800 text-lg font-semibold mb-2">{post.caption}</p>
                 {/* Post comments */}
-                <div>
-                    <p className="text-gray-600 font-medium">Username:</p>
-                    <p className="text-gray-700">Comment text</p>
-                </div>
+                {post.comments.map((comment, index) => (
+                    <div key={index} className="mb-1">
+                        <p className="text-gray-600 font-medium">{comment.username}:</p>
+                        <p className="text-gray-700">{comment.text}</p>
+                    </div>
+                ))}
                 {/* Add more comments */}
                 <a href="#" className="text-blue-500 hover:underline">View all comments</a>
             </div>
@@ -51,5 +58,4 @@ function Post({ post }) {
     );
 }
 
-// Exporting Post
 export default Post;

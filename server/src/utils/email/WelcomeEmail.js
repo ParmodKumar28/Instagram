@@ -68,7 +68,7 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
             <p>With Instagram, you can share your photos and videos, connect with friends and family, and explore new content from around the world.</p>
             <p>If you have any questions or need assistance, feel free to reach out to us.</p>
             <p>Happy sharing!</p>
-            <p>Best regards,<br>The Instagram Team</p>
+            <p>Best regards,<br>Parmod Yadav The Instagram Team</p>
         </div>
     </div>
 </body>

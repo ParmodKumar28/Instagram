@@ -7,12 +7,9 @@ import { MdAddBox } from "react-icons/md";
 import { RiMessage2Fill } from "react-icons/ri";
 import { FaUserAlt } from "react-icons/fa";
 
-// Footer component here 
+// Footer component
 function Footer() {
-
-    // Side Effect's
-
-    // Returning JSx
+    // Return JSX
     return (
         // Footer container div
         <div className="py-7 h-10 w-full flex justify-evenly items-center border-2 fixed bottom-0 bg-white" id="footerContainer">
@@ -75,11 +72,10 @@ function Footer() {
                 </Link>
             </div>
             {/* Profile End's */}
-
         </div>
         // Footer container div end's
-    )
+    );
 }
 
 // Exporting footer
-export default Footer
+export default Footer;

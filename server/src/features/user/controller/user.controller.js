@@ -196,6 +196,7 @@ export const forgotPasswordOtp = async (req, res, next) => {
       );
     }
 
+    console.log("Called");
     const user = await userByEmailDb(email);
     if (!user) {
       return next(
@@ -231,7 +232,7 @@ export const resetPassword = async (req, res, next) => {
     if (!resetToken) {
       return next(new ErrorHandler(400, "Please give otp token!"));
     }
-    
+
     // Creating token hash to compare with token stored on user
     const hashedToken = await crypto
       .createHash("sha256")
