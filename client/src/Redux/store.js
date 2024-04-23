@@ -5,6 +5,7 @@ import { configureStore } from "@reduxjs/toolkit";
 // Local import's
 import { usersReducer } from "./Reducer/usersReducer";
 import { postsReducer } from "./Reducer/postsReducer";
+import { commentsReducer } from "./Reducer/commentsReducer";
 
 // Store
 const store = configureStore({
@@ -12,6 +13,7 @@ const store = configureStore({
   reducer: {
     usersReducer,
     postsReducer,
+    commentsReducer,
   },
 });
 

@@ -88,7 +88,7 @@ export const getCommentsDb = async (postId) => {
     }
     const comments = await CommentModel.find({
       post: new ObjectId(postId),
-    }).populate("user", "name email _id");
+    }).populate("user", "name profilePic _id");
     return comments;
   } catch (error) {
     throw error;

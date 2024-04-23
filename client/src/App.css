@@ -42,3 +42,20 @@
   }
 }
 
+
+.scrollable-comments {
+  max-height: 200px; /* Adjust maxHeight as needed */
+  overflow-y: auto;
+  scrollbar-width: thin; /* "thin", "auto", or "none" */
+}
+
+/* For WebKit browsers (e.g., Chrome, Safari) */
+.scrollable-comments::-webkit-scrollbar {
+  width: 10px; /* Adjust the width of the scrollbar */
+}
+
+/* For Firefox */
+.scrollable-comments::-moz-scrollbar {
+  width: 10px; /* Adjust the width of the scrollbar */
+}
+

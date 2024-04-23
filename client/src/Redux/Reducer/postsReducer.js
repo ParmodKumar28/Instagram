@@ -107,7 +107,6 @@ const postsSlice = createSlice({
     // Fetch post's fulfilled state start's
     builder.addCase(fetchPostsAsync.fulfilled, (state, action) => {
       state.postsLoading = false;
-      console.log(action.payload.posts);
       state.posts = action.payload.posts;
     });
     // Fetch post's fulfilled state end's

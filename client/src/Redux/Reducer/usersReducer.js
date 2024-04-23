@@ -239,7 +239,7 @@ const usersSlice = createSlice({
 
     // When fulfilled
     builder.addCase(userDataAsync.fulfilled, (state, action) => {
-      console.log(action.payload);
+
     });
 
     // When rejected
@@ -257,7 +257,6 @@ const usersSlice = createSlice({
       state.isSignIn = false;
       state.signedUser = {};
       state.token = "";
-      console.log(action.payload);
       toast.success("Logout Successful!"); // Toast notification
     });
 
