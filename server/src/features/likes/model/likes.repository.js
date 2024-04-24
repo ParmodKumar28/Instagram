@@ -27,7 +27,7 @@ export const getLikesDb = async (id, type) => {
       likeable: new ObjectId(id),
       on_model: type,
     })
-      .populate({ path: "user", select: "name email _id" })
+      .populate({ path: "user", select: "name profilePic _id" })
       .populate("likeable");
 
     if (likes.length === 0) {

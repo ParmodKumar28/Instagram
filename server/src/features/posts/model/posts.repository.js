@@ -130,7 +130,11 @@ export const getAllPostsDb = async () => {
       .populate({
         path: "likes",
         select: "user",
-        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
+        populate: {
+          path: "user",
+          select: "name username profilePic",
+          model: "User",
+        },
       })
       .populate({
         path: "comments",

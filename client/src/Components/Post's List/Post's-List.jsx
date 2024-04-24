@@ -33,7 +33,7 @@ function PostsList() {
             ) : (
                 <div className="post-list-container flex flex-col gap-5 my-5 py-5">
                     {posts.map((post) => (
-                        <Post post={post} key={post.id} />
+                        <Post post={post} key={post._id} />
                     ))}
                 </div>
             )}

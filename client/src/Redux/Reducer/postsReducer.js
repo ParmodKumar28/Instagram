@@ -16,7 +16,6 @@ export const createPostAsync = createAsyncThunk(
   "posts/create",
   async (formData, { dispatch }) => {
     try {
-      console.log(formData);
       const response = await axios.post(
         `${BASE_URL_POSTS}/create-post`,
         formData

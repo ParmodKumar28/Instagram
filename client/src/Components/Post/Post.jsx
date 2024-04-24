@@ -1,45 +1,139 @@
-import { useState, useEffect } from 'react';
+// Import statements
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './Post.module.css';
+import { toast } from 'react-toastify';
 import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH, FaRegPaperPlane } from 'react-icons/fa';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCommentAsync, commentsSelector, getCommentsAsync } from '../../Redux/Reducer/commentsReducer';
-import './Post.module.css'
+import CommentList from './Comments List/CommentList';
+import LikeList from './Like List/LikeList';
+
+// Base URL for API requests
+const BASE_URL = 'http://localhost:8000/api';
 
 function Post({ post }) {
+
+    // State variables
     const [commentText, setCommentText] = useState('');
     const [showComments, setShowComments] = useState(false);
-    const dispatch = useDispatch();
+    const [likeList, setLikeList] = useState([]);
+    const [isLiked, setIsLiked] = useState(false);
+    const [showLikeList, setShowLikeList] = useState(false);
+    const [isDoubleTapped, setIsDoubleTapped] = useState(false);
+    const [showHeart, setShowHeart] = useState(false);
+    const [comments, setComments] = useState([]);
+    const [commentsLoading, setCommentsLoading] = useState(false);
+    const [likes, setLikes] = useState([]);
 
-
-    // Retrieve comments state using useSelector
-    const { comments, commentsLoading } = useSelector(commentsSelector);
-
-    const handleAddComment = () => {
-        dispatch(addCommentAsync({ postId: post._id, comment: commentText }))
+    // Add comment handler
+    const handleAddComment = async () => {
+        try {
+            const response = await axios.post(`${BASE_URL}/comment/add/${post._id}`, { comment: commentText });
+            if (response.statusText === "OK") {
+                getComments();
+                toast.success("Comment added");
+                setCommentText('');
+            }
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.error) {
+                toast.error(error.response.data.error);
+            } else {
+                console.error('Error adding comment:', error);
+            }
+        }
         setCommentText("");
     };
 
 
-    useEffect(() => {
-        if (showComments && post._id) { // Load comments only once when showComments is true
-            dispatch(getCommentsAsync(post._id));
-        }
-    }, [showComments, post._id, dispatch]);
+    // Toggle like handler
+    const handleToggleLike = async () => {
+        setIsLiked(!isLiked);
+        setShowHeart(true);
+        setTimeout(() => {
+            setShowHeart(false);
+        }, 1000);
 
-    const handleLikeComment = (index) => {
-        const updatedComments = [...comments];
-        updatedComments[index].likes += 1;
-        // Update the comments state with the modified comment
-        // setComments(updatedComments);
+        try {
+            const response = await axios.get(`${BASE_URL}/like/toggle/${post._id}?type=Post`);
+            if (response.statusText === "OK") {
+                await fetchLikes();
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        }
     };
+
+    // Fetch likes from API
+    const fetchLikes = async () => {
+        try {
+            const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`);
+            if (response.statusText === "OK") {
+                setLikeList(response.data.likes);
+                // const updatedLikes = isLiked ? likeList.filter(like => like.postId !== post._id) : [...likeList, { postId: post._id }];
+                // setLikeList(updatedLikes);
+            }
+        } catch (error) {
+            console.error('Error fetching likes:', error);
+        }
+    }
+
+    // Handle click on like count
+    const handleLikeCountClickOnPost = async () => {
+        try {
+            if (!showLikeList) {
+                const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`);
+                const likes = response.data.likes;
+                setLikeList(likes);
+            }
+            setShowLikeList(!showLikeList);
+        } catch (error) {
+            console.error('Error fetching likes:', error);
+        }
+    };
+
+    // Fetch comments from API
+    const getComments = async () => {
+        setCommentsLoading(true);
+        try {
+            const response = await axios.get(`${BASE_URL}/comment/${post._id}`);
+            setComments(response.data.comments);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        } finally {
+            setCommentsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        setIsLiked(likes.some(like => like.postId === post._id));
+    }, [likes, post._id]);
+
+    useEffect(() => {
+        if (showComments && post._id) {
+            getComments();
+        }
+    }, [showComments, post._id]);
+
+    useEffect(() => {
+        if (isDoubleTapped) {
+            handleToggleLike();
+            setIsDoubleTapped(false);
+        }
+    }, [isDoubleTapped]);
 
     return (
         <div className="my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
+
+                {/* user name and image container */}
                 <div className="flex items-center">
+                    {/* Profile pic */}
                     <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
+                    {/* Username */}
                     <p className="text-sm font-semibold">{post.user.username}</p>
                 </div>
+
+                {/* Option's button */}
                 <button className="text-gray-700">
                     <FaEllipsisH className="w-6 h-6" />
                 </button>
@@ -47,24 +141,49 @@ function Post({ post }) {
 
             {/* Post image */}
             {post.media && (
-                <img className="w-full" src={post.media} alt="Post" />
+                <div className="relative select-none">
+                    <img
+                        className="w-full"
+                        src={post.media}
+                        alt="Post"
+                        onTouchStart={() => setIsDoubleTapped(true)}
+                        onDoubleClick={() => setIsDoubleTapped(true)}
+                    />
+
+                    {/* Shwoing heart on double tap */}
+                    {showHeart && (
+                        <FaHeart className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-500 w-20 h-20 animate-heart transition-all" />
+                    )}
+                </div>
             )}
 
             {/* Post actions */}
             <div className="flex justify-between p-4">
-                {/* Like, Comment, Share */}
-                <div className="flex items-center">
+                {/* Button's container */}
+                <div className="flex items-center gap-2">
+
+                    {/* Heart button */}
                     <button className="text-gray-700">
-                        <FaHeart className="w-6 h-6" />
+                        <FaHeart onClick={handleToggleLike}
+                            className={`w-6 h-6 ${isLiked ? 'text-red-500' : ''} ${isDoubleTapped ? 'animate-like' : ''}`}
+                        />
+                        <span className="ml-1" onClick={handleLikeCountClickOnPost}>{likeList.length}</span>
                     </button>
+
+                    {/* Comment button */}
                     <button className="text-gray-700 ml-4" onClick={() => setShowComments(!showComments)}>
                         <FaRegComment className="w-6 h-6" />
+                        <span className="ml-1">{comments.length}</span>
                     </button>
+
+                    {/* Share button */}
                     <button className="text-gray-700 ml-4">
                         <FaRegPaperPlane className="w-6 h-6" />
+                        <span className="ml-1">{ }</span>
                     </button>
                 </div>
-                {/* Bookmark icon */}
+
+                {/* Bookmark button */}
                 <button className="text-gray-700">
                     <FaRegBookmark className="w-6 h-6" />
                 </button>
@@ -72,56 +191,26 @@ function Post({ post }) {
 
             {/* Post content */}
             <div className="px-4 pb-2">
+
                 {/* Post caption */}
                 <p className="text-gray-800 text-lg font-semibold mb-2">{post.caption}</p>
-                {/* Location */}
+
+                {/* Post location */}
                 {post.location && (
                     <p className="text-gray-600 mb-2">Location: {post.location}</p>
                 )}
 
-                {/* Post comments */}
+                {/* When showComment's is true it will render Comment's list component */}
                 {showComments && (
-                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}> {/* Adjust maxHeight as needed */}
-                        {/* Check if comments is defined before mapping */}
-                        {commentsLoading ? (
-                            // Show loader while comments are loading
-                            <p>Loading comments...</p>
-                        ) : (
-                            comments && comments.length > 0 ? (
-                                comments.map((comment, index) => (
-                                    <div key={index} className="mb-2">
-                                        <div className="flex items-center justify-between px-2">
-                                            <div className="flex items-center">
-                                                <img className="w-6 h-6 rounded-full mr-2" src={comment.user.profilePic} alt="User" />
-                                                <p className="text-gray-600 font-medium">{comment.user.name}:</p>
-                                            </div>
-                                            <button
-                                                className="text-gray-700"
-                                                onClick={() => handleLikeComment(index)}
-                                            >
-                                                <FaHeart className="w-4 h-4" />
-                                                <span className="ml-1">{comment.likes}</span>
-                                            </button>
-                                        </div>
-                                        <p className="text-gray-700">{comment.content}</p>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-gray-700">No comments yet.</p>
-                            )
-                        )}
-                    </div>
+                    <CommentList comments={comments} commentLoading={commentsLoading} />
                 )}
 
-
-
-
-                {/* Add comment */}
+                {/* When comment's list is on then show add comment input */}
                 {showComments && (
                     <div className="flex items-center mt-2">
                         <input
                             type="text"
-                            name='comment'
+                            name="comment"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none"
                             placeholder="Add a comment..."
                             required
@@ -138,6 +227,11 @@ function Post({ post }) {
                     </div>
                 )}
             </div>
+
+            {/* When we click on like count's then it render LikeList component */}
+            {showLikeList && likeList.length > 0 && (
+                <LikeList likeList={likeList} />
+            )}
         </div>
     );
 }

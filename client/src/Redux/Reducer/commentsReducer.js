@@ -1,19 +1,25 @@
+// Import's
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { fetchPostsAsync } from "./postsReducer";
 
+// Base url for comment's
 const BASE_URL_COMMENTS = "http://localhost:8000/api/comment";
 
+// Setting Axios default for credentials
 axios.defaults.withCredentials = true;
 
+// Async Thunks
 // Add comment
 export const addCommentAsync = createAsyncThunk(
   "comments/add",
-  async ({ postId, comment }) => {
+  async ({ postId, comment }, { dispatch }) => {
     try {
       const response = await axios.post(`${BASE_URL_COMMENTS}/add/${postId}`, {
         comment,
       });
+      // dispatch(fetchPostsAsync());
       if (response.status === 201) {
         return response.data.comment; // Return the new comment
       }
@@ -83,5 +89,8 @@ const commentsSlice = createSlice({
   },
 });
 
+// Extract comment reducer from the slice
 export const commentsReducer = commentsSlice.reducer;
+
+// State from the reducer and exporting state
 export const commentsSelector = (state) => state.commentsReducer;

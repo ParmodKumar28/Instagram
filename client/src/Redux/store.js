@@ -6,6 +6,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { usersReducer } from "./Reducer/usersReducer";
 import { postsReducer } from "./Reducer/postsReducer";
 import { commentsReducer } from "./Reducer/commentsReducer";
+import { likesReducer } from "./Reducer/likesReducer";
 
 // Store
 const store = configureStore({
@@ -14,6 +15,7 @@ const store = configureStore({
     usersReducer,
     postsReducer,
     commentsReducer,
+    likesReducer,
   },
 });
 

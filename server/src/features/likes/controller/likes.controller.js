@@ -7,7 +7,7 @@ import { getLikesDb, toggleLikeDb } from "../model/likes.repository.js";
 export const getLikes = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const type = req.body.type;
+    const type = req.query.type;
     if (type != "Post" && type != "Comment") {
       return next(
         new ErrorHandler(

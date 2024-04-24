@@ -201,6 +201,7 @@ const usersSlice = createSlice({
       state.signedUser = action.payload.user;
       Cookies.set("token", action.payload.token); // Storing fresh token to cooke
       Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
+      Cookies.set("signedUser", state.signedUser);
       toast.success("Signed In!"); // Showing notification
     });
 
@@ -224,6 +225,7 @@ const usersSlice = createSlice({
       state.isSignIn = true;
       Cookies.set("token", action.payload.token); // Storing fresh token to cooke
       Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
+      Cookies.set("signedUser", state.signedUser); // Storing signedUser to cookie
       toast.success("Login Successful!");
     });
 
@@ -238,9 +240,7 @@ const usersSlice = createSlice({
     builder.addCase(userDataAsync.pending, (state, action) => {});
 
     // When fulfilled
-    builder.addCase(userDataAsync.fulfilled, (state, action) => {
-
-    });
+    builder.addCase(userDataAsync.fulfilled, (state, action) => {});
 
     // When rejected
     builder.addCase(userDataAsync.rejected, (state, action) => {});
@@ -254,6 +254,7 @@ const usersSlice = createSlice({
     builder.addCase(logoutAsync.fulfilled, (state, action) => {
       // Setting state
       Cookies.remove("isSignIn"); //Removing isSignin from cookie
+      Cookies.remove("signedUser");
       state.isSignIn = false;
       state.signedUser = {};
       state.token = "";
