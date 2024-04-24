@@ -9,13 +9,12 @@ import LikeList from './Like List/LikeList';
 import OptionsList from './Options List/OptionsList';
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
-import { deletePostAsync } from '../../Redux/Reducer/postsReducer';
+import { deletePostAsync, updatePostAsync } from '../../Redux/Reducer/postsReducer'; // Import updatePostAsync action
 
 // Base URL for API requests
 const BASE_URL = 'http://localhost:8000/api';
 
 function Post({ post }) {
-
     // State variables
     const [commentText, setCommentText] = useState('');
     const [showComments, setShowComments] = useState(false);
@@ -26,8 +25,10 @@ function Post({ post }) {
     const [showHeart, setShowHeart] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentsLoading, setCommentsLoading] = useState(false);
+    const [showOptions, setShowOptions] = useState(false);
     const [likes, setLikes] = useState([]);
-    const [showOptions, setShowOptions] = useState(false); // Add state for controlling options list visibility
+    const [isEditing, setIsEditing] = useState(false); // State variable to manage editing state
+    const [editedCaption, setEditedCaption] = useState(post.caption || ''); // Initialize editedCaption with post's caption
 
     // Dispatcher
     const dispatch = useDispatch();
@@ -111,21 +112,31 @@ function Post({ post }) {
         }
     };
 
+    // Handle delete post
     const handleDeletePost = async () => {
         try {
             dispatch(deletePostAsync(post._id));
         } catch (error) {
             console.error('Error deleting post:', error);
         }
-    }
+    };
 
-    const handleEditPost = async () => {
+    // Handle edit post
+    const handleEditPost = () => {
+        setIsEditing(true); // Set editing state to true when edit is clicked
+        setShowOptions(false);
+    };
+
+    // Update post
+    const handleUpdatePost = async () => {
         try {
-            // You can dispatch an action here to update the post
+            // Dispatch action to update the post
+            dispatch(updatePostAsync({ postId: post._id, postData: { ...post, caption: editedCaption } }));
+            setIsEditing(false); // Reset editing state after successful update
         } catch (error) {
-            console.error('Error editing post:', error);
+            console.error('Error updating post:', error);
         }
-    }
+    };
 
     useEffect(() => {
         setIsLiked(likes.some(like => like.postId === post._id));
@@ -148,12 +159,9 @@ function Post({ post }) {
         <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
-
-                {/* user name and image container */}
+                {/* Rendering user info remains the same */}
                 <div className="flex items-center">
-                    {/* Profile pic */}
                     <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
-                    {/* Username */}
                     <p className="text-sm font-semibold">{post.user.username}</p>
                 </div>
 
@@ -163,12 +171,10 @@ function Post({ post }) {
                 </button>
 
                 {/* Conditionally render OptionsList */}
-                {/* && post.user._id === Cookies.get("signedUser")._id && */}
                 {showOptions && (
                     <OptionsList onDelete={handleDeletePost} onEdit={handleEditPost} />
                 )}
             </div>
-
 
             {/* Post image */}
             {post.media && (
@@ -192,7 +198,6 @@ function Post({ post }) {
             <div className="flex justify-between p-4">
                 {/* Button's container */}
                 <div className="flex items-center gap-2">
-
                     {/* Heart button */}
                     <button className="text-gray-700">
                         <FaHeart onClick={handleToggleLike}
@@ -222,21 +227,28 @@ function Post({ post }) {
 
             {/* Post content */}
             <div className="px-4 pb-2">
+                {/* Render post caption */}
+                {isEditing ? (
+                    <textarea
+                        value={editedCaption}
+                        onChange={(e) => setEditedCaption(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md p-2 mb-2"
+                    />
+                ) : (
+                    <p className="text-gray-800 text-lg font-semibold mb-2">{post.caption}</p>
+                )}
 
-                {/* Post caption */}
-                <p className="text-gray-800 text-lg font-semibold mb-2">{post.caption}</p>
-
-                {/* Post location */}
+                {/* Render post location */}
                 {post.location && (
                     <p className="text-gray-600 mb-2">Location: {post.location}</p>
                 )}
 
-                {/* When showComment's is true it will render Comment's list component */}
+                {/* Render comments */}
                 {showComments && (
                     <CommentList comments={comments} commentLoading={commentsLoading} />
                 )}
 
-                {/* When comment's list is on then show add comment input */}
+                {/* Render add comment input */}
                 {showComments && (
                     <div className="flex items-center mt-2">
                         <input
@@ -257,9 +269,27 @@ function Post({ post }) {
                         </button>
                     </div>
                 )}
+
+                {/* Render edit and delete buttons */}
+                {isEditing && (
+                    <div className="flex justify-end">
+                        <button
+                            onClick={handleUpdatePost}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2"
+                        >
+                            Update
+                        </button>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {/* When we click on like count's then it render LikeList component */}
+            {/* Render like list */}
             {showLikeList && likeList.length > 0 && (
                 <LikeList likeList={likeList} />
             )}

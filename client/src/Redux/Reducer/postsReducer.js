@@ -61,11 +61,11 @@ export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
 // Async Thunk for updating a post
 export const updatePostAsync = createAsyncThunk(
   "posts/update",
-  async ({ postId, updatedData }, { dispatch }) => {
+  async ({ postId, postData }, { dispatch }) => {
     try {
       const response = await axios.put(
         `${BASE_URL_POSTS}/update-post/${postId}`,
-        updatedData
+        postData
       );
       if (response.statusText === "OK") {
         dispatch(fetchPostsAsync());
