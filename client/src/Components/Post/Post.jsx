@@ -77,8 +77,6 @@ function Post({ post }) {
             const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`);
             if (response.statusText === "OK") {
                 setLikeList(response.data.likes);
-                // const updatedLikes = isLiked ? likeList.filter(like => like.postId !== post._id) : [...likeList, { postId: post._id }];
-                // setLikeList(updatedLikes);
             }
         } catch (error) {
             console.error('Error fetching likes:', error);
@@ -115,6 +113,10 @@ function Post({ post }) {
     // Handle delete post
     const handleDeletePost = async () => {
         try {
+            if (post.user._id != Cookies.get("signedUser")._id) {
+                toast.error("You cannot delete other's post");
+                return setShowOptions(false);
+            }
             dispatch(deletePostAsync(post._id));
         } catch (error) {
             console.error('Error deleting post:', error);
@@ -123,6 +125,10 @@ function Post({ post }) {
 
     // Handle edit post
     const handleEditPost = () => {
+        if (post.user._id != Cookies.get("signedUser")._id) {
+            toast.error("You cannot edit other's post");
+            return setShowOptions(false);
+        }
         setIsEditing(true); // Set editing state to true when edit is clicked
         setShowOptions(false);
     };
@@ -154,6 +160,12 @@ function Post({ post }) {
             setIsDoubleTapped(false);
         }
     }, [isDoubleTapped]);
+
+    useEffect(() => {
+        fetchLikes();
+        setIsLiked(likeList.find((like) => like.likeable._id && like.user._id));
+        getComments();
+    }, [])
 
     return (
         <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
