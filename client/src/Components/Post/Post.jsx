@@ -6,6 +6,10 @@ import { toast } from 'react-toastify';
 import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH, FaRegPaperPlane } from 'react-icons/fa';
 import CommentList from './Comments List/CommentList';
 import LikeList from './Like List/LikeList';
+import OptionsList from './Options List/OptionsList';
+import { useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+import { deletePostAsync } from '../../Redux/Reducer/postsReducer';
 
 // Base URL for API requests
 const BASE_URL = 'http://localhost:8000/api';
@@ -23,6 +27,10 @@ function Post({ post }) {
     const [comments, setComments] = useState([]);
     const [commentsLoading, setCommentsLoading] = useState(false);
     const [likes, setLikes] = useState([]);
+    const [showOptions, setShowOptions] = useState(false); // Add state for controlling options list visibility
+
+    // Dispatcher
+    const dispatch = useDispatch();
 
     // Add comment handler
     const handleAddComment = async () => {
@@ -103,6 +111,22 @@ function Post({ post }) {
         }
     };
 
+    const handleDeletePost = async () => {
+        try {
+            dispatch(deletePostAsync(post._id));
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    }
+
+    const handleEditPost = async () => {
+        try {
+            // You can dispatch an action here to update the post
+        } catch (error) {
+            console.error('Error editing post:', error);
+        }
+    }
+
     useEffect(() => {
         setIsLiked(likes.some(like => like.postId === post._id));
     }, [likes, post._id]);
@@ -121,7 +145,7 @@ function Post({ post }) {
     }, [isDoubleTapped]);
 
     return (
-        <div className="my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
 
@@ -133,11 +157,18 @@ function Post({ post }) {
                     <p className="text-sm font-semibold">{post.user.username}</p>
                 </div>
 
-                {/* Option's button */}
-                <button className="text-gray-700">
+                {/* Options button */}
+                <button className="text-gray-700" onClick={() => setShowOptions(!showOptions)}>
                     <FaEllipsisH className="w-6 h-6" />
                 </button>
+
+                {/* Conditionally render OptionsList */}
+                {/* && post.user._id === Cookies.get("signedUser")._id && */}
+                {showOptions && (
+                    <OptionsList onDelete={handleDeletePost} onEdit={handleEditPost} />
+                )}
             </div>
+
 
             {/* Post image */}
             {post.media && (

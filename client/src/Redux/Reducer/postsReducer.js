@@ -58,6 +58,55 @@ export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
 });
 // Fetch post's end's
 
+// Async Thunk for updating a post
+export const updatePostAsync = createAsyncThunk(
+  "posts/update",
+  async ({ postId, updatedData }, { dispatch }) => {
+    try {
+      const response = await axios.put(
+        `${BASE_URL_POSTS}/update-post/${postId}`,
+        updatedData
+      );
+      if (response.statusText === "OK") {
+        dispatch(fetchPostsAsync());
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+
+// Async Thunk for deleting a post
+export const deletePostAsync = createAsyncThunk(
+  "posts/delete",
+  async (postId, { dispatch }) => {
+    try {
+      const response = await axios.delete(
+        `${BASE_URL_POSTS}/delete-post/${postId}`
+      );
+      if (response.statusText === "OK") {
+        dispatch(fetchPostsAsync());
+        return postId;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+
 // Initial State
 const INITIAL_STATE = {
   postsLoading: true,
@@ -76,45 +125,72 @@ const postsSlice = createSlice({
   // Reducers
   reducers: {},
 
-  // Extra reducer's
+  // Extra reducers
   extraReducers: (builder) => {
-    // Create post pending state extra reducer start's here
+    // Create post pending state extra reducer
     builder.addCase(createPostAsync.pending, (state, action) => {
-      state.addPostLoad = true;
+      state.addPostLoad = true; // Set loading state for adding a post
     });
-    // Create post pending state extra reducer end's here
 
-    // Create post fulfilled state extra reducer start's here
+    // Create post fulfilled state extra reducer
     builder.addCase(createPostAsync.fulfilled, (state, action) => {
-      state.addPostLoad = false;
-      toast.success("Post uploaded successfully!");
+      state.addPostLoad = false; // Set loading state to false
+      toast.success("Post uploaded successfully!"); // Display success message
     });
-    // Create post fulfilled state extra reducer end's here
 
-    // Create post rejected state extra reducer start's here
+    // Create post rejected state extra reducer
     builder.addCase(createPostAsync.rejected, (state, action) => {
-      state.addPostLoad = false;
+      state.addPostLoad = false; // Set loading state to false
     });
-    // Create post rejected state extra reducer end's here
 
-    // Fetch post's pending state start's
+    // Fetch posts pending state extra reducer
     builder.addCase(fetchPostsAsync.pending, (state, action) => {
-      state.postsLoading = true;
+      state.postsLoading = true; // Set loading state for fetching posts
     });
-    // Fetch post's pending state end's
 
-    // Fetch post's fulfilled state start's
+    // Fetch posts fulfilled state extra reducer
     builder.addCase(fetchPostsAsync.fulfilled, (state, action) => {
-      state.postsLoading = false;
-      state.posts = action.payload.posts;
+      state.postsLoading = false; // Set loading state to false
+      state.posts = action.payload.posts; // Update posts state with fetched data
     });
-    // Fetch post's fulfilled state end's
 
-    // Fetch post's rejected state start's
+    // Fetch posts rejected state extra reducer
     builder.addCase(fetchPostsAsync.rejected, (state, action) => {
-      state.postsLoading = false;
+      state.postsLoading = false; // Set loading state to false
     });
-    // Fetch post's rejected state end's
+
+    // Update post pending state extra reducer
+    builder.addCase(updatePostAsync.pending, (state, action) => {
+      // Handle pending state for updating post if needed
+    });
+
+    // Update post fulfilled state extra reducer
+    builder.addCase(updatePostAsync.fulfilled, (state, action) => {
+      // Handle fulfilled state for updating post if needed
+      toast.success("Post updated successfully!"); // Display success message
+    });
+
+    // Update post rejected state extra reducer
+    builder.addCase(updatePostAsync.rejected, (state, action) => {
+      // Handle rejected state for updating post if needed
+    });
+
+    // Delete post pending state extra reducer
+    builder.addCase(deletePostAsync.pending, (state, action) => {
+      // Handle pending state for deleting post if needed
+    });
+
+    // Delete post fulfilled state extra reducer
+    builder.addCase(deletePostAsync.fulfilled, (state, action) => {
+      // Handle fulfilled state for deleting post if needed
+      toast.success("Post deleted successfully!"); // Display success message
+      state.posts = state.posts.filter((post) => post.id !== action.payload); // Remove deleted post from state
+    });
+
+    // Delete post rejected state extra reducer
+    builder.addCase(deletePostAsync.rejected, (state, action) => {
+      // Handle rejected state for deleting post if needed
+    });
   },
 });
 

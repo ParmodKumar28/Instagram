@@ -13,7 +13,7 @@ const CommentList = ({ comments, commentsLoading, }) => {
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center">
                                     <img className="w-6 h-6 rounded-full mr-2" src={comment.user.profilePic} alt="User" />
-                                    <p className="text-gray-600 font-medium">{comment.user.username}:</p>
+                                    <p className="text-gray-600 font-medium">{comment.user.name}:</p>
                                 </div>
                                 <button
                                     className="text-gray-700"
