@@ -52,7 +52,7 @@ function Header() {
                 {/* Dropdown list for logout */}
                 {showDropdown && (
                     <div className="absolute top-full mt-1 w-24 bg-white border border-gray-300 rounded-lg shadow-lg">
-                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100">Logout</button>
+                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100 cursor-pointer">Logout</button>
                     </div>
                 )}
             </div>

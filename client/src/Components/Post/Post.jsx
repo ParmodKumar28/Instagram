@@ -113,10 +113,6 @@ function Post({ post }) {
     // Handle delete post
     const handleDeletePost = async () => {
         try {
-            if (post.user._id != Cookies.get("signedUser")._id) {
-                toast.error("You cannot delete other's post");
-                return setShowOptions(false);
-            }
             dispatch(deletePostAsync(post._id));
         } catch (error) {
             console.error('Error deleting post:', error);
@@ -125,10 +121,10 @@ function Post({ post }) {
 
     // Handle edit post
     const handleEditPost = () => {
-        if (post.user._id != Cookies.get("signedUser")._id) {
-            toast.error("You cannot edit other's post");
-            return setShowOptions(false);
-        }
+        // if (post.user._id != Cookies.get("signedUser")._id) {
+        //     toast.error("You cannot edit other's post");
+        //     return setShowOptions(false);
+        // }
         setIsEditing(true); // Set editing state to true when edit is clicked
         setShowOptions(false);
     };
@@ -163,7 +159,8 @@ function Post({ post }) {
 
     useEffect(() => {
         fetchLikes();
-        setIsLiked(likeList.find((like) => like.likeable._id && like.user._id));
+        let liked = likeList.find((like) => like.likeable._id && like.user._id);
+        setIsLiked(liked ? true : false);
         getComments();
     }, [])
 

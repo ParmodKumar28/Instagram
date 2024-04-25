@@ -19,6 +19,7 @@ import "./App.css";
 import PostForm from "./Components/Post Form/PostForm";
 import Footer from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
+import NotFound from "./Pages/Misc/404Page";
 
 // Function App component this is a parent component here
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
     {
       path: "/",
       element: <ProtectedRoute><HomePage /></ProtectedRoute>,
+      errorElement: <NotFound />,
       children: [
         {
           index: true, element: <Home />

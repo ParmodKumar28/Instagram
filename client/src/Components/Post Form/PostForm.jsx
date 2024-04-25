@@ -3,7 +3,6 @@ import { useState } from "react";
 import { createPostAsync, postsSelector } from "../../Redux/Reducer/postsReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { ClipLoader } from "react-spinners";
-import { toast } from "react-toastify";
 
 // Component for the new post form
 function PostForm() {
