@@ -13,8 +13,8 @@ import { deletePostAsync, updatePostAsync } from '../../Redux/Reducer/postsReduc
 import { Link } from 'react-router-dom';
 
 // Base URL for API requests
-const BASE_URL = 'http://localhost:8000/api';
-// const BASE_URL = 'https://instagram-xbht.onrender.com/api';
+// const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'https://instagram-xbht.onrender.com/api';
 
 function Post({ post }) {
     // State variables
@@ -38,7 +38,11 @@ function Post({ post }) {
     // Add comment handler
     const handleAddComment = async () => {
         try {
-            const response = await axios.post(`${BASE_URL}/comment/add/${post._id}`, { comment: commentText });
+            const response = await axios.post(`${BASE_URL}/comment/add/${post._id}`, { comment: commentText }, {
+                headers: {
+                    'auth-token': `${localStorage.getItem('auth-token')}`,
+                },
+            });
             if (response.statusText === "OK") {
                 getComments();
                 toast.success("Comment added");
@@ -64,7 +68,11 @@ function Post({ post }) {
         }, 1000);
 
         try {
-            const response = await axios.get(`${BASE_URL}/like/toggle/${post._id}?type=Post`);
+            const response = await axios.get(`${BASE_URL}/like/toggle/${post._id}?type=Post`, {
+                headers: {
+                    'auth-token': `${localStorage.getItem('auth-token')}`,
+                },
+            });
             if (response.statusText === "OK") {
                 await fetchLikes();
             }
@@ -76,7 +84,11 @@ function Post({ post }) {
     // Fetch likes from API
     const fetchLikes = async () => {
         try {
-            const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`);
+            const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`, {
+                headers: {
+                    'auth-token': `${localStorage.getItem('auth-token')}`,
+                },
+            });
             if (response.statusText === "OK") {
                 setLikeList(response.data.likes);
             }
@@ -89,7 +101,11 @@ function Post({ post }) {
     const handleLikeCountClickOnPost = async () => {
         try {
             if (!showLikeList) {
-                const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`);
+                const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`, {
+                    headers: {
+                        'auth-token': `${localStorage.getItem('auth-token')}`,
+                    },
+                });
                 const likes = response.data.likes;
                 setLikeList(likes);
             }
@@ -103,7 +119,11 @@ function Post({ post }) {
     const getComments = async () => {
         setCommentsLoading(true);
         try {
-            const response = await axios.get(`${BASE_URL}/comment/${post._id}`);
+            const response = await axios.get(`${BASE_URL}/comment/${post._id}`, {
+                headers: {
+                    'auth-token': `${localStorage.getItem('auth-token')}`,
+                },
+            });
             setComments(response.data.comments);
         } catch (error) {
             console.error('Error fetching comments:', error);
@@ -170,7 +190,7 @@ function Post({ post }) {
         <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
-                {/* Rendering user info remains the same */ }
+                {/* Rendering user info remains the same */}
                 <Link to={`/profile/${post.user._id}`}>
                     <div className="flex items-center">
                         <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />

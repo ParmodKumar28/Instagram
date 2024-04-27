@@ -5,8 +5,8 @@ import { toast } from "react-toastify";
 import { fetchPostsAsync } from "./postsReducer";
 
 // Base url for comment's
-const BASE_URL_COMMENTS = "http://localhost:8000/api/comment";
-// const BASE_URL_COMMENTS = "https://instagram-xbht.onrender.com/api/comment";
+// const BASE_URL_COMMENTS = "http://localhost:8000/api/comment";
+const BASE_URL_COMMENTS = "https://instagram-xbht.onrender.com/api/comment";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -19,6 +19,10 @@ export const addCommentAsync = createAsyncThunk(
     try {
       const response = await axios.post(`${BASE_URL_COMMENTS}/add/${postId}`, {
         comment,
+      }, {
+        headers: {
+          'auth-token': `${localStorage.getItem('auth-token')}`,
+        },
       });
       // dispatch(fetchPostsAsync());
       if (response.status === 201) {
@@ -41,7 +45,11 @@ export const getCommentsAsync = createAsyncThunk(
   "comments/get",
   async (postId) => {
     try {
-      const response = await axios.get(`${BASE_URL_COMMENTS}/${postId}`);
+      const response = await axios.get(`${BASE_URL_COMMENTS}/${postId}`, {
+        headers: {
+          'auth-token': `${localStorage.getItem('auth-token')}`,
+        },
+      });
       if (response.status === 200) {
         return response.data.comments; // Return the fetched comments
       }

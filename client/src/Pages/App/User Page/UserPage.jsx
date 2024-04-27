@@ -61,11 +61,11 @@ const UserPage = () => {
     return (
         <div className={`bg-gray-100 min-h-screen ${styles.userPage}`}>
             <div className={`max-w-6xl mx-auto px-4 py-8 ${styles.content}`}>
-                <div className={`grid grid-cols-4 gap-4 items-start ${styles.userDetails}`}>
-                    <div className="col-span-1">
-                        <img className="rounded-full w-36 h-36 object-cover" src={user.profilePic} alt={user.username} />
+                <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start ${styles.userDetails}`}>
+                    <div className="col-span-1 sm:col-span-1">
+                        <img className="rounded-full sm:w-32 sm:h-32 w-36 h-36 object-cover" src={user.profilePic} alt={user.username} />
                     </div>
-                    <div className="col-span-3 space-y-1">
+                    <div className="col-span-1 sm:col-span-1 md:col-span-3 space-y-1">
                         <h2 className="text-2xl font-bold">{user.username}</h2>
                         <p className="text-gray-600">{user.bio}</p>
                         <a href={user.website} className='text-blue-600' target='_blank'>Website: {user.website}</a>
@@ -78,7 +78,7 @@ const UserPage = () => {
                         {signedUser === user._id ? (
                             <div className="flex justify-end mt-4 space-x-4">
                                 <Link to={"/edit-profile"}>
-                                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                                    <button className=" bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                                         Edit Profile
                                     </button>
                                 </Link>

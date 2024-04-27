@@ -6,7 +6,7 @@ import styles from "./UserPostList.module.css"; // Import module CSS
 
 const UserPostList = ({ posts }) => {
     return (
-        <div className={`grid grid-cols-4 gap-4 ${styles.postContainer}`}>
+        <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${styles.postContainer}`}>
             {posts.map((post) => (
                 <div key={post._id} className={`relative ${styles.postItem}`}>
                     <Link to={`/post/${post._id}`} className={styles.postLink}> 

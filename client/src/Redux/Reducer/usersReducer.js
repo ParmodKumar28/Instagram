@@ -6,8 +6,8 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
 // Base url for user's
-const BASE_URL_USERS = "http://localhost:8000/api/user";
-// const BASE_URL_USERS = "https://instagram-xbht.onrender.com/api/user";
+// const BASE_URL_USERS = "http://localhost:8000/api/user";
+const BASE_URL_USERS = "https://instagram-xbht.onrender.com/api/user";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -19,13 +19,23 @@ export const signUpAsync = createAsyncThunk(
   async ({ email, fullName, username, password }) => {
     try {
       // Sending request to the server
-      const response = await axios.post(`${BASE_URL_USERS}/signup`, {
-        name: fullName,
-        email,
-        username,
-        password,
-      });
-      // If response is ok then return repsonse.data
+      const response = await axios.post(
+        `${BASE_URL_USERS}/signup`,
+        {
+          name: fullName,
+          email,
+          username,
+          password,
+        },
+        {
+          headers: {
+            Accept: "application/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
       }
@@ -36,7 +46,7 @@ export const signUpAsync = createAsyncThunk(
       } else {
         toast.error("An error occurred. Please try again later.");
       }
-      throw error; // Throw the error to trigger the rejected case
+      throw error;
     }
   }
 );
@@ -44,15 +54,25 @@ export const signUpAsync = createAsyncThunk(
 
 // Login
 export const loginAsync = createAsyncThunk(
-  "users/lgin",
+  "users/login",
   async ({ email, password }) => {
     try {
       // Sending request to the server
-      const response = await axios.post(`${BASE_URL_USERS}/signin`, {
-        email,
-        password,
-      });
-      // If response is ok then return repsonse.data
+      const response = await axios.post(
+        `${BASE_URL_USERS}/signin`,
+        {
+          email,
+          password,
+        },
+        {
+          headers: {
+            Accept: "application/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
       }
@@ -73,7 +93,11 @@ export const loginAsync = createAsyncThunk(
 export const logoutAsync = createAsyncThunk("users/logout", async () => {
   try {
     // Sending request to the server
-    const response = await axios.get(`${BASE_URL_USERS}/logout`);
+    const response = await axios.get(`${BASE_URL_USERS}/logout`, {
+      headers: {
+        "auth-token": `${localStorage.getItem("auth-token")}`,
+      },
+    });
     // If response is ok then return repsonse.data
     if (response.statusText === "OK") {
       return response.data;
@@ -96,8 +120,15 @@ export const userDataAsync = createAsyncThunk(
   async ({ userId }) => {
     try {
       // Sending request to the server
-      const response = await axios.get(`${BASE_URL_USERS}/user-data/${userId}`);
-      // If response is ok then return repsonse.data
+      const response = await axios.get(
+        `${BASE_URL_USERS}/user-data/${userId}`,
+        {
+          headers: {
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+          },
+        }
+      );
+      // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
       }
@@ -122,9 +153,14 @@ export const forgotPasswordOtpAsync = createAsyncThunk(
       // Sending request to the server
       const response = await axios.post(
         `${BASE_URL_USERS}/forgot-password-otp`,
-        { email }
+        { email },
+        {
+          headers: {
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+          },
+        }
       );
-      // If response is ok then return repsonse.data
+      // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
       }
@@ -147,12 +183,20 @@ export const resetPasswordAsync = createAsyncThunk(
   async ({ newPassword, confirmPassword, otp }) => {
     try {
       // Sending request to the server
-      const response = await axios.put(`${BASE_URL_USERS}/reset-password`, {
-        password: newPassword,
-        confirmPassword: confirmPassword,
-        resetToken: otp,
-      });
-      // If response is ok then return repsonse.data
+      const response = await axios.put(
+        `${BASE_URL_USERS}/reset-password`,
+        {
+          password: newPassword,
+          confirmPassword: confirmPassword,
+          resetToken: otp,
+        },
+        {
+          headers: {
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+          },
+        }
+      );
+      // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
       }
@@ -177,7 +221,14 @@ export const updateProfileAsync = createAsyncThunk(
       // Sending request to the server
       const response = await axios.put(
         `${BASE_URL_USERS}/update-profile`,
-        userData
+        userData,
+        {
+          headers: {
+            Accept: "application/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       // If response is ok then return response.data
       if (response.statusText === "OK") {
@@ -208,6 +259,7 @@ export const uploadProfilePicAsync = createAsyncThunk(
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
           },
         }
       );
@@ -269,6 +321,7 @@ const usersSlice = createSlice({
       Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
       Cookies.set("signedUser", JSON.stringify(state.signedUser));
       Cookies.set("userId", state.signedUser._id);
+      localStorage.setItem("auth-token", action.payload.token);
       toast.success("Signed In!"); // Showing notification
     });
 
@@ -295,6 +348,7 @@ const usersSlice = createSlice({
       Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
       Cookies.set("signedUser", JSON.stringify(state.signedUser));
       Cookies.set("userId", state.signedUser._id);
+      localStorage.setItem("auth-token", action.payload.token);
       toast.success("Login Successful!");
     });
 
@@ -327,6 +381,7 @@ const usersSlice = createSlice({
       Cookies.remove("isSignIn"); //Removing isSignin from cookie
       Cookies.remove("signedUser");
       Cookies.remove("userId");
+      localStorage.removeItem("auth-token");
       state.isSignIn = false;
       state.signedUser = {};
       state.token = "";

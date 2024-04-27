@@ -5,7 +5,8 @@ import { ErrorHandler } from "../utils/errorHandler.js";
 import userModel from "../features/user/model/user.schema.js";
 
 export const auth = async (req, res, next) => {
-  const { token } = req.cookies;
+  const token = req.header("auth-token");
+  // const { token } = req.cookies;
   if (!token) {
     return next(new ErrorHandler(401, "Login to access this route!"));
   }

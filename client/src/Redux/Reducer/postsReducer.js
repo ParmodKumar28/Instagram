@@ -5,23 +5,29 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 // Base url for user's
-const BASE_URL_POSTS = "http://localhost:8000/api/post";
-// const BASE_URL_POSTS = "https://instagram-xbht.onrender.com/api/post";
+// const BASE_URL_POSTS = "http://localhost:8000/api/post";
+const BASE_URL_POSTS = "https://instagram-xbht.onrender.com/api/post";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
 
 // Async Thunks
-// Create new post start's here
+// Create new post starts here
 export const createPostAsync = createAsyncThunk(
   "posts/create",
   async (formData, { dispatch }) => {
     try {
       const response = await axios.post(
         `${BASE_URL_POSTS}/create-post`,
-        formData
+        formData,
+        {
+          headers: {
+            Accept: 'application/form-data',
+            'auth-token': `${localStorage.getItem('auth-token')}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
-      // If response is ok then return repsonse.data
       if (response.statusText === "OK") {
         dispatch(fetchPostsAsync());
         return response.data;
@@ -29,35 +35,38 @@ export const createPostAsync = createAsyncThunk(
     } catch (error) {
       console.log(error);
       if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
+        toast.error(error.response.data.error);
       } else {
         toast.error("An error occurred. Please try again later.");
       }
-      throw error; // Throw the error to trigger the rejected case
+      throw error;
     }
   }
 );
-// Create new post end's here
+// Create new post ends here
 
-// Fetch post's
+// Fetch posts
 export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
   try {
-    const response = await axios.get(`${BASE_URL_POSTS}/all-posts`);
-    // If response is ok then return repsonse.data
+    const response = await axios.get(`${BASE_URL_POSTS}/all-posts`, {
+      headers: {
+        'auth-token': `${localStorage.getItem('auth-token')}`,
+      },
+    });
     if (response.statusText === "OK") {
       return response.data;
     }
   } catch (error) {
     console.log(error);
     if (error.response && error.response.data && error.response.data.error) {
-      toast.error(error.response.data.error); // Display the error message in a toast
+      toast.error(error.response.data.error);
     } else {
       toast.error("An error occurred. Please try again later.");
     }
-    throw error; // Throw the error to trigger the rejected case
+    throw error;
   }
 });
-// Fetch post's end's
+// Fetch posts ends
 
 // Async Thunk for updating a post
 export const updatePostAsync = createAsyncThunk(
@@ -66,7 +75,14 @@ export const updatePostAsync = createAsyncThunk(
     try {
       const response = await axios.put(
         `${BASE_URL_POSTS}/update-post/${postId}`,
-        postData
+        postData,
+        {
+          headers: {
+            Accept: 'application/form-data',
+            'auth-token': `${localStorage.getItem('auth-token')}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
       if (response.statusText === "OK") {
         dispatch(fetchPostsAsync());
@@ -90,7 +106,12 @@ export const deletePostAsync = createAsyncThunk(
   async (postId, { dispatch }) => {
     try {
       const response = await axios.delete(
-        `${BASE_URL_POSTS}/delete-post/${postId}`
+        `${BASE_URL_POSTS}/delete-post/${postId}`,
+        {
+          headers: {
+            'auth-token': `${localStorage.getItem('auth-token')}`,
+          },
+        }
       );
       if (response.statusText === "OK") {
         dispatch(fetchPostsAsync());
@@ -114,7 +135,12 @@ export const fetchUserPostsAsync = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${BASE_URL_POSTS}/user-posts/${userId}`
+        `${BASE_URL_POSTS}/user-posts/${userId}`,
+        {
+          headers: {
+            'auth-token': `${localStorage.getItem('auth-token')}`,
+          },
+        }
       );
       return response.data.posts;
     } catch (error) {
@@ -128,13 +154,18 @@ export const fetchSinglePostAsync = createAsyncThunk(
   "posts/fetchSinglePost",
   async (postId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${BASE_URL_POSTS}/${postId}`);
+      const response = await axios.get(`${BASE_URL_POSTS}/${postId}`, {
+        headers: {
+          'auth-token': `${localStorage.getItem('auth-token')}`,
+        },
+      });
       return response.data.post;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
+
 
 // Initial State
 const INITIAL_STATE = {

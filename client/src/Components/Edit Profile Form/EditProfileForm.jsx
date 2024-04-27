@@ -25,7 +25,9 @@ const EditProfileForm = () => {
             setEmail(userData.user.email || '');
             setUsername(userData.user.username || '');
             setPhone(userData.user.phone || '');
-            setDateOfBirth(userData.user.dateOfBirth || '');
+            // Extract only the date part from the ISO string and set it to dateOfBirth state
+            const userDateOfBirth = userData.user.dateOfBirth ? userData.user.dateOfBirth.split('T')[0] : '';
+            setDateOfBirth(userDateOfBirth);
             setGender(userData.user.gender || '');
             setAccountType(userData.user.accountType || 'public');
             setBio(userData.user.bio || '');
