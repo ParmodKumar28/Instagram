@@ -19,22 +19,12 @@ export const signUpAsync = createAsyncThunk(
   async ({ email, fullName, username, password }) => {
     try {
       // Sending request to the server
-      const response = await axios.post(
-        `${BASE_URL_USERS}/signup`,
-        {
-          name: fullName,
-          email,
-          username,
-          password,
-        },
-        {
-          headers: {
-            Accept: "application/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`${BASE_URL_USERS}/signup`, {
+        name: fullName,
+        email,
+        username,
+        password,
+      });
       // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
@@ -58,20 +48,10 @@ export const loginAsync = createAsyncThunk(
   async ({ email, password }) => {
     try {
       // Sending request to the server
-      const response = await axios.post(
-        `${BASE_URL_USERS}/signin`,
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            Accept: "application/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`${BASE_URL_USERS}/signin`, {
+        email,
+        password,
+      });
       // If response is ok then return response.data
       if (response.statusText === "OK") {
         return response.data;
