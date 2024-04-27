@@ -1,0 +1,35 @@
+/* EditProfileForm.module.css */
+
+.inputField {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.fileInput {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.primaryBtn {
+    background-color: aqua;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.primaryBtn:hover {
+    background-color: #ec44b7;
+}
+
+/* Add more styles as needed */

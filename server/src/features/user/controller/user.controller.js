@@ -116,7 +116,7 @@ export const updateUserProfile = async (req, res, next) => {
       return next(new ErrorHandler(400, "Please provide data to update!"));
     }
 
-    const userId = req.user._id;
+    const userId = req.user._id;  
     const updatedUser = await updateUserDb(updatedData, userId);
 
     if (!updatedUser) {

@@ -170,8 +170,8 @@ function Post({ post }) {
         <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
-                {/* Rendering user info remains the same */}
-                <Link to={`profile/${post.user._id}`}>
+                {/* Rendering user info remains the same */ }
+                <Link to={`/profile/${post.user._id}`}>
                     <div className="flex items-center">
                         <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
                         <p className="text-sm font-semibold">{post.user.username}</p>

@@ -8,8 +8,8 @@ const UserPostList = ({ posts }) => {
     return (
         <div className={`grid grid-cols-4 gap-4 ${styles.postContainer}`}>
             {posts.map((post) => (
-                <div key={post.id} className={`relative ${styles.postItem}`}>
-                    <Link to={`post/${post._id}`} className={styles.postLink}>
+                <div key={post._id} className={`relative ${styles.postItem}`}>
+                    <Link to={`/post/${post._id}`} className={styles.postLink}> 
                         <img className="w-full h-full object-cover" src={post.media} alt={post.caption} />
                     </Link>
 

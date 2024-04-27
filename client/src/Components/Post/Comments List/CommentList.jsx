@@ -1,5 +1,6 @@
 import React from 'react'
 import { FaHeart } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 
 const CommentList = ({ comments, commentsLoading, }) => {
     return (
@@ -11,10 +12,12 @@ const CommentList = ({ comments, commentsLoading, }) => {
                     comments.map((comment, index) => (
                         <div key={index} className="mb-2">
                             <div className="flex items-center justify-between px-2">
-                                <div className="flex items-center">
-                                    <img className="w-6 h-6 rounded-full mr-2" src={comment.user.profilePic} alt="User" />
-                                    <p className="text-gray-600 font-medium">{comment.user.name}:</p>
-                                </div>
+                                <Link to={`/profile/${comment.user._id}`}>
+                                    <div className="flex items-center">
+                                        <img className="w-6 h-6 rounded-full mr-2" src={comment.user.profilePic} alt="User" />
+                                        <p className="text-gray-600 font-medium">{comment.user.name}:</p>
+                                    </div>
+                                </Link>
                                 <button
                                     className="text-gray-700"
                                 // onClick={() => handleLikeComment(index)}

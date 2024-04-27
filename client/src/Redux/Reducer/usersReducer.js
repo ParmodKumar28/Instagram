@@ -169,6 +169,65 @@ export const resetPasswordAsync = createAsyncThunk(
 );
 // Reset password start's end's
 
+// Update profile
+export const updateProfileAsync = createAsyncThunk(
+  "users/updateProfile",
+  async (userData) => {
+    try {
+      // Sending request to the server
+      const response = await axios.put(
+        `${BASE_URL_USERS}/update-profile`,
+        userData
+      );
+      // If response is ok then return response.data
+      if (response.statusText === "OK") {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+// Update profile ends
+
+// Upload profile picture
+export const uploadProfilePicAsync = createAsyncThunk(
+  "users/uploadProfilePic",
+  async (formData) => {
+    try {
+      // Sending request to the server
+      const response = await axios.post(
+        `${BASE_URL_USERS}/upload-profile-pic`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      // If response is ok then return response.data
+      if (response.statusText === "OK") {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+// Upload profile picture ends
+
 // Initial State
 const INITIAL_STATE = {
   isSignIn: false,
@@ -209,6 +268,7 @@ const usersSlice = createSlice({
       Cookies.set("token", action.payload.token);
       Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
       Cookies.set("signedUser", JSON.stringify(state.signedUser));
+      Cookies.set("userId", state.signedUser._id);
       toast.success("Signed In!"); // Showing notification
     });
 
@@ -234,6 +294,7 @@ const usersSlice = createSlice({
       Cookies.set("token", action.payload.token);
       Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
       Cookies.set("signedUser", JSON.stringify(state.signedUser));
+      Cookies.set("userId", state.signedUser._id);
       toast.success("Login Successful!");
     });
 
@@ -265,6 +326,7 @@ const usersSlice = createSlice({
       // Setting state
       Cookies.remove("isSignIn"); //Removing isSignin from cookie
       Cookies.remove("signedUser");
+      Cookies.remove("userId");
       state.isSignIn = false;
       state.signedUser = {};
       state.token = "";
@@ -300,6 +362,45 @@ const usersSlice = createSlice({
     // When rejected
     builder.addCase(resetPasswordAsync.rejected, (state, action) => {});
     // Reset password thunks extra reducer's end's
+
+    // updateProfileAsync thunk extra reducers start here
+    // When pending
+    builder.addCase(updateProfileAsync.pending, (state, action) => {
+      state.userLoading = true;
+    });
+
+    // When fulfilled
+    builder.addCase(updateProfileAsync.fulfilled, (state, action) => {
+      state.userLoading = false;
+      // Update user data in state if necessary
+      // state.userData = action.payload;
+      toast.success("Profile updated successfully!");
+    });
+
+    // When rejected
+    builder.addCase(updateProfileAsync.rejected, (state, action) => {
+      state.userLoading = false;
+    });
+    // updateProfileAsync thunk extra reducers end here
+
+    // uploadProfilePicAsync thunk extra reducers start here
+    // When pending
+    builder.addCase(uploadProfilePicAsync.pending, (state, action) => {
+      state.userLoading = true;
+    });
+
+    // When fulfilled
+    builder.addCase(uploadProfilePicAsync.fulfilled, (state, action) => {
+      state.userLoading = false;
+      // Update user data in state if necessary
+      // state.userData = action.payload;
+      toast.success("Profile picture uploaded successfully!");
+    });
+
+    // When rejected
+    builder.addCase(uploadProfilePicAsync.rejected, (state, action) => {
+      state.userLoading = false;
+    });
   },
 });
 
