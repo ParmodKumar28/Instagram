@@ -118,7 +118,7 @@ export const getPost = async (req, res, next) => {
 // Getting user posts
 export const getUserPosts = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     if (!userId) {
       return next(new ErrorHandler(400, "Enter user id please!"));
     }

@@ -27,7 +27,7 @@ postsRouter.delete("/delete-post/:postId", auth, deletePost);
 postsRouter.put("/update-post/:postId", upload.none(), auth, updatePost);
 
 // Getting user posts
-postsRouter.get("/user-posts", auth, getUserPosts);
+postsRouter.get("/user-posts/:userId", auth, getUserPosts);
 
 // Getting all posts
 postsRouter.get("/all-posts", auth, getAllPosts);

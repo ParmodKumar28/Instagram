@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 // Base url for user's
 const BASE_URL_USERS = "http://localhost:8000/api/user";
+// const BASE_URL_USERS = "https://instagram-xbht.onrender.com/api/user";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -90,24 +91,27 @@ export const logoutAsync = createAsyncThunk("users/logout", async () => {
 // Logout end's
 
 // Get user details
-export const userDataAsync = createAsyncThunk("users/details", async () => {
-  try {
-    // Sending request to the server
-    const response = await axios.get(`${BASE_URL_USERS}/user-data`);
-    // If response is ok then return repsonse.data
-    if (response.statusText === "OK") {
-      return response.data;
+export const userDataAsync = createAsyncThunk(
+  "users/details",
+  async ({ userId }) => {
+    try {
+      // Sending request to the server
+      const response = await axios.get(`${BASE_URL_USERS}/user-data/${userId}`);
+      // If response is ok then return repsonse.data
+      if (response.statusText === "OK") {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
     }
-  } catch (error) {
-    console.log(error);
-    if (error.response && error.response.data && error.response.data.error) {
-      toast.error(error.response.data.error); // Display the error message in a toast
-    } else {
-      toast.error("An error occurred. Please try again later.");
-    }
-    throw error;
   }
-});
+);
 // Get user details end's
 
 // Forgot password otp
@@ -172,6 +176,8 @@ const INITIAL_STATE = {
   signedUser: {},
   signUpLoading: false,
   loginLoading: false,
+  userLoading: true,
+  userData: {},
 };
 
 // Slice
@@ -199,9 +205,10 @@ const usersSlice = createSlice({
       state.isSignIn = true;
       state.token = action.payload.token;
       state.signedUser = action.payload.user;
-      Cookies.set("token", action.payload.token); // Storing fresh token to cooke
-      Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
-      Cookies.set("signedUser", state.signedUser);
+      // Stringify objects before setting them as cookies
+      Cookies.set("token", action.payload.token);
+      Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
+      Cookies.set("signedUser", JSON.stringify(state.signedUser));
       toast.success("Signed In!"); // Showing notification
     });
 
@@ -223,9 +230,10 @@ const usersSlice = createSlice({
       state.token = action.payload.token;
       state.signedUser = action.payload.user;
       state.isSignIn = true;
-      Cookies.set("token", action.payload.token); // Storing fresh token to cooke
-      Cookies.set("isSignIn", state.isSignIn); // Storing isSignIn to cookie
-      Cookies.set("signedUser", state.signedUser); // Storing signedUser to cookie
+      // Stringify objects before setting them as cookies
+      Cookies.set("token", action.payload.token);
+      Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
+      Cookies.set("signedUser", JSON.stringify(state.signedUser));
       toast.success("Login Successful!");
     });
 
@@ -236,14 +244,16 @@ const usersSlice = createSlice({
     // loginAsync thunk ends
 
     // Get userDataAsync extra reducer's start's here
-    // When pending
-    builder.addCase(userDataAsync.pending, (state, action) => {});
-
-    // When fulfilled
-    builder.addCase(userDataAsync.fulfilled, (state, action) => {});
-
-    // When rejected
-    builder.addCase(userDataAsync.rejected, (state, action) => {});
+    builder.addCase(userDataAsync.pending, (state, action) => {
+      state.userLoading = true;
+    });
+    builder.addCase(userDataAsync.fulfilled, (state, action) => {
+      state.userLoading = false;
+      state.userData = action.payload;
+    });
+    builder.addCase(userDataAsync.rejected, (state, action) => {
+      state.userLoading = false;
+    });
     // Get userDataAsync ends
 
     // logoutAsync thunk extra reducer's start's here

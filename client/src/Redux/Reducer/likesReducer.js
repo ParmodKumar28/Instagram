@@ -6,6 +6,7 @@ import { fetchPostsAsync } from "./postsReducer";
 
 // Base url for like's
 const BASE_URL_LIKES = "http://localhost:8000/api/like";
+// const BASE_URL_LIKES = "https://instagram-xbht.onrender.com/api/like";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;

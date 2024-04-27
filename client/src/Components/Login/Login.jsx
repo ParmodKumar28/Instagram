@@ -36,19 +36,18 @@ export default function Login() {
             // Dispatching loginAsync thunk here
             await dispatch(loginAsync({ email, password }));
 
-            // Clear fields
-            setEmail("");
-            setPassword("");
-
             // Redirect to home page after successful login
             if (Cookies.get("isSignIn")) {
+                // Clear fields
+                setEmail("");
+                setPassword("");
                 navigate("/");
             }
         } catch (error) {
             console.error("Login failed:", error);
         }
     };
-    
+
 
     // Returning JSX
     return (

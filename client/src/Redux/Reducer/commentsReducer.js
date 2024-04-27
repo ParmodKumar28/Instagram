@@ -6,6 +6,7 @@ import { fetchPostsAsync } from "./postsReducer";
 
 // Base url for comment's
 const BASE_URL_COMMENTS = "http://localhost:8000/api/comment";
+// const BASE_URL_COMMENTS = "https://instagram-xbht.onrender.com/api/comment";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;

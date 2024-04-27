@@ -166,7 +166,7 @@ export const addProfilePic = async (req, res, next) => {
 // Get user data
 export const userData = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.params.userId;
     if (!userId) {
       return next(new ErrorHandler(404, "User id not recieved!"));
     }
@@ -195,8 +195,6 @@ export const forgotPasswordOtp = async (req, res, next) => {
         )
       );
     }
-
-    console.log("Called");
     const user = await userByEmailDb(email);
     if (!user) {
       return next(

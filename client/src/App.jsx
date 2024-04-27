@@ -20,6 +20,9 @@ import PostForm from "./Components/Post Form/PostForm";
 import Footer from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
 import NotFound from "./Pages/Misc/404Page";
+import Post from "./Components/Post/Post";
+import PostPage from "./Pages/App/PostPage/PostPage";
+import UserPage from "./Pages/App/User Page/UserPage";
 
 // Function App component this is a parent component here
 const App = () => {
@@ -37,7 +40,9 @@ const App = () => {
         {
           index: true, element: <Home />
         },
-        { path: "new-post", element: <PostForm /> }
+        { path: "new-post", element: <PostForm /> },
+        { path: "profile/:userId", element: <UserPage /> },
+        { path: "post/:postId", element: <PostPage /> }
       ]
     }
   ]);

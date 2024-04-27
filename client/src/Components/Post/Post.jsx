@@ -10,9 +10,11 @@ import OptionsList from './Options List/OptionsList';
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import { deletePostAsync, updatePostAsync } from '../../Redux/Reducer/postsReducer'; // Import updatePostAsync action
+import { Link } from 'react-router-dom';
 
 // Base URL for API requests
 const BASE_URL = 'http://localhost:8000/api';
+// const BASE_URL = 'https://instagram-xbht.onrender.com/api';
 
 function Post({ post }) {
     // State variables
@@ -169,10 +171,12 @@ function Post({ post }) {
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
                 {/* Rendering user info remains the same */}
-                <div className="flex items-center">
-                    <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
-                    <p className="text-sm font-semibold">{post.user.username}</p>
-                </div>
+                <Link to={`profile/${post.user._id}`}>
+                    <div className="flex items-center">
+                        <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
+                        <p className="text-sm font-semibold">{post.user.username}</p>
+                    </div>
+                </Link>
 
                 {/* Options button */}
                 <button className="text-gray-700" onClick={() => setShowOptions(!showOptions)}>

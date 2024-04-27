@@ -13,7 +13,7 @@ function NotFound() {
     const goBack = () => {
         setTimeout(() => {
             navigate("/");
-        }, 2000);
+        }, 5000);
     }
 
     useEffect(() => {

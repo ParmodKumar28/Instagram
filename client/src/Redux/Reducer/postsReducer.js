@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 // Base url for user's
 const BASE_URL_POSTS = "http://localhost:8000/api/post";
+// const BASE_URL_POSTS = "https://instagram-xbht.onrender.com/api/post";
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -107,11 +108,43 @@ export const deletePostAsync = createAsyncThunk(
   }
 );
 
+// Async Thunk for fetching user posts
+export const fetchUserPostsAsync = createAsyncThunk(
+  "posts/fetchUserPosts",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL_POSTS}/user-posts/${userId}`
+      );
+      return response.data.posts;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// Async Thunk for fetching a single post by ID
+export const fetchSinglePostAsync = createAsyncThunk(
+  "posts/fetchSinglePost",
+  async (postId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${BASE_URL_POSTS}/${postId}`);
+      return response.data.post;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 // Initial State
 const INITIAL_STATE = {
   postsLoading: true,
   addPostLoad: false,
   posts: [],
+  userPostsLoading: false,
+  userPosts: [],
+  singlePostLoading: false,
+  singlePost: null,
 };
 
 // Slice
@@ -141,6 +174,36 @@ const postsSlice = createSlice({
     // Create post rejected state extra reducer
     builder.addCase(createPostAsync.rejected, (state, action) => {
       state.addPostLoad = false; // Set loading state to false
+    });
+
+    // Fetch user posts pending state extra reducer
+    builder.addCase(fetchUserPostsAsync.pending, (state) => {
+      state.userPostsLoading = true;
+    });
+
+    // Fetch user posts fulfilled state extra reducer
+    builder.addCase(fetchUserPostsAsync.fulfilled, (state, action) => {
+      state.userPostsLoading = false;
+      state.userPosts = action.payload;
+    });
+
+    // Fetch user posts rejected state extra reducer
+    builder.addCase(fetchUserPostsAsync.rejected, (state) => {
+      state.userPostsLoading = false;
+    });
+
+    // Extra reducers for fetching a single post by ID
+    builder.addCase(fetchSinglePostAsync.pending, (state) => {
+      state.singlePostLoading = true;
+    });
+
+    builder.addCase(fetchSinglePostAsync.fulfilled, (state, action) => {
+      state.singlePostLoading = false;
+      state.singlePost = action.payload;
+    });
+
+    builder.addCase(fetchSinglePostAsync.rejected, (state) => {
+      state.singlePostLoading = false;
     });
 
     // Fetch posts pending state extra reducer

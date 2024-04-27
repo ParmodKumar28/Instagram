@@ -42,7 +42,7 @@ userRouter.post(
 );
 
 // Getting user data
-userRouter.get("/user-data", auth, userData);
+userRouter.get("/user-data/:userId", auth, userData);
 
 // Otp for password reset
 userRouter.post("/forgot-password-otp", forgotPasswordOtp);

@@ -6,11 +6,14 @@ import { RiVideoFill } from "react-icons/ri";
 import { MdAddBox } from "react-icons/md";
 import { RiMessage2Fill } from "react-icons/ri";
 import { FaUserAlt } from "react-icons/fa";
+import Cookies from "js-cookie"
 
 // Footer component
 function Footer() {
     // Get current location
     const location = useLocation();
+    const signedUser = Cookies.get("signedUser");
+    const userId = signedUser ? JSON.parse(signedUser)._id : null;
 
     // Return JSX
     return (
@@ -67,9 +70,9 @@ function Footer() {
             {/* Message's End's */}
 
             {/* Profile */}
-            <div className={location.pathname === "/profile" ? "text-blue-500" : ""}>
+            <div className={location.pathname === `/profile/${userId}` ? "text-blue-500" : ""}>
                 {/* Navigate Link with the Icon here */}
-                <Link to={"/profile"}>
+                <Link to={`/profile/${userId}`}>
                     {/* Icon */}
                     <FaUserAlt className="text-3xl" />
                 </Link>
@@ -82,3 +85,4 @@ function Footer() {
 
 // Exporting footer
 export default Footer;
+    
