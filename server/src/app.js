@@ -25,10 +25,13 @@ const app = express();
 // Setting up cors
 app.use(
   cors({
-    origin: "*", // Replace with your frontend origin
-    credentials: true, // Allow credentials (cookies)
+    origin: function(origin, callback) {
+      callback(null, true);
+    },
+    credentials: true,
   })
 );
+
 
 // Parsing cookies
 app.use(cookieParser());
