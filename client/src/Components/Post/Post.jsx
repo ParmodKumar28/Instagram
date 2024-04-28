@@ -11,10 +11,7 @@ import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import { deletePostAsync, updatePostAsync } from '../../Redux/Reducer/postsReducer'; // Import updatePostAsync action
 import { Link } from 'react-router-dom';
-
-// Base URL for API requests
-// const BASE_URL = 'http://localhost:8000/api';
-const BASE_URL = 'https://instagram-xbht.onrender.com/api';
+import BASE_URL from '../../Redux/baseUrl';
 
 function Post({ post }) {
     // State variables
@@ -143,10 +140,6 @@ function Post({ post }) {
 
     // Handle edit post
     const handleEditPost = () => {
-        // if (post.user._id != Cookies.get("signedUser")._id) {
-        //     toast.error("You cannot edit other's post");
-        //     return setShowOptions(false);
-        // }
         setIsEditing(true); // Set editing state to true when edit is clicked
         setShowOptions(false);
     };

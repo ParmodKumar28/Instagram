@@ -36,13 +36,21 @@ function PostForm() {
 
     // On adding media converting it to url
     const handlemediaUpload = (event) => {
-        setMedia(event.target.files[0]);
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                // Set the uploaded image
+                setMedia(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     // Returning Jsx
     return (
         // Form container
-        <div className="flex flex-col items-center mt-10">
+        <div className="flex flex-col items-center my-10">
             {/* Heading */}
             <h2 className="text-2xl font-semibold mb-4">Add New Post</h2>
             {/* Heading End's */}
@@ -68,6 +76,14 @@ function PostForm() {
                     {/* Media file input end's */}
                 </div>
                 {/* Media uploader container end's */}
+
+                {/* Display selected media */}
+                {media && (
+                    <div className="mb-4">
+                        <img src={media} alt="Selected" className="max-w-full w-80 rounded-3xl h-auto" />
+                    </div>
+                )}
+                {/* Display selected media end's */}
 
                 {/* Content container */}
                 <div className="mb-4">

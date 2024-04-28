@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom'; // Assuming you're using React Router
 import { useNavigate } from 'react-router-dom';
 
-// 404 Error componenet is here
+// 404 Error component is here
 function NotFound() {
 
     // Navigator
@@ -22,10 +22,10 @@ function NotFound() {
 
     // Returning Jsx
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-            <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
-            <p className="text-xl text-gray-600 mb-8">Oops! Page not found</p>
-            <Link to="/" className="text-blue-500 hover:underline">Go back to Home</Link>
+        <div className="flex flex-col items-center justify-center h-screen bg-cover bg-center bg-slate-600" style={{ backgroundImage: "url('instagram-background.jpg')" }}>
+            <h1 className="text-9xl font-bold text-white mb-4">Oops!</h1>
+            <p className="text-4xl text-white mb-8">We couldn't find the page you're looking for.</p>
+            <Link to="/" className="text-2xl text-white bg-blue-500 px-8 py-3 rounded-full hover:bg-blue-600 transition-colors duration-300">Take me home</Link>
         </div>
     );
 }

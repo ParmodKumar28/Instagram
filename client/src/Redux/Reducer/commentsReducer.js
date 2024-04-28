@@ -3,10 +3,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { fetchPostsAsync } from "./postsReducer";
+import BASE_URL from "../baseUrl";
 
 // Base url for comment's
-// const BASE_URL_COMMENTS = "http://localhost:8000/api/comment";
-const BASE_URL_COMMENTS = "https://instagram-xbht.onrender.com/api/comment";
+const BASE_URL_COMMENTS = `${BASE_URL}/comment`;
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -17,13 +17,17 @@ export const addCommentAsync = createAsyncThunk(
   "comments/add",
   async ({ postId, comment }, { dispatch }) => {
     try {
-      const response = await axios.post(`${BASE_URL_COMMENTS}/add/${postId}`, {
-        comment,
-      }, {
-        headers: {
-          'auth-token': `${localStorage.getItem('auth-token')}`,
+      const response = await axios.post(
+        `${BASE_URL_COMMENTS}/add/${postId}`,
+        {
+          comment,
         },
-      });
+        {
+          headers: {
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+          },
+        }
+      );
       // dispatch(fetchPostsAsync());
       if (response.status === 201) {
         return response.data.comment; // Return the new comment
@@ -47,7 +51,7 @@ export const getCommentsAsync = createAsyncThunk(
     try {
       const response = await axios.get(`${BASE_URL_COMMENTS}/${postId}`, {
         headers: {
-          'auth-token': `${localStorage.getItem('auth-token')}`,
+          "auth-token": `${localStorage.getItem("auth-token")}`,
         },
       });
       if (response.status === 200) {

@@ -25,20 +25,23 @@ const app = express();
 // Setting up cors
 app.use(
   cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
       callback(null, true);
     },
     credentials: true,
   })
 );
 
-
 // Parsing cookies
 app.use(cookieParser());
 
 // Parsing data
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(express.json({ limit: "50mb" }));
+
+// Creating upload Endpoint for images
+app.use("/images", express.static("upload/images"));
+export const filePath = `http://localhost:${process.env.PORT}/images`;
 
 // Configuring cloudinary
 cloudinary.config({

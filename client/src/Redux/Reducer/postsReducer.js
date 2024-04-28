@@ -3,10 +3,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
+import BASE_URL from "../baseUrl";
 
-// Base url for user's
-// const BASE_URL_POSTS = "http://localhost:8000/api/post";
-const BASE_URL_POSTS = "https://instagram-xbht.onrender.com/api/post";
+// Base url for post's
+const BASE_URL_POSTS = `${BASE_URL}/post`;
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -22,9 +22,9 @@ export const createPostAsync = createAsyncThunk(
         formData,
         {
           headers: {
-            Accept: 'application/form-data',
-            'auth-token': `${localStorage.getItem('auth-token')}`,
-            'Content-Type': 'application/json',
+            Accept: "application/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -50,7 +50,7 @@ export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
   try {
     const response = await axios.get(`${BASE_URL_POSTS}/all-posts`, {
       headers: {
-        'auth-token': `${localStorage.getItem('auth-token')}`,
+        "auth-token": `${localStorage.getItem("auth-token")}`,
       },
     });
     if (response.statusText === "OK") {
@@ -78,9 +78,9 @@ export const updatePostAsync = createAsyncThunk(
         postData,
         {
           headers: {
-            Accept: 'application/form-data',
-            'auth-token': `${localStorage.getItem('auth-token')}`,
-            'Content-Type': 'application/json',
+            Accept: "application/form-data",
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -109,7 +109,7 @@ export const deletePostAsync = createAsyncThunk(
         `${BASE_URL_POSTS}/delete-post/${postId}`,
         {
           headers: {
-            'auth-token': `${localStorage.getItem('auth-token')}`,
+            "auth-token": `${localStorage.getItem("auth-token")}`,
           },
         }
       );
@@ -138,7 +138,7 @@ export const fetchUserPostsAsync = createAsyncThunk(
         `${BASE_URL_POSTS}/user-posts/${userId}`,
         {
           headers: {
-            'auth-token': `${localStorage.getItem('auth-token')}`,
+            "auth-token": `${localStorage.getItem("auth-token")}`,
           },
         }
       );
@@ -156,7 +156,7 @@ export const fetchSinglePostAsync = createAsyncThunk(
     try {
       const response = await axios.get(`${BASE_URL_POSTS}/${postId}`, {
         headers: {
-          'auth-token': `${localStorage.getItem('auth-token')}`,
+          "auth-token": `${localStorage.getItem("auth-token")}`,
         },
       });
       return response.data.post;
@@ -165,7 +165,6 @@ export const fetchSinglePostAsync = createAsyncThunk(
     }
   }
 );
-
 
 // Initial State
 const INITIAL_STATE = {

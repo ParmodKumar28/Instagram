@@ -1,5 +1,6 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
+import { filePath } from "../../../app.js";
 import uploadCloudinary from "../../../utils/cloudinary.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
@@ -23,6 +24,7 @@ export const createPost = async (req, res, next) => {
     postData.user = req.user._id;
     if (req.file) {
       const imageUrl = await uploadCloudinary(req.file.path);
+      // const imageUrl = `${filePath}/${req.file.filename}`;
       postData.media = imageUrl;
     }
     // Passing to db to save the post here.

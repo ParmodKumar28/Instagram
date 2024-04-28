@@ -1,5 +1,6 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
+import { filePath } from "../../../app.js";
 import uploadCloudinary from "../../../utils/cloudinary.js";
 import { sendResetPasswordMail } from "../../../utils/email/PasswordResetEmail.js";
 import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
@@ -116,7 +117,7 @@ export const updateUserProfile = async (req, res, next) => {
       return next(new ErrorHandler(400, "Please provide data to update!"));
     }
 
-    const userId = req.user._id;  
+    const userId = req.user._id;
     const updatedUser = await updateUserDb(updatedData, userId);
 
     if (!updatedUser) {
@@ -139,11 +140,11 @@ export const addProfilePic = async (req, res, next) => {
         new ErrorHandler(400, "Please add a image file in request body!")
       );
     }
-    const file = req.file.path;
     // User
     const user = req.user;
     // Uploading image on the cloudinary and then adding to database
     const imageUrl = await uploadCloudinary(req.file.path);
+    // const imageUrl = `${filePath}/${req.file.filename}`;
     if (!imageUrl) {
       return next(
         new ErrorHandler(

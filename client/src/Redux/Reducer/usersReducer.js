@@ -4,10 +4,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import BASE_URL from "../baseUrl";
 
 // Base url for user's
-// const BASE_URL_USERS = "http://localhost:8000/api/user";
-const BASE_URL_USERS = "https://instagram-xbht.onrender.com/api/user";
+const BASE_URL_USERS = `${BASE_URL}/user`;
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;

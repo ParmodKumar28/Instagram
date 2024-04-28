@@ -3,10 +3,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { fetchPostsAsync } from "./postsReducer";
+import BASE_URL from "../baseUrl";
 
 // Base url for like's
-// const BASE_URL_LIKES = "http://localhost:8000/api/like";
-const BASE_URL_LIKES = "https://instagram-xbht.onrender.com/api/like";
+const BASE_URL_LIKES = `${BASE_URL}/like`;
 
 // Setting Axios default for credentials
 axios.defaults.withCredentials = true;
@@ -17,11 +17,14 @@ export const toggleLikeAsync = createAsyncThunk(
   "likes/toggle",
   async ({ id, type }, { dispatch }) => {
     try {
-      const response = axios.get(`${BASE_URL_LIKES}/toggle/${id}?type=${type}`, {
-        headers: {
-          'auth-token': `${localStorage.getItem('auth-token')}`,
-        },
-      });
+      const response = axios.get(
+        `${BASE_URL_LIKES}/toggle/${id}?type=${type}`,
+        {
+          headers: {
+            "auth-token": `${localStorage.getItem("auth-token")}`,
+          },
+        }
+      );
       // If response is ok then return repsonse.data
       // dispatch(fetchPostsAsync());
       if (response.statusText === "OK") {
@@ -46,7 +49,7 @@ export const getLikesAsync = createAsyncThunk(
     try {
       const response = await axios.get(`${BASE_URL_LIKES}/${id}?type=${type}`, {
         headers: {
-          'auth-token': `${localStorage.getItem('auth-token')}`,
+          "auth-token": `${localStorage.getItem("auth-token")}`,
         },
       });
       // If response is ok then return response.data
