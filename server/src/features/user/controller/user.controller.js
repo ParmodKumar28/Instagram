@@ -143,8 +143,8 @@ export const addProfilePic = async (req, res, next) => {
     // User
     const user = req.user;
     // Uploading image on the cloudinary and then adding to database
-    const imageUrl = await uploadCloudinary(req.file.path);
-    // const imageUrl = `${filePath}/${req.file.filename}`;
+    // const imageUrl = await uploadCloudinary(req.file.path);
+    const imageUrl = `${filePath}/${req.file.filename}`;
     if (!imageUrl) {
       return next(
         new ErrorHandler(
