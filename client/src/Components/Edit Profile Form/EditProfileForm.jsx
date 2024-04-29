@@ -72,7 +72,7 @@ const EditProfileForm = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="mt-5 max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden">
             {/* Profile Picture Upload Form */}
             <div className="p-6">
                 <h2 className="text-xl font-semibold mb-4">Upload Profile Picture</h2>
@@ -90,7 +90,7 @@ const EditProfileForm = () => {
             </div>
             <hr className="border-gray-300" />
             {/* Profile Details Form */}
-            <div className="p-6">
+            <div className="p-6 mb-5">
                 <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">

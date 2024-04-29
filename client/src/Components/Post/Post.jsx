@@ -40,9 +40,9 @@ function Post({ post }) {
                     'auth-token': `${localStorage.getItem('auth-token')}`,
                 },
             });
-            if (response.statusText === "OK") {
+            if (response.status === 201) {
                 getComments();
-                toast.success("Comment added");
+                toast.success(response.data.msg);
                 setCommentText('');
             }
         } catch (error) {
