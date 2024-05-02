@@ -1,4 +1,3 @@
-// UserPage.js
 import React, { useEffect, useState } from 'react';
 import { fetchUserPostsAsync, postsSelector } from '../../../Redux/Reducer/postsReducer';
 import { logoutAsync, userDataAsync, usersSelector } from '../../../Redux/Reducer/usersReducer';
@@ -10,6 +9,7 @@ import styles from "./UserPage.module.css"; // Import module CSS
 import { Link } from 'react-router-dom';
 import Cookies from "js-cookie"; // Import Cookies
 import { ColorRing } from 'react-loader-spinner';
+import { followersSelector, getFollowingAsync, toggleFollowAsync, unfollowUserAsync } from '../../../Redux/Reducer/followersReducer';
 
 const UserPage = () => {
     const dispatch = useDispatch();
@@ -18,12 +18,21 @@ const UserPage = () => {
     const [signedUser, setSignedUser] = useState(null);
     const { userId } = useParams();
     const navigate = useNavigate();
+    const { following } = useSelector(followersSelector);
+    const [isFollowed, setIsFollowed] = useState(false); // Initialize as false
 
     useEffect(() => {
         setSignedUser(Cookies.get("userId"));
         dispatch(userDataAsync({ userId }));
         dispatch(fetchUserPostsAsync(userId));
     }, [dispatch, userId]);
+
+    // Update isFollowed whenever following changes
+    useEffect(() => {
+        // Check if the signedUser is following the current user
+        dispatch(getFollowingAsync(signedUser));
+        setIsFollowed(following.some((user) => user.following._id === userId));
+    }, [dispatch, following, signedUser, userId]);
 
     // Hanlding logout
     const handleLogout = async () => {
@@ -38,6 +47,15 @@ const UserPage = () => {
         } catch (error) {
             console.error("Logout failed:", error);
         }
+    }
+
+    // Function to handle follow/unfollow
+    const handleFollowToggle = () => {
+        dispatch(toggleFollowAsync(userId));
+    }
+
+    const handleUnfollow = () => {
+        dispatch(unfollowUserAsync(userId));
     }
 
     if (userLoading) {
@@ -71,9 +89,24 @@ const UserPage = () => {
                         <a href={user.website} className='text-blue-600' target='_blank'>Website: {user.website}</a>
                         <div className="flex space-x-4">
                             <span className="font-semibold">{user.posts.length} posts</span>
-                            <span className="font-semibold">{user.followers.length} followers</span>
-                            <span className="font-semibold">{user.following.length} following</span>
+                            <Link to={`/followers/${user._id}`}>
+                                <span className="font-semibold">{user.followers.length} followers</span>
+                            </Link>
+                            <Link to={`/following/${user._id}`}>
+                                <span className="font-semibold">{user.following.length} following</span>
+                            </Link>
                         </div>
+
+                        {/* Conditionally render follow/unfollow button */}
+                        {signedUser !== userId && (
+                            <button
+                                onClick={isFollowed ? handleUnfollow : handleFollowToggle}
+                                className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4`}
+                            >
+                                {isFollowed ? "Unfollow" : "Follow"}
+                            </button>
+                        )}
+
                         {/* Conditionally render Edit Profile and Logout buttons */}
                         {signedUser === user._id ? (
                             <div className="flex justify-end mt-4 space-x-4">

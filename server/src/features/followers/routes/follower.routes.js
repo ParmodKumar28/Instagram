@@ -36,10 +36,10 @@ followersRouter.get("/remove-follower/:follower", auth, removeFollower);
 followersRouter.get("/requests", auth, getRequests);
 
 // Get follower's
-followersRouter.get("/followers", auth, getFollowers);
+followersRouter.get("/followers/:userId", auth, getFollowers);
 
 // Get following's
-followersRouter.get("/following", auth, getFollowing);
+followersRouter.get("/following/:userId", auth, getFollowing);
 
 // Exporting like router
 export default followersRouter;

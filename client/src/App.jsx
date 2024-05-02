@@ -24,6 +24,8 @@ import Post from "./Components/Post/Post";
 import PostPage from "./Pages/App/PostPage/PostPage";
 import UserPage from "./Pages/App/User Page/UserPage";
 import EditProfileForm from "./Components/Edit Profile Form/EditProfileForm";
+import FollowerList from "./Components/FollowerList/FollowerList";
+import FollowingList from "./Components/FollowingList/FollowingList";
 
 // Function App component this is a parent component here
 const App = () => {
@@ -39,12 +41,14 @@ const App = () => {
       errorElement: <NotFound />,
       children: [
         {
-          index: true, element: <Home />  
+          index: true, element: <Home />
         },
         { path: "new-post", element: <PostForm /> },
         { path: "profile/:userId", element: <UserPage /> },
         { path: "/post/:postId", element: <PostPage /> },
-        { path: "/edit-profile", element: <EditProfileForm /> }
+        { path: "/edit-profile", element: <EditProfileForm /> },
+        { path: "/followers/:userId", element: <FollowerList /> },
+        { path: "/following/:userId", element: <FollowingList /> }
       ]
     }
   ]);

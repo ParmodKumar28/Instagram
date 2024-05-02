@@ -135,7 +135,8 @@ export const removeFollower = async (req, res, next) => {
 // Get request's
 export const getRequests = async (req, res, next) => {
   try {
-    const requests = await getRequestsDb(req.user._id);
+    const { userId } = req.params;
+    const requests = await getRequestsDb(userId);
     return res.status(200).json({
       success: true,
       requests: requests,
@@ -148,7 +149,8 @@ export const getRequests = async (req, res, next) => {
 // Get followers
 export const getFollowers = async (req, res, next) => {
   try {
-    const followers = await getFollowersDb(req.user._id);
+    const { userId } = req.params;
+    const followers = await getFollowersDb(userId);
     return res.status(200).json({
       success: true,
       followers: followers,

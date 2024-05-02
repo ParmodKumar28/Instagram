@@ -273,7 +273,10 @@ export const getFollowersDb = async (userId) => {
       status: "accepted",
     })
       .select("follower createdAt")
-      .populate("follower", "name email id");
+      .populate({
+        path: "follower",
+        select: "profilePic username name",
+      });
     return followers;
   } catch (error) {
     throw error;
@@ -289,7 +292,10 @@ export const getfollowingDb = async (userId) => {
       status: "accepted",
     })
       .select("following createdAt")
-      .populate("following", "name email id");
+      .populate({
+        path: "following",
+        select: "profilePic username name email ",
+      });
     return following;
   } catch (error) {
     throw error;

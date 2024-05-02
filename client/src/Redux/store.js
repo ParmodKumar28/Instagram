@@ -7,6 +7,7 @@ import { usersReducer } from "./Reducer/usersReducer";
 import { postsReducer } from "./Reducer/postsReducer";
 import { commentsReducer } from "./Reducer/commentsReducer";
 import { likesReducer } from "./Reducer/likesReducer";
+import { followersReducer } from "./Reducer/followersReducer";
 
 // Store
 const store = configureStore({
@@ -16,6 +17,7 @@ const store = configureStore({
     postsReducer,
     commentsReducer,
     likesReducer,
+    followersReducer,
   },
 });
 
