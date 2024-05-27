@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom"
 import { useParams } from "react-router-dom";
-import { followersSelector, getFollowingAsync, removeFollowerAsync, unfollowUserAsync } from "../../Redux/Reducer/followersReducer";
+import { followersSelector, getFollowingAsync, unfollowUserAsync } from "../../Redux/Reducer/followersReducer";
+import { ColorRing } from "react-loader-spinner";
 
 const FollowingList = () => {
     const dispatch = useDispatch();
@@ -11,7 +12,7 @@ const FollowingList = () => {
 
     useEffect(() => {
         dispatch(getFollowingAsync(userId));
-    }, [dispatch, userId, following]);
+    }, [dispatch, userId]);
 
     const unfollow = (followingId) => {
         // Implement your unfollow logic here
@@ -19,7 +20,15 @@ const FollowingList = () => {
     }
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="flex justify-center items-center h-screen">
+            <ColorRing
+                visible={true}
+                height={80}
+                width={80}
+                ariaLabel="color-ring-loading"
+                color={'#e15b64'}
+            />
+        </div>
     }
 
     return (
@@ -32,7 +41,7 @@ const FollowingList = () => {
                     {following.map((followedUser) => (
                         <li key={followedUser._id} className="flex items-center mb-3">
                             <Link to={`/profile/${followedUser.following._id}`}>
-                                <img src={followedUser.following.profilePic} alt={followedUser.following.name} className="w-10 h-10 rounded-full mr-2" />
+                                <img src={followedUser.following.profilePic} alt={followedUser.following.name} className="w-12 h-12 rounded-full mr-2" />
                             </Link>
 
                             <div>

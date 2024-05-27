@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchUserPostsAsync, postsSelector } from '../../../Redux/Reducer/postsReducer';
 import { logoutAsync, userDataAsync, usersSelector } from '../../../Redux/Reducer/usersReducer';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -32,7 +32,7 @@ const UserPage = () => {
         // Check if the signedUser is following the current user
         dispatch(getFollowingAsync(signedUser));
         setIsFollowed(following.some((user) => user.following._id === userId));
-    }, [dispatch, following, signedUser, userId]);
+    }, [dispatch, signedUser, userId]);
 
     // Hanlding logout
     const handleLogout = async () => {

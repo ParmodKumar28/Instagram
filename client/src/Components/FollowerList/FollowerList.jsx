@@ -1,24 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { followersSelector, getFollowersAsync, removeFollowerAsync } from "../../Redux/Reducer/followersReducer";
 import { Link, useParams } from "react-router-dom";
+import { ColorRing } from "react-loader-spinner";
 
 const FollowerList = () => {
     const dispatch = useDispatch();
     const { loading, followers } = useSelector(followersSelector);
     const { userId } = useParams();
+    const [signedUser, setSignedUser] = useState("");
+
+    useEffect(() => {
+        setSignedUser(localStorage.getItem("signedUser"));
+    }, [])
 
     useEffect(() => {
         dispatch(getFollowersAsync(userId));
-    }, [dispatch, userId, followers]);
+    }, [dispatch, userId]); // Removed 'followers' from the dependency array
 
     const removeFollower = (followerId) => {
-        // Implement your remove follower logic here
-        dispatch(removeFollowerAsync(followerId));
+        dispatch(removeFollowerAsync(followerId))
     }
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="flex justify-center items-center h-screen">
+            <ColorRing
+                visible={true}
+                height={80}
+                width={80}
+                ariaLabel="color-ring-loading"
+                color={'#e15b64'}
+            />
+        </div>
     }
 
     return (
@@ -37,7 +50,7 @@ const FollowerList = () => {
                                 <span className="text-gray-800">{follower.follower.name}</span>
                                 <p className="text-sm text-gray-500">Followed on {new Date(follower.createdAt).toLocaleString()}</p>
                             </div>
-                            <button onClick={() => removeFollower(follower.follower._id)} className="ml-auto bg-red-500 text-white rounded px-2 py-1">Remove Follower</button>
+                            {signedUser === userId ? <button onClick={() => removeFollower(follower.follower._id)} className="ml-auto bg-red-500 text-white rounded px-2 py-1">Remove Follower</button> : null}
                         </li>
                     ))}
                 </ul>
@@ -47,4 +60,3 @@ const FollowerList = () => {
 };
 
 export default FollowerList;
-

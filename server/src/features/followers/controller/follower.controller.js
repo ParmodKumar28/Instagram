@@ -163,7 +163,8 @@ export const getFollowers = async (req, res, next) => {
 // Get following
 export const getFollowing = async (req, res, next) => {
   try {
-    const following = await getfollowingDb(req.user._id);
+    const { userId } = req.params;
+    const following = await getfollowingDb(userId);
     return res.status(200).json({
       success: true,
       following: following,

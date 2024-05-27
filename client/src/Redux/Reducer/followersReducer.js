@@ -65,6 +65,7 @@ export const getFollowingAsync = createAsyncThunk(
   "followers/getFollowing",
   async (userId) => {
     try {
+        console.log("Called");
       const response = await axios.get(
         `${BASE_URL_FOLLOWERS}/following/${userId}`,
         {
