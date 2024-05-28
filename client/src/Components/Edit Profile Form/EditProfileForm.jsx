@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateProfileAsync, uploadProfilePicAsync, usersSelector } from '../../Redux/Reducer/usersReducer';
 
 const EditProfileForm = () => {
     const dispatch = useDispatch();
     const { userData } = useSelector(usersSelector);
-
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');

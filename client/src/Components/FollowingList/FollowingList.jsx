@@ -1,23 +1,36 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom"
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { followersSelector, getFollowingAsync, unfollowUserAsync } from "../../Redux/Reducer/followersReducer";
 import { ColorRing } from "react-loader-spinner";
+import Cookies from "js-cookie";
 
 const FollowingList = () => {
     const dispatch = useDispatch();
-    const { loading, following } = useSelector(followersSelector);
+    const { loading, following: initialFollowing } = useSelector(followersSelector);
     const { userId } = useParams();
+    const [signedUser, setSignedUser] = useState("");
+    const [following, setFollowing] = useState([]);
+
+    useEffect(() => {
+        setSignedUser(Cookies.get("userId"));
+    }, []);
 
     useEffect(() => {
         dispatch(getFollowingAsync(userId));
     }, [dispatch, userId]);
 
+    useEffect(() => {
+        setFollowing(initialFollowing);
+    }, [initialFollowing]);
+
     const unfollow = (followingId) => {
-        // Implement your unfollow logic here
+        // Optimistically update the following list
+        setFollowing(following.filter(followedUser => followedUser.following._id !== followingId));
+
+        // Dispatch the unfollow action
         dispatch(unfollowUserAsync(followingId));
-    }
+    };
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">
@@ -28,7 +41,7 @@ const FollowingList = () => {
                 ariaLabel="color-ring-loading"
                 color={'#e15b64'}
             />
-        </div>
+        </div>;
     }
 
     return (
@@ -41,7 +54,7 @@ const FollowingList = () => {
                     {following.map((followedUser) => (
                         <li key={followedUser._id} className="flex items-center mb-3">
                             <Link to={`/profile/${followedUser.following._id}`}>
-                                <img src={followedUser.following.profilePic} alt={followedUser.following.name} className="w-12 h-12 rounded-full mr-2" />
+                                <img src={followedUser.following.profilePic || "https://placekitten.com/200/200"} alt={followedUser.following.name} className="w-12 h-12 rounded-full mr-2" />
                             </Link>
 
                             <div>
@@ -49,7 +62,9 @@ const FollowingList = () => {
                                 <p className="text-sm text-gray-500">Followed since {new Date(followedUser.createdAt).toLocaleString()}</p>
                             </div>
 
-                            <button onClick={() => unfollow(followedUser.following._id)} className="ml-auto bg-red-500 text-white rounded px-2 py-1">Unfollow</button>
+                            {signedUser === userId && (
+                                <button onClick={() => unfollow(followedUser.following._id)} className="ml-auto bg-red-500 text-white rounded px-2 py-1">Unfollow</button>
+                            )}
                         </li>
                     ))}
                 </ul>
@@ -59,4 +74,3 @@ const FollowingList = () => {
 };
 
 export default FollowingList;
-
