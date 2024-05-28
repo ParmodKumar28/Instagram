@@ -23,8 +23,8 @@ export const createPost = async (req, res, next) => {
     }
     postData.user = req.user._id;
     if (req.file) {
-      // const imageUrl = await uploadCloudinary(req.file.path);
-      const imageUrl = `${filePath}/${req.file.path}`;
+      const imageUrl = await uploadCloudinary(req.file.path);
+      // const imageUrl = `${filePath}/${req.file.path}`;
       postData.media = imageUrl;
     }
     // Passing to db to save the post here.

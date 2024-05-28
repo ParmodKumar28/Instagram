@@ -22,19 +22,22 @@ const UserPage = () => {
     const [isFollowed, setIsFollowed] = useState(false); // Initialize as false
 
     useEffect(() => {
-        setSignedUser(Cookies.get("userId"));
-        dispatch(userDataAsync({ userId }));
-        dispatch(fetchUserPostsAsync(userId));
+        const userIdFromCookies = Cookies.get("userId");
+        setSignedUser(userIdFromCookies);
+        if (userIdFromCookies) {
+            dispatch(userDataAsync({ userId }));
+            dispatch(fetchUserPostsAsync(userId));
+            dispatch(getFollowingAsync(userIdFromCookies));
+        }
     }, [dispatch, userId]);
 
-    // Update isFollowed whenever following changes
     useEffect(() => {
-        // Check if the signedUser is following the current user
-        dispatch(getFollowingAsync(signedUser));
-        setIsFollowed(following.some((user) => user.following._id === userId));
-    }, [dispatch, signedUser, userId]);
+        if (following) {
+            setIsFollowed(following.some((user) => user.following._id === userId));
+        }
+    }, [following, userId]);
 
-    // Hanlding logout
+    // Handling logout
     const handleLogout = async () => {
         try {
             await dispatch(logoutAsync());
@@ -51,11 +54,12 @@ const UserPage = () => {
 
     // Function to handle follow/unfollow
     const handleFollowToggle = () => {
-        dispatch(toggleFollowAsync(userId));
-    }
-
-    const handleUnfollow = () => {
-        dispatch(unfollowUserAsync(userId));
+        if (isFollowed) {
+            dispatch(unfollowUserAsync(userId));
+        } else {
+            dispatch(toggleFollowAsync(userId));
+        }
+        setIsFollowed(!isFollowed);
     }
 
     if (userLoading) {
@@ -71,6 +75,7 @@ const UserPage = () => {
     }
 
     const { user } = userData;
+    const defaultProfilePic = "https://placekitten.com/200/200";
 
     if (!user) {
         return <div>User not found.</div>;
@@ -81,12 +86,12 @@ const UserPage = () => {
             <div className={`max-w-6xl mx-auto px-4 py-8 ${styles.content}`}>
                 <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start ${styles.userDetails}`}>
                     <div className="col-span-1 sm:col-span-1">
-                        <img className="rounded-full sm:w-32 sm:h-32 w-36 h-36 object-cover" src={user.profilePic} alt={user.username} />
+                        <img className="rounded-full sm:w-32 sm:h-32 w-36 h-36 object-cover" src={user.profilePic || defaultProfilePic} alt={user.username} />
                     </div>
                     <div className="col-span-1 sm:col-span-1 md:col-span-3 space-y-1">
                         <h2 className="text-2xl font-bold">{user.username}</h2>
                         <p className="text-gray-600">{user.bio}</p>
-                        <a href={user.website} className='text-blue-600' target='_blank'>Website: {user.website}</a>
+                        <a href={user.website} className='text-blue-600' target='_blank' rel='noopener noreferrer'>Website: {user.website}</a>
                         <div className="flex space-x-4">
                             <span className="font-semibold">{user.posts.length} posts</span>
                             <Link to={`/followers/${user._id}`}>
@@ -100,7 +105,7 @@ const UserPage = () => {
                         {/* Conditionally render follow/unfollow button */}
                         {signedUser !== userId && (
                             <button
-                                onClick={isFollowed ? handleUnfollow : handleFollowToggle}
+                                onClick={handleFollowToggle}
                                 className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4`}
                             >
                                 {isFollowed ? "Unfollow" : "Follow"}
@@ -130,7 +135,7 @@ const UserPage = () => {
                     <span className="text-lg font-semibold">Posts</span>
                     <FaComment className="text-blue-500" />
                 </div>
-                <div className={`mt-10 grid grid-cols-1  gap-4 ${styles.postContainer}`}>
+                <div className={`mt-10 grid grid-cols-1 gap-4 ${styles.postContainer}`}>
                     {userPostsLoading ? "Loading..." : <UserPostList posts={userPosts} />}
                 </div>
             </div>
