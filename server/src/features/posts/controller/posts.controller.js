@@ -16,32 +16,42 @@ import {
 export const createPost = async (req, res, next) => {
   try {
     const postData = req.body;
-    if (Object.keys(postData).length === 0) {
+
+    // Ensure that at least one field is provided
+    if (!postData.caption && !postData.location && !req.file) {
       return next(
-        new ErrorHandler(400, "Please add post data to create new post!")
+        new ErrorHandler(400, "Please add post data to create a new post!")
       );
     }
+
+    // Assign the user ID to the post data
     postData.user = req.user._id;
+
+    // If a file is uploaded, convert its path to a URL string
     if (req.file) {
       const imageUrl = await uploadCloudinary(req.file.path);
-      // const imageUrl = `${filePath}/${req.file.path}`;
+      // const imageUrl = `http://localhost:8000/${req.file.path}`;
       postData.media = imageUrl;
     }
-    // Passing to db to save the post here.
+
+    // Save the new post to the database
     const newPost = await createPostDb(postData, req.user);
+
+    // Check if the post was successfully created
     if (!newPost) {
       return next(
-        new ErrorHandler(400, "Post, not created something went wrong!")
+        new ErrorHandler(400, "Post not created, something went wrong!")
       );
     }
-    // Sending response
+
+    // Respond with the created post
     res.status(201).json({
       success: true,
       msg: "Post created!",
       newPost: newPost,
     });
   } catch (error) {
-    return next(new ErrorHandler(400, error));
+    return next(new ErrorHandler(400, error.message));
   }
 };
 

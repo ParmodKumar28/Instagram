@@ -11,6 +11,7 @@ import {
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 import cors from "cors";
+import path from "path";
 
 // Routers imported
 import userRouter from "./features/user/routes/user.routes.js";
@@ -40,7 +41,10 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 
 // Creating upload Endpoint for images
-// app.use("/images", express.static("upload/images"));
+app.use("/images", express.static("upload/images"));
+// Set static folder for serving images
+// const __dirname = path.resolve();
+// app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 export const filePath = `http://localhost:${process.env.PORT}`;
 
 // Configuring cloudinary
