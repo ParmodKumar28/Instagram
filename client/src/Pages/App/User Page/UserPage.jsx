@@ -20,6 +20,7 @@ const UserPage = () => {
     const navigate = useNavigate();
     const { following } = useSelector(followersSelector);
     const [isFollowed, setIsFollowed] = useState(false); // Initialize as false
+    const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
 
     useEffect(() => {
         const userIdFromCookies = Cookies.get("userId");
@@ -62,6 +63,11 @@ const UserPage = () => {
         setIsFollowed(!isFollowed);
     }
 
+    // Zoom Image on click profile
+    const handleProfilePicClick = () => {
+        setIsProfilePicZoomed(!isProfilePicZoomed);
+    }
+
     if (userLoading) {
         return <div className="flex justify-center items-center h-screen">
             <ColorRing
@@ -86,7 +92,7 @@ const UserPage = () => {
             <div className={`max-w-6xl mx-auto px-4 py-8 ${styles.content}`}>
                 <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start ${styles.userDetails}`}>
                     <div className="col-span-1 sm:col-span-1">
-                        <img className="rounded-full sm:w-32 sm:h-32 w-36 h-36 object-cover" src={user.profilePic || defaultProfilePic} alt={user.username} />
+                        <img className="rounded-full sm:w-32 sm:h-32 w-36 h-36 object-cover" onClick={handleProfilePicClick} src={user.profilePic || defaultProfilePic} alt={user.username} />
                     </div>
                     <div className="col-span-1 sm:col-span-1 md:col-span-3 space-y-1">
                         <h2 className="text-2xl font-bold">{user.username}</h2>
@@ -139,6 +145,13 @@ const UserPage = () => {
                     {userPostsLoading ? "Loading..." : <UserPostList posts={userPosts} />}
                 </div>
             </div>
+
+            {/* Modal for profile pic zoom fetaure */}
+            {isProfilePicZoomed && (
+                <div className='fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50' onClick={handleProfilePicClick}>
+                <img className='max-w-full max-h-full rounded-xl' src={user.profilePic || defaultProfilePic} alt={user.username}/>
+                </div>
+            )}
         </div>
     );
 }
