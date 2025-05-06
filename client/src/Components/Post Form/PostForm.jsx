@@ -41,8 +41,15 @@ function PostForm() {
   const handleMediaUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setMedia(file);
-      setMediaPreview(URL.createObjectURL(file));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            // Set the uploaded image
+            setMedia(reader.result);
+        };
+        reader.readAsDataURL(file);
+        const url = URL.createObjectURL(file);
+        // setMedia(url);
+        setMediaPreview(url);
     }
   };
 
