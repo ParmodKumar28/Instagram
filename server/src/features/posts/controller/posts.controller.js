@@ -16,7 +16,7 @@ import {
 export const createPost = async (req, res, next) => {
   try {
     const postData = req.body;
-    // console.log("postData", postData);
+    console.log("postData", postData);
 
     // Ensure that at least one field is provided
     if (!postData.caption && !postData.location && !req.file) {
@@ -31,12 +31,15 @@ export const createPost = async (req, res, next) => {
     // If a file is uploaded, convert its path to a URL string
     if (req.file) {
       // const imageUrl = await uploadCloudinary(req.file.path);
-      let imageUrl;
+      let host;
       if (process.env.MODE === "production") {
-        imageUrl = `${process.env.PRODUCTION}/${req.file.path}`;
+        host = process.env.PRODUCTION;
       } else {
-        imageUrl = `${process.env.LOCALHOST}/${req.file.path}`;
+        host = process.env.LOCALHOST;
       }
+      let imageUrl = `${host}/images/${req.file.filename}`;
+      console.log("imageUrl", imageUrl);
+      
       postData.media = imageUrl;
     }
 

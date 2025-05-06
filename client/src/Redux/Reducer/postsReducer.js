@@ -17,28 +17,31 @@ export const createPostAsync = createAsyncThunk(
   "posts/create",
   async (formData, { dispatch }) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL_POSTS}/create-post`,
-        formData,
-        {
-          headers: {
-            Accept: "application/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.status === 200) {
+      const response = await fetch(`${BASE_URL_POSTS}/create-post`, {
+        method: "POST",
+        headers: {
+          "auth-token": `${localStorage.getItem("auth-token")}`,
+        },
+        body: formData,
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
         dispatch(fetchPostsAsync());
-        return response.data;
+        return data;
+      } else {
+        const errorData = await response.json();
+        if (errorData.error) {
+          toast.error(errorData.error);
+        } else {
+          toast.error("An error occurred. Please try again later.");
+        }
+        throw new Error("Failed to create post");
       }
     } catch (error) {
       console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error("An error occurred. Please try again later.");
       throw error;
     }
   }

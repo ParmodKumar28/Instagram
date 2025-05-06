@@ -41,14 +41,14 @@ function PostForm() {
   const handleMediaUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            // Set the uploaded image
-            setMedia(reader.result);
-        };
-        reader.readAsDataURL(file);
+        // const reader = new FileReader();
+        // reader.onloadend = () => {
+        //     // Set the uploaded image
+        //     setMedia(reader.result);
+        // };
+        // reader.readAsDataURL(file);
         const url = URL.createObjectURL(file);
-        // setMedia(url);
+        setMedia(file);
         setMediaPreview(url);
     }
   };
