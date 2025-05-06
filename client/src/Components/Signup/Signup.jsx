@@ -78,10 +78,10 @@ export default function SignUp() {
 
                 {/* Form container */}
                 <div>
-                    <div className="w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg">
+                    <div className="w-5/6 md:w-[22rem] flex flex-col px-8 py-8 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg">
                         {/* Branding Here */}
                         <h1
-                            className="text-[3.2rem] mb-5 text-gray-800"
+                            className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-600 to-gray-800 text-[3.2rem] mb-5"
                             style={{ fontFamily: "Lobster Two" }}
                         >
                             Instagram
@@ -160,7 +160,7 @@ export default function SignUp() {
                                     style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', cursor: 'pointer' }}
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
-                                    {showPassword ? <FaEye className="text-xl" /> : <RiEyeCloseFill className="text-xl" />}
+                                    {showPassword ? <RiEyeCloseFill className="text-xl" /> : <FaEye className="text-xl" />}
                                 </span>
                                 {/* Eye Icons ends */}
                             </div>
@@ -237,7 +237,7 @@ export default function SignUp() {
             {/* Main conatiner end's */}
 
             {/* Footer */}
-            <footer className="py-10 flex flex-col gap-2 items-center text-sm text-gray-500 w-auto">
+            <footer className="w-auto py-10 flex flex-col gap-2 items-center text-sm text-gray-500">
                 {/* Links */}
                 <div className="flex gap-4 flex-wrap justify-center">
                     <span className="cursor-pointer hover:underline">Meta</span>

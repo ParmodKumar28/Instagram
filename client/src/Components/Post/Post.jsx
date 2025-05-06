@@ -121,13 +121,13 @@ function Post({ post }) {
     }, [isDoubleTapped]);
 
     return (
-        <div className="relative my-2 max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <div className="relative my-2 w-11/12  md:max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
                 <Link to={`/profile/${post.user._id}`}>
                     <div className="flex items-center">
                         <img className="w-10 h-10 rounded-full mr-4" src={post.user.profilePic} alt="User" />
-                        <p className="text-sm font-semibold">{post.user.username}</p>
+                        <p className="text-sm font-semibold text-slate-600">{post.user.username}</p>
                     </div>
                 </Link>
                 <button className="text-gray-700" onClick={() => setShowOptions(!showOptions)}>
@@ -217,9 +217,10 @@ function Post({ post }) {
 
             {showLikeList && likeList.length > 0 && (
                 <Suspense fallback={<p>Loading likes...</p>}>
-                    <LikeList likeList={likeList} />
+                    <LikeList likeList={likeList} onClose={() => setShowLikeList(false)} />
                 </Suspense>
             )}
+
         </div>
     );
 }

@@ -6,7 +6,7 @@ import { RiVideoFill } from "react-icons/ri";
 import { MdAddBox } from "react-icons/md";
 import { RiMessage2Fill } from "react-icons/ri";
 import { FaUserAlt } from "react-icons/fa";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 
 // Footer component
 function Footer() {
@@ -15,74 +15,56 @@ function Footer() {
     const signedUser = Cookies.get("signedUser");
     const userId = signedUser ? JSON.parse(signedUser)._id : null;
 
+    // Active link styles
+    const activeStyle = "text-blue-500 scale-110";
+
     // Return JSX
     return (
-        // Footer container div
-        <div className="py-7 h-10 w-full flex justify-evenly items-center border-2 fixed bottom-0 bg-white" id="footerContainer">
+        <div className="py-5 h-16 w-full flex justify-evenly items-center fixed bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-300 shadow-lg">
             {/* Home */}
-            <div className={location.pathname === "/" ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            <div className={location.pathname === "/" ? activeStyle : "text-gray-600"}>
                 <Link to={"/"}>
-                    {/* Icon */}
-                    <GoHomeFill className="text-4xl" />
+                    <GoHomeFill className="text-4xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Home End's*/}
 
             {/* Explore */}
-            <div className={location.pathname === "/explore" ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            <div className={location.pathname === "/explore" ? activeStyle : "text-gray-600"}>
                 <Link to={"/explore"}>
-                    {/* Icon */}
-                    <MdExplore className="text-4xl" />
+                    <MdExplore className="text-4xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Explore End's */}
 
-            {/* Reel's */}
-            <div className={location.pathname === "/reels" ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            {/* Reels */}
+            <div className={location.pathname === "/reels" ? activeStyle : "text-gray-600"}>
                 <Link to={"/reels"}>
-                    {/* Icon */}
-                    <RiVideoFill className="text-4xl" />
+                    <RiVideoFill className="text-4xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Reel's End's */}
 
-            {/* Add Post*/}
-            <div className={location.pathname === "/new-post" ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            {/* Add Post */}
+            <div className={location.pathname === "/new-post" ? activeStyle : "text-gray-600"}>
                 <Link to={"/new-post"}>
-                    {/* Icon */}
-                    <MdAddBox className="text-4xl" />
+                    <MdAddBox className="text-4xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Add Post End's */}
 
-            {/* Message's */}
-            <div className={location.pathname === "/messages" ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            {/* Messages */}
+            <div className={location.pathname === "/messages" ? activeStyle : "text-gray-600"}>
                 <Link to={"/messages"}>
-                    {/* Icon */}
-                    <RiMessage2Fill className="text-4xl" />
+                    <RiMessage2Fill className="text-4xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Message's End's */}
 
             {/* Profile */}
-            <div className={location.pathname === `/profile/${userId}` ? "text-blue-500" : ""}>
-                {/* Navigate Link with the Icon here */}
+            <div className={location.pathname === `/profile/${userId}` ? activeStyle : "text-gray-600"}>
                 <Link to={`/profile/${userId}`}>
-                    {/* Icon */}
-                    <FaUserAlt className="text-3xl" />
+                    <FaUserAlt className="text-3xl hover:scale-110 transition-transform duration-200" />
                 </Link>
             </div>
-            {/* Profile End's */}
         </div>
-        // Footer container div end's
     );
 }
 
-// Exporting footer
+// Export Footer
 export default Footer;
-    

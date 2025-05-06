@@ -39,11 +39,11 @@ function Header() {
     // Returning JSX
     return (
         // Header container
-        <div className="h-10 py-6 px-2 w-full flex justify-between items-center border-2 md:px-5" id="headerContainer">
+        <div className="h-10 py-6 px-3 w-full flex justify-between items-center border-2 md:px-5" id="headerContainer">
             {/* Logo */}
             <div className="relative flex items-center gap-2">
                 {/* Navigate Link with logo */}
-                <Link to={"/"} className="text-2xl" style={{ fontFamily: "Lobster Two" }}>
+                <Link to={"/"} className="text-lg md:text-2xl text-transparent bg-clip-text bg-gradient-to-tr from-red-600 to-blue-600" style={{ fontFamily: "Lobster Two" }}>
                     Instagram
                 </Link>
 
@@ -51,21 +51,21 @@ function Header() {
 
                 {/* Dropdown list for logout */}
                 {showDropdown && (
-                    <div className="absolute top-full mt-1 w-24 bg-white border border-gray-300 rounded-lg shadow-lg">
-                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100 cursor-pointer">Logout</button>
+                    <div className="absolute top-full mt-1 w-24 font-semibold bg-white border border-gray-300 rounded-lg shadow-lg">
+                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100 cursor-pointer text-red-800">Logout</button>
                     </div>
                 )}
             </div>
             {/* Logo end's */}
 
             {/* Search */}
-            <div className="flex items-center md:w-80">
+            <div className="flex items-center w-[200px] md:w-80">
                 {/* Search icon */}
                 <span className="absolute m-2">
-                    <CiSearch className="text-xl text-slate-600" />
+                    <CiSearch className="text-lg text-slate-600" />
                 </span>
                 {/* Search input */}
-                <input type="text" placeholder="Search" className="rounded-lg bg-slate-100 py-1 px-5 placeholder:ps-5 focus:outline-slate-200 w-[100%]" />
+                <input type="text" placeholder="Search" className="rounded-lg bg-slate-100 py-1 px-8 placeholder:ps-5 focus:outline-slate-200 w-[100%]" />
             </div>
             {/* Search End's */}
 
@@ -73,7 +73,7 @@ function Header() {
             <div className="">
                 {/* Navigate Link */}
                 <Link to={"/"}>
-                    <FaRegHeart className="text-2xl" />
+                    <FaRegHeart className="text-2xl text-red-700" />
                 </Link>
             </div>
             {/* Heart Ends */}
