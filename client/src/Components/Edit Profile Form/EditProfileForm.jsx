@@ -165,7 +165,7 @@ const EditProfileForm = () => {
         {/* Header */}
         <div className="sticky top-0 bg-white shadow-sm z-10 rounded-b-xl mb-6">
           <div className="flex items-center p-4">
-            <Link to="/profile" className="mr-4">
+            <Link to={`/profile/${userData.user._id}`} className="mr-4">
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
