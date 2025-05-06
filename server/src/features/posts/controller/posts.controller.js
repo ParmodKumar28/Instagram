@@ -16,7 +16,7 @@ import {
 export const createPost = async (req, res, next) => {
   try {
     const postData = req.body;
-    console.log("postData", postData);
+    // console.log("postData", postData);
     
 
     // Ensure that at least one field is provided

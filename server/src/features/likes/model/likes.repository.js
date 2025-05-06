@@ -52,7 +52,6 @@ export const toggleLikeDb = async (userId, likeableId, type) => {
     } else if (type === "Comment") {
       likeable = await CommentModel.findById(likeableId);
     }
-    console.log(likeable);
 
     if (!likeable) {
       throw new ErrorHandler(
