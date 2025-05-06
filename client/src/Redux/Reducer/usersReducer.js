@@ -26,7 +26,7 @@ export const signUpAsync = createAsyncThunk(
         password,
       });
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -53,7 +53,7 @@ export const loginAsync = createAsyncThunk(
         password,
       });
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -79,7 +79,7 @@ export const logoutAsync = createAsyncThunk("users/logout", async () => {
       },
     });
     // If response is ok then return repsonse.data
-    if (response.statusText === "OK") {
+    if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
@@ -109,7 +109,7 @@ export const userDataAsync = createAsyncThunk(
         }
       );
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -141,7 +141,7 @@ export const forgotPasswordOtpAsync = createAsyncThunk(
         }
       );
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -177,7 +177,7 @@ export const resetPasswordAsync = createAsyncThunk(
         }
       );
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -211,7 +211,7 @@ export const updateProfileAsync = createAsyncThunk(
         }
       );
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -244,7 +244,7 @@ export const uploadProfilePicAsync = createAsyncThunk(
         }
       );
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -319,6 +319,8 @@ const usersSlice = createSlice({
 
     // When fulfilled
     builder.addCase(loginAsync.fulfilled, (state, action) => {
+      console.log(action.payload);
+      
       state.loginLoading = false;
       state.token = action.payload.token;
       state.signedUser = action.payload.user;

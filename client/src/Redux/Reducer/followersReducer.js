@@ -19,7 +19,7 @@ export const toggleFollowAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -46,7 +46,7 @@ export const getFollowersAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data.followers;
       }
     } catch (error) {
@@ -74,7 +74,7 @@ export const getFollowingAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data.following;
       }
     } catch (error) {
@@ -103,7 +103,7 @@ export const removeFollowerAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return followerId; // Return the ID of the removed follower upon success
       }
     } catch (error) {
@@ -132,7 +132,7 @@ export const unfollowUserAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data.msg; // Return the success message
       }
     } catch (error) {

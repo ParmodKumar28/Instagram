@@ -27,7 +27,7 @@ export const toggleLikeAsync = createAsyncThunk(
       );
       // If response is ok then return repsonse.data
       // dispatch(fetchPostsAsync());
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
@@ -53,7 +53,7 @@ export const getLikesAsync = createAsyncThunk(
         },
       });
       // If response is ok then return response.data
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         return response.data;
       }
     } catch (error) {

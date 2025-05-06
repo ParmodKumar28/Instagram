@@ -28,7 +28,7 @@ export const createPostAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         dispatch(fetchPostsAsync());
         return response.data;
       }
@@ -53,7 +53,7 @@ export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
         "auth-token": `${localStorage.getItem("auth-token")}`,
       },
     });
-    if (response.statusText === "OK") {
+    if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
@@ -84,7 +84,7 @@ export const updatePostAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         dispatch(fetchPostsAsync());
         return response.data;
       }
@@ -113,7 +113,7 @@ export const deletePostAsync = createAsyncThunk(
           },
         }
       );
-      if (response.statusText === "OK") {
+      if (response.status === 200) {
         dispatch(fetchPostsAsync());
         return postId;
       }
