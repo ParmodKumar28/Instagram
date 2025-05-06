@@ -93,7 +93,6 @@ const commentsSlice = createSlice({
       })
       .addCase(getCommentsAsync.fulfilled, (state, action) => {
         state.commentsLoading = false;
-        console.log(action.payload);
         state.comments = action.payload; // Update comments in the state
       })
       .addCase(getCommentsAsync.rejected, (state, action) => {
