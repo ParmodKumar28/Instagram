@@ -2,7 +2,7 @@
 // Imports
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import BASE_URL from "../baseUrl";
 
 // Base url for post's

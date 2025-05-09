@@ -3,7 +3,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import BASE_URL from "../baseUrl";
 
 // Base url for user's
@@ -319,8 +319,6 @@ const usersSlice = createSlice({
 
     // When fulfilled
     builder.addCase(loginAsync.fulfilled, (state, action) => {
-      console.log(action.payload);
-      
       state.loginLoading = false;
       state.token = action.payload.token;
       state.signedUser = action.payload.user;

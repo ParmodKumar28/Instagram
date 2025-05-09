@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import axios from 'axios';
 import './Post.module.css';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH, FaRegPaperPlane } from 'react-icons/fa';
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";

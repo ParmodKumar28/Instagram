@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import BASE_URL from "../baseUrl";
 
 const BASE_URL_FOLLOWERS = `${BASE_URL}/follower`;
