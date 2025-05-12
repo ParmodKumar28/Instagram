@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaRegHeart } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // added useEffect import
 import { useDispatch } from "react-redux";
 import { logoutAsync } from "../../Redux/Reducer/usersReducer";
 import { IoIosArrowDown } from "react-icons/io";
@@ -12,8 +12,20 @@ import Cookies from "js-cookie";
 function Header() {
     // State for managing dropdown visibility
     const [showDropdown, setShowDropdown] = useState(false);
+    const [scroll, setScroll] = useState(false);
 
-    // User's state
+    // Better approach: using useEffect to manage event listener lifecycle gracefully
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 50) {
+                setScroll(true);
+            } else {
+                setScroll(false);
+            }
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     // Dispatcher
     const dispatch = useDispatch();
@@ -21,7 +33,7 @@ function Header() {
     // Navigator
     const navigate = useNavigate();
 
-    // Hanlding logout
+    // Handling logout
     const handleLogout = async () => {
         try {
             await dispatch(logoutAsync());
@@ -30,7 +42,6 @@ function Header() {
             if (!Cookies.get("isSignIn")) {
                 navigate("/login");
             }
-
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -38,12 +49,14 @@ function Header() {
 
     // Returning JSX
     return (
-        // Header container
-        <div className="h-10 py-6 px-3 w-full flex justify-between items-center border-2 md:px-5" id="headerContainer">
+        // Header container with smoother transition classes, additional easing and z-index for fixed state
+        <div className={`h-10 py-6 px-3 w-full flex justify-between items-center border-b-2 md:px-5 transition-all duration-500 ease-in-out select-none ${
+            scroll ? "fixed top-0 left-0 bg-white bg-opacity-70 backdrop-blur-md shadow-md z-50" : "relative"
+        }`} id="headerContainer">
             {/* Logo */}
             <div className="relative flex items-center gap-2">
                 {/* Navigate Link with logo */}
-                <Link to={"/"} className="text-lg md:text-2xl text-transparent bg-clip-text bg-gradient-to-tr from-red-600 to-blue-600" style={{ fontFamily: "Lobster Two" }}>
+                <Link to={"/"} className="text-xl md:text-2xl text-transparent bg-clip-text bg-gradient-to-tr from-red-600 to-blue-600" style={{ fontFamily: "Lobster Two" }}>
                     Instagram
                 </Link>
 
@@ -52,7 +65,9 @@ function Header() {
                 {/* Dropdown list for logout */}
                 {showDropdown && (
                     <div className="absolute top-full mt-1 w-24 font-semibold bg-white border border-gray-300 rounded-lg shadow-lg">
-                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100 cursor-pointer text-red-800">Logout</button>
+                        <button onClick={() => handleLogout()} className="block w-full py-2 px-4 text-left hover:bg-gray-100 cursor-pointer text-red-800">
+                            Logout
+                        </button>
                     </div>
                 )}
             </div>
@@ -79,7 +94,7 @@ function Header() {
             {/* Heart Ends */}
         </div>
         // Header container end's
-    )
+    );
 }
 
 // Exporting Header

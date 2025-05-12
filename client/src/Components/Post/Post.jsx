@@ -21,7 +21,8 @@ function Post({ post }) {
     const [likeList, setLikeList] = useState([]);
     const [isLiked, setIsLiked] = useState(false);
     const [showLikeList, setShowLikeList] = useState(false);
-    const [isDoubleTapped, setIsDoubleTapped] = useState(false);
+    // Removed isDoubleTapped state.
+    const [lastTap, setLastTap] = useState(0); // For double-tap detection
     const [showHeart, setShowHeart] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentsLoading, setCommentsLoading] = useState(false);
@@ -30,15 +31,22 @@ function Post({ post }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedCaption, setEditedCaption] = useState(post.caption || '');
 
-    // Action Dispatcher
+    // Dispatcher
     const dispatch = useDispatch();
 
-    // Event handler's
+    // Get current user id from cookies (adjust if needed)
+    const currentUserId = Cookies.get("userId") || "";
+
+    // Event handler for adding comment
     const handleAddComment = async () => {
         try {
-            const response = await axios.post(`${BASE_URL}/comment/add/${post._id}`, { comment: commentText }, {
-                headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
-            });
+            const response = await axios.post(
+                `${BASE_URL}/comment/add/${post._id}`,
+                { comment: commentText },
+                {
+                    headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
+                }
+            );
             if (response.status === 201) {
                 getComments();
                 toast.success(response.data.msg);
@@ -49,8 +57,10 @@ function Post({ post }) {
         }
     };
 
+    // Toggle like state and show heart animation
     const handleToggleLike = async () => {
-        setIsLiked(!isLiked);
+        // Optimistically update liked state.
+        setIsLiked(prev => !prev);
         setShowHeart(true);
         setTimeout(() => setShowHeart(false), 1000);
 
@@ -64,6 +74,7 @@ function Post({ post }) {
         }
     };
 
+    // Fetch likes for the post
     const fetchLikes = async () => {
         try {
             const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`, {
@@ -75,12 +86,14 @@ function Post({ post }) {
         }
     };
 
+    // Toggle the like list modal
     const handleLikeCountClickOnPost = async (e) => {
         e.stopPropagation();
         if (!showLikeList) fetchLikes();
         setShowLikeList(!showLikeList);
     };
 
+    // Fetch comments for the post
     const getComments = async () => {
         setCommentsLoading(true);
         try {
@@ -107,21 +120,31 @@ function Post({ post }) {
         setIsEditing(false);
     };
 
+    // On component mount, fetch likes and comments
     useEffect(() => {
         fetchLikes();
         getComments();
-        setIsLiked(likeList.some(like => like.likeable._id === post._id));
+        // Removed the setting of isLiked here.
     }, []);
 
+    // Update isLiked whenever likeList changes.
     useEffect(() => {
-        if (isDoubleTapped) {
+        // Check if the current user is among the likers.
+        setIsLiked(likeList.some(like => like.user && like.user._id === currentUserId));
+    }, [likeList, currentUserId]);
+
+    // Handler for detecting double taps on mobile devices.
+    const handleImageTap = () => {
+        const now = Date.now();
+        const DOUBLE_TAP_DELAY = 300; // milliseconds
+        if (now - lastTap < DOUBLE_TAP_DELAY) {
             handleToggleLike();
-            setIsDoubleTapped(false);
         }
-    }, [isDoubleTapped]);
+        setLastTap(now);
+    };
 
     return (
-        <div className="relative my-2 w-11/12  md:max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        <div className="relative my-2 w-11/12 md:max-w-md mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
             {/* User Info */}
             <div className="flex items-center justify-between p-4">
                 <Link to={`/profile/${post.user._id}`}>
@@ -147,8 +170,8 @@ function Post({ post }) {
                         className="w-full"
                         src={post.media}
                         alt="Post"
-                        onTouchStart={() => setIsDoubleTapped(true)}
-                        onDoubleClick={() => setIsDoubleTapped(true)}
+                        onDoubleClick={handleToggleLike}
+                        onTouchEnd={handleImageTap}
                     />
                     {showHeart && (
                         <FaHeart className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-500 w-20 h-20 animate-heart" />
@@ -161,7 +184,9 @@ function Post({ post }) {
                 <div className="flex items-center gap-2">
                     <button onClick={handleToggleLike} className={`text-gray-700 ${isLiked ? 'text-red-500' : ''}`}>
                         <FaHeart className="w-6 h-6" />
-                        <span className="ml-1" onClick={(e) => handleLikeCountClickOnPost(e)}>{likeList.length}</span>
+                        <span className="ml-1" onClick={(e) => handleLikeCountClickOnPost(e)}>
+                            {likeList.length}
+                        </span>
                     </button>
                     <button onClick={() => setShowComments(!showComments)} className="text-gray-700">
                         <FaRegComment className="w-6 h-6" />
@@ -220,7 +245,6 @@ function Post({ post }) {
                     <LikeList likeList={likeList} onClose={() => setShowLikeList(false)} />
                 </Suspense>
             )}
-
         </div>
     );
 }

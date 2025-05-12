@@ -53,7 +53,7 @@ export default function Login() {
     return (
         <>
             {/* Form container */}
-            <div className="w-5/6 md:w-[22rem] flex flex-col px-8 py-6 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg">
+            <div className="w-5/6 md:w-[22rem] flex flex-col px-8 py-6 justify-center items-center mx-auto mt-10 sm:border rounded-lg shadow-lg select-none">
                 {/* Logo Instgram */}
                 <h1
                     className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-600 to-gray-800 text-[3.2rem] mb-5"

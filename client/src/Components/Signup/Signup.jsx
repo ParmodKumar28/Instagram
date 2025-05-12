@@ -59,7 +59,7 @@ export default function SignUp() {
         <>
             {/* Main */}
             <main
-                className="flex justify-center items-center"
+                className="flex justify-center items-center select-none"
                 id={styles.mainContainer}
             >
                 {/* Iphone Instagram image visible starts sm width */}
