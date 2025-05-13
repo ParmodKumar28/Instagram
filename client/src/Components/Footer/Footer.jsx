@@ -20,9 +20,10 @@ function Footer() {
     const activeStyle = "text-blue-500 scale-110";
 
     useEffect(() => {
-        if(location.pathname === "/"){
+        console.log("Footer mounted");
+        // if(location.pathname === "/"){
             window.scrollTo(0, 0);
-        }
+        // }    
     }, [location])
 
     // Return JSX

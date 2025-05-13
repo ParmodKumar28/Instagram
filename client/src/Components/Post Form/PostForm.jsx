@@ -85,7 +85,7 @@ function PostForm() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto my-8 px-4">
+    <div className="w-full max-w-2xl mt-16 md:mt-20 mx-auto px-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 py-4 px-6">
