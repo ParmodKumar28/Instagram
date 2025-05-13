@@ -7,6 +7,7 @@ import { MdAddBox } from "react-icons/md";
 import { RiMessage2Fill } from "react-icons/ri";
 import { FaUserAlt } from "react-icons/fa";
 import Cookies from "js-cookie";
+import { useEffect } from "react";
 
 // Footer component
 function Footer() {
@@ -17,6 +18,12 @@ function Footer() {
 
     // Active link styles
     const activeStyle = "text-blue-500 scale-110";
+
+    useEffect(() => {
+        if(location.pathname === "/"){
+            window.scrollTo(0, 0);
+        }
+    }, [location])
 
     // Return JSX
     return (

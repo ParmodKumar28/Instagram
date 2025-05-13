@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaRegHeart } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { useState, useEffect } from "react"; // added useEffect import
+import { useState, useEffect, useRef } from "react"; // added useEffect import
 import { useDispatch } from "react-redux";
 import { logoutAsync } from "../../Redux/Reducer/usersReducer";
 import { IoIosArrowDown } from "react-icons/io";
@@ -13,15 +13,19 @@ function Header() {
     // State for managing dropdown visibility
     const [showDropdown, setShowDropdown] = useState(false);
     const [scroll, setScroll] = useState(false);
+    const lastScrollY = useRef(window.scrollY)
 
     // Better approach: using useEffect to manage event listener lifecycle gracefully
     useEffect(() => {
+        console.log("Header mounted");
         const handleScroll = () => {
-            if (window.scrollY > 50) {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY < lastScrollY.current) {
                 setScroll(true);
             } else {
                 setScroll(false);
             }
+            lastScrollY.current = currentScrollY;
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -50,9 +54,8 @@ function Header() {
     // Returning JSX
     return (
         // Header container with smoother transition classes, additional easing and z-index for fixed state
-        <div className={`h-10 py-6 px-3 w-full flex justify-between items-center border-b-2 md:px-5 transition-all duration-500 ease-in-out select-none ${
-            scroll ? "fixed top-0 left-0 bg-white bg-opacity-70 backdrop-blur-md shadow-md z-50" : "relative"
-        }`} id="headerContainer">
+        <div className={`h-10 py-6 px-3 w-full flex justify-between items-center border-b-2 md:px-5 transition-all duration-500 ease-in-out select-none ${scroll ? "fixed top-0 left-0 bg-white bg-opacity-70 backdrop-blur-md shadow-md z-50" : "relative"
+            }`} id="headerContainer">
             {/* Logo */}
             <div className="relative flex items-center gap-2">
                 {/* Navigate Link with logo */}
