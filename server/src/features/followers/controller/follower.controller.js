@@ -3,6 +3,7 @@
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
   acceptRequestDb,
+  getFollowStatusDb,
   getFollowersDb,
   getRequestsDb,
   getfollowingDb,
@@ -168,6 +169,23 @@ export const getFollowing = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       following: following,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// get follow status
+export const getFollowStatus = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return next(new ErrorHandler(400, "Please, enter user id in params!"));
+    }
+    const response = await getFollowStatusDb(req.user._id, userId);
+    return res.status(200).json({
+      success: true,
+      followStatus: response,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

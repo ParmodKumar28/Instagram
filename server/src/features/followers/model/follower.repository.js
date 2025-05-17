@@ -301,3 +301,20 @@ export const getfollowingDb = async (userId) => {
     throw error;
   }
 };
+
+// Get follow status db
+export const getFollowStatusDb = async (userId, followingId) => {
+  try {
+    // Getting user follow status here
+    const followStatus = await FollowerModel.findOne({
+      follower: userId,
+      following: new ObjectId(followingId),
+    }).select("status");
+    if (!followStatus) {
+      return "not-following";
+    }
+    return followStatus;
+  } catch (error) {
+    throw error;
+  }
+};

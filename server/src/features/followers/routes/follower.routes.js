@@ -6,6 +6,7 @@ import {
   acceptRequest,
   getFollowers,
   getFollowing,
+  getFollowStatus,
   getRequests,
   rejectRequest,
   removeFollower,
@@ -40,6 +41,9 @@ followersRouter.get("/followers/:userId", auth, getFollowers);
 
 // Get following's
 followersRouter.get("/following/:userId", auth, getFollowing);
+
+// Checking follow status of user
+followersRouter.get("/follow-status/:userId", auth, getFollowStatus);
 
 // Exporting like router
 export default followersRouter;
