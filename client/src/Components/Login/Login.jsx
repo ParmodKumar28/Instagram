@@ -13,7 +13,8 @@ import Cookies from "js-cookie";
 // Login component is here
 export default function Login() {
     // States
-    const [email, setEmail] = useState("");
+    // const [email, setEmail] = useState("");
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
@@ -34,12 +35,13 @@ export default function Login() {
             e.preventDefault();
 
             // Dispatching loginAsync thunk here
-            await dispatch(loginAsync({ email, password }));
+            await dispatch(loginAsync({ identifier, password }));
 
             // Redirect to home page after successful login
             if (Cookies.get("isSignIn")) {
                 // Clear fields
-                setEmail("");
+                // setEmail("");
+                setIdentifier
                 setPassword("");
                 navigate("/");
             }
@@ -66,12 +68,12 @@ export default function Login() {
                     {/* Input Email */}
                     <input
                         className="my-1 px-3 py-1 h-10 border-2 w-full text-sm focus:outline-slate-600 rounded"
-                        type="email"
-                        name="email"
+                        type="text"
+                        name="identifier"
                         required
-                        placeholder="Email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Username, Email, or Mobile Number"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
                     />
 
                     {/* Password Input */}

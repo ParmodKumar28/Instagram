@@ -13,8 +13,8 @@ import { useEffect } from "react";
 function Footer() {
     // Get current location
     const location = useLocation();
-    const signedUser = Cookies.get("signedUser");
-    const userId = signedUser ? JSON.parse(signedUser)._id : null;
+    const signedUser = JSON.parse(Cookies.get("signedUser"));
+    const userId = signedUser ? signedUser._id : null;
 
     // Active link styles
     const activeStyle = "text-blue-500 scale-110";
@@ -23,8 +23,8 @@ function Footer() {
         console.log("Footer mounted");
         // if(location.pathname === "/"){
             window.scrollTo(0, 0);
-        // }    
-    }, [location])
+        // }
+    }, [location]);
 
     // Return JSX
     return (
@@ -67,7 +67,11 @@ function Footer() {
             {/* Profile */}
             <div className={location.pathname === `/profile/${userId}` ? activeStyle : "text-gray-600"}>
                 <Link to={`/profile/${userId}`}>
+                {signedUser && signedUser.profilePic ? (
+                    <img src={signedUser.profilePic} alt="Profile" className="w-8 h-8 rounded-full" />
+                ) : (
                     <FaUserAlt className="text-3xl hover:scale-110 transition-transform duration-200" />
+                )}
                 </Link>
             </div>
         </div>

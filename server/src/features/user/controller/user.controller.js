@@ -13,6 +13,7 @@ import {
   signupDb,
   updateUserDb,
   userByEmailDb,
+  userByIdentifierDb,
 } from "../model/user.repository.js";
 import crypto from "crypto";
 
@@ -65,18 +66,18 @@ export const signUp = async (req, res, next) => {
 // Post signIn
 export const signIn = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { identifier, password } = req.body;
+    if (!identifier || !password) {
       return next(
-        new ErrorHandler(400, "Please provide both email & password!")
+        new ErrorHandler(400, "Please provide both email or username or phone number & password!")
       );
     }
 
     // Checking if the credentials are correct or not
-    const user = await userByEmailDb(email);
+    const user = await userByIdentifierDb(identifier);
     if (!user) {
       return next(
-        new ErrorHandler(401, "No user exist by this email register yourself!")
+        new ErrorHandler(401, "User not found register yourself!")
       );
     }
     // Comparing password

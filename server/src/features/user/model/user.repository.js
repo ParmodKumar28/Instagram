@@ -14,6 +14,17 @@ export const userByEmailDb = async (email) => {
   return await UserModel.findOne({ email });
 };
 
+// Finding user by email or username or phone number
+export const userByIdentifierDb = async (identifier) => {
+  return await UserModel.findOne({
+    $or: [
+      { email: identifier },
+      { username: identifier },
+      { phone: identifier },
+    ],
+  });
+};
+
 // Updating user data into the database
 export const updateUserDb = async (updatedData, userId) => {
   return await UserModel.findByIdAndUpdate(userId, updatedData, {

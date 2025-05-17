@@ -45,11 +45,11 @@ export const signUpAsync = createAsyncThunk(
 // Login
 export const loginAsync = createAsyncThunk(
   "users/login",
-  async ({ email, password }) => {
+  async ({ identifier, password }) => {
     try {
       // Sending request to the server
       const response = await axios.post(`${BASE_URL_USERS}/signin`, {
-        email,
+        identifier,
         password,
       });
       // If response is ok then return response.data
