@@ -30,28 +30,30 @@ export default function SignUp() {
     const navigate = useNavigate();
 
     // Handler's
-    const handleSignUp = (e) => {
+    const handleSignUp = async (e) => {
         try {
-            // Preventing default behaviour of submit here
-            e.preventDefault();
-            // Dispatching action to the user reducer
-            dispatch(signUpAsync({ email, fullName, username, password }))
+            e.preventDefault(); // Prevent default form submission
 
-            // Clear field's
-            setEmail("");
-            setFullName("");
-            setUsername("");
-            setPassword("");
+            // Dispatch sign-up action and wait for completion
+            const response = await dispatch(signUpAsync({ email, fullName, username, password }));
 
-            // Redirect to home page after successful login
-            if (Cookies.get("isSignIn")) {
-                navigate("/");
+            // Check if signup was successful (response should contain expected success data)
+            if (response?.payload?.success) {  // Ensure to check payload success
+                // Clear fields only upon successful signup
+                setEmail("");
+                setFullName("");
+                setUsername("");
+                setPassword("");
+
+                // Redirect to home page after successful sign-up
+                if (Cookies.get("isSignIn")) {
+                    navigate("/");
+                }
             }
 
         } catch (error) {
             console.error("SignUp failed:", error);
         }
-
     };
 
     // Returning JSX

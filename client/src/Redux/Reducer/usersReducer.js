@@ -260,6 +260,34 @@ export const uploadProfilePicAsync = createAsyncThunk(
 );
 // Upload profile picture ends
 
+// Delete account
+export const deleteAccountAsync = createAsyncThunk(
+  "users/deleteAccount",
+  async () => {
+    try {
+      // Sending request to the server
+      const response = await axios.delete(`${BASE_URL_USERS}/delete-account`, {
+        headers: {
+          "auth-token": `${localStorage.getItem("auth-token")}`,
+        },
+      });
+      // If response is ok then return response.data
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error); // Display the error message in a toast
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+);
+// Delete account ends
+
 // Initial State
 const INITIAL_STATE = {
   isSignIn: false,
@@ -434,6 +462,29 @@ const usersSlice = createSlice({
 
     // When rejected
     builder.addCase(uploadProfilePicAsync.rejected, (state) => {
+      state.userLoading = false;
+    });
+    // uploadProfilePicAsync thunk extra reducers end here
+    // deleteAccountAsync thunk extra reducers start here
+    // When pending
+    builder.addCase(deleteAccountAsync.pending, (state) => {
+      state.userLoading = true;
+    });
+    // When fulfilled
+    builder.addCase(deleteAccountAsync.fulfilled, (state) => {
+      state.userLoading = false;
+      // Clear user data and cookies
+      Cookies.remove("isSignIn");
+      Cookies.remove("signedUser");
+      Cookies.remove("userId");
+      localStorage.removeItem("auth-token");
+      state.isSignIn = false;
+      state.signedUser = {};
+      state.token = "";
+      toast.success("Account deleted successfully!");
+    });
+    // When rejected
+    builder.addCase(deleteAccountAsync.rejected, (state) => {
       state.userLoading = false;
     });
   },

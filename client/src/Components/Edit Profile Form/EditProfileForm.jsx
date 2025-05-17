@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { updateProfileAsync, uploadProfilePicAsync, usersSelector } from "../../Redux/Reducer/usersReducer"
+import { deleteAccountAsync, updateProfileAsync, uploadProfilePicAsync, usersSelector } from "../../Redux/Reducer/usersReducer"
 import { motion } from "framer-motion"
 import { Camera, Check, ChevronLeft, Info, Loader2, Upload, X } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
 
 const EditProfileForm = () => {
   const dispatch = useDispatch()
@@ -26,6 +27,7 @@ const EditProfileForm = () => {
   const [activeSection, setActiveSection] = useState("basic") // basic, additional, privacy
   const [formErrors, setFormErrors] = useState({})
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (userData?.user) {
@@ -159,6 +161,22 @@ const EditProfileForm = () => {
     setPreviewImage(userData?.user?.profilePic || null)
   }
 
+  const handleDeleteProfile = async () => {
+    if (window.confirm("Are you sure you want to delete your profile? This action cannot be undone.")) {
+      try {
+        const response = await dispatch(deleteAccountAsync()).unwrap()
+        if (response.success) {
+          navigate("/login");
+        }
+
+      } catch (err) {
+        console.error("Error deleting profile:", err);
+        // Handle error (e.g., show a notification)
+        toast.error("Error deleting profile. Please try again.");
+      }
+    }
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen pb-10">
       <div className="max-w-2xl mx-auto px-4">
@@ -239,11 +257,10 @@ const EditProfileForm = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={handleProfilePicUpload}
                     disabled={uploadLoading}
-                    className={`flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      uploadLoading
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}
+                    className={`flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${uploadLoading
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600 text-white"
+                      }`}
                   >
                     {uploadLoading ? (
                       <>
@@ -279,9 +296,8 @@ const EditProfileForm = () => {
           <div className="flex border-b">
             <button
               onClick={() => setActiveSection("basic")}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${
-                activeSection === "basic" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
-              }`}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${activeSection === "basic" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
+                }`}
             >
               Basic Info
               {activeSection === "basic" && (
@@ -290,9 +306,8 @@ const EditProfileForm = () => {
             </button>
             <button
               onClick={() => setActiveSection("additional")}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${
-                activeSection === "additional" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
-              }`}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${activeSection === "additional" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
+                }`}
             >
               Additional
               {activeSection === "additional" && (
@@ -301,9 +316,8 @@ const EditProfileForm = () => {
             </button>
             <button
               onClick={() => setActiveSection("privacy")}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${
-                activeSection === "privacy" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
-              }`}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 relative ${activeSection === "privacy" ? "text-blue-500" : "text-gray-500 hover:text-gray-800"
+                }`}
             >
               Privacy
               {activeSection === "privacy" && (
@@ -332,9 +346,8 @@ const EditProfileForm = () => {
                       id="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 rounded-lg border ${
-                        formErrors.name ? "border-red-500" : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full px-3 py-2 rounded-lg border ${formErrors.name ? "border-red-500" : "border-gray-300"
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       placeholder="Your full name"
                     />
                     {formErrors.name && (
@@ -353,9 +366,8 @@ const EditProfileForm = () => {
                       id="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 rounded-lg border ${
-                        formErrors.email ? "border-red-500" : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full px-3 py-2 rounded-lg border ${formErrors.email ? "border-red-500" : "border-gray-300"
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       placeholder="your.email@example.com"
                     />
                     {formErrors.email && (
@@ -376,9 +388,8 @@ const EditProfileForm = () => {
                         id="username"
                         value={formData.username}
                         onChange={handleInputChange}
-                        className={`w-full pl-8 pr-3 py-2 rounded-lg border ${
-                          formErrors.username ? "border-red-500" : "border-gray-300"
-                        } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                        className={`w-full pl-8 pr-3 py-2 rounded-lg border ${formErrors.username ? "border-red-500" : "border-gray-300"
+                          } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                         placeholder="username"
                       />
                     </div>
@@ -446,9 +457,8 @@ const EditProfileForm = () => {
                       id="website"
                       value={formData.website}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 rounded-lg border ${
-                        formErrors.website ? "border-red-500" : "border-gray-300"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                      className={`w-full px-3 py-2 rounded-lg border ${formErrors.website ? "border-red-500" : "border-gray-300"
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       placeholder="https://yourwebsite.com"
                     />
                     {formErrors.website && (
@@ -584,11 +594,10 @@ const EditProfileForm = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileLoading}
-                className={`w-full flex items-center justify-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-                  profileLoading
-                    ? "bg-blue-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg"
-                }`}
+                className={`w-full flex items-center justify-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${profileLoading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg"
+                  }`}
               >
                 {profileLoading ? (
                   <>
@@ -599,6 +608,15 @@ const EditProfileForm = () => {
                   "Save Changes"
                 )}
               </motion.button>
+
+              {/* Delete Profile Button */}
+              <button
+                type="button"
+                onClick={handleDeleteProfile}
+                className="w-full mt-4 py-3 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium shadow-md transition-all duration-200"
+              >
+                Delete Account
+              </button>
 
               {error && <p className="mt-3 text-center text-sm text-red-500 bg-red-50 p-2 rounded-lg">{error}</p>}
 
