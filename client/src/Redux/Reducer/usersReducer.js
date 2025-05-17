@@ -286,7 +286,7 @@ const usersSlice = createSlice({
   extraReducers: (builder) => {
     // signUpAsync thunk extra reducer's start's here
     // When pending
-    builder.addCase(signUpAsync.pending, (state, action) => {
+    builder.addCase(signUpAsync.pending, (state) => {
       state.signUpLoading = true;
     });
 
@@ -306,14 +306,14 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(signUpAsync.rejected, (state, action) => {
+    builder.addCase(signUpAsync.rejected, (state) => {
       state.signUpLoading = false; // Set signUpLoading to false in case of rejection
     });
     // signUpAsync thunk extra reducer's end's
 
     // loginAsync thunk start's here
     // When pending
-    builder.addCase(loginAsync.pending, (state, action) => {
+    builder.addCase(loginAsync.pending, (state) => {
       state.loginLoading = true;
     });
 
@@ -333,30 +333,30 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(loginAsync.rejected, (state, action) => {
+    builder.addCase(loginAsync.rejected, (state) => {
       state.loginLoading = false;
     });
     // loginAsync thunk ends
 
     // Get userDataAsync extra reducer's start's here
-    builder.addCase(userDataAsync.pending, (state, action) => {
+    builder.addCase(userDataAsync.pending, (state) => {
       state.userLoading = true;
     });
     builder.addCase(userDataAsync.fulfilled, (state, action) => {
       state.userLoading = false;
       state.userData = action.payload;
     });
-    builder.addCase(userDataAsync.rejected, (state, action) => {
+    builder.addCase(userDataAsync.rejected, (state) => {
       state.userLoading = false;
     });
     // Get userDataAsync ends
 
     // logoutAsync thunk extra reducer's start's here
     // When pending
-    builder.addCase(logoutAsync.pending, (state, action) => {});
+    builder.addCase(logoutAsync.pending, () => {});
 
     // When fulfilled
-    builder.addCase(logoutAsync.fulfilled, (state, action) => {
+    builder.addCase(logoutAsync.fulfilled, (state) => {
       // Setting state
       Cookies.remove("isSignIn"); //Removing isSignin from cookie
       Cookies.remove("signedUser");
@@ -369,12 +369,12 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(logoutAsync.rejected, (state, action) => {});
+    builder.addCase(logoutAsync.rejected, () => {});
     // logoutAsync thunk extra reducer's end's here
 
     // Forgot password thunks extra reducer's
     // When pending
-    builder.addCase(forgotPasswordOtpAsync.pending, (state, action) => {});
+    builder.addCase(forgotPasswordOtpAsync.pending, () => {});
 
     // When fulfilled
     builder.addCase(forgotPasswordOtpAsync.fulfilled, (state, action) => {
@@ -382,30 +382,30 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(forgotPasswordOtpAsync.rejected, (state, action) => {});
+    builder.addCase(forgotPasswordOtpAsync.rejected, () => {});
     // Forgot password thunks extra reducer's end's
 
     // Reset password thunks extra reducer's
     // When pending
-    builder.addCase(resetPasswordAsync.pending, (state, action) => {});
+    builder.addCase(resetPasswordAsync.pending, () => {});
 
     // When fulfilled
-    builder.addCase(resetPasswordAsync.fulfilled, (state, action) => {
+    builder.addCase(resetPasswordAsync.fulfilled, (action) => {
       toast.success(action.payload.msg);
     });
 
     // When rejected
-    builder.addCase(resetPasswordAsync.rejected, (state, action) => {});
+    builder.addCase(resetPasswordAsync.rejected, () => {});
     // Reset password thunks extra reducer's end's
 
     // updateProfileAsync thunk extra reducers start here
     // When pending
-    builder.addCase(updateProfileAsync.pending, (state, action) => {
+    builder.addCase(updateProfileAsync.pending, (state) => {
       state.userLoading = true;
     });
 
     // When fulfilled
-    builder.addCase(updateProfileAsync.fulfilled, (state, action) => {
+    builder.addCase(updateProfileAsync.fulfilled, (state) => {
       state.userLoading = false;
       // Update user data in state if necessary
       // state.userData = action.payload;
@@ -413,19 +413,19 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(updateProfileAsync.rejected, (state, action) => {
+    builder.addCase(updateProfileAsync.rejected, (state) => {
       state.userLoading = false;
     });
     // updateProfileAsync thunk extra reducers end here
 
     // uploadProfilePicAsync thunk extra reducers start here
     // When pending
-    builder.addCase(uploadProfilePicAsync.pending, (state, action) => {
+    builder.addCase(uploadProfilePicAsync.pending, (state) => {
       state.userLoading = true;
     });
 
     // When fulfilled
-    builder.addCase(uploadProfilePicAsync.fulfilled, (state, action) => {
+    builder.addCase(uploadProfilePicAsync.fulfilled, (state) => {
       state.userLoading = false;
       // Update user data in state if necessary
       // state.userData = action.payload;
@@ -433,7 +433,7 @@ const usersSlice = createSlice({
     });
 
     // When rejected
-    builder.addCase(uploadProfilePicAsync.rejected, (state, action) => {
+    builder.addCase(uploadProfilePicAsync.rejected, (state) => {
       state.userLoading = false;
     });
   },
