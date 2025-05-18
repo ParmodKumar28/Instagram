@@ -9,6 +9,7 @@ import Cookies from "js-cookie"
 import {
   followersSelector,
   getFollowingAsync,
+  getFollowStatusAsync,
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../../Redux/Reducer/followersReducer"
@@ -21,10 +22,11 @@ const UserPage = () => {
   const [signedUser, setSignedUser] = useState(null)
   const { userId } = useParams()
   const navigate = useNavigate()
-  const { following } = useSelector(followersSelector)
-  const [isFollowed, setIsFollowed] = useState(false)
+  const { following, followStatus } = useSelector(followersSelector)
   const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false)
   const [activeTab, setActiveTab] = useState("posts")
+  // Always use the Redux followStatus for the button
+  const currentFollowStatus = followStatus || "none"
 
   useEffect(() => {
     const userIdFromCookies = Cookies.get("userId")
@@ -33,9 +35,12 @@ const UserPage = () => {
       dispatch(userDataAsync({ userId }))
       dispatch(fetchUserPostsAsync(userId))
       dispatch(getFollowingAsync(userIdFromCookies))
+      dispatch(getFollowStatusAsync(userId))
     }
   }, [dispatch, userId])
 
+  // Update following state for UI (optional, can be removed if you use only followStatus)
+  const [isFollowed, setIsFollowed] = useState(false)
   useEffect(() => {
     if (following) {
       setIsFollowed(following.some((user) => user.following._id === userId))
@@ -53,14 +58,17 @@ const UserPage = () => {
     }
   }
 
-  const handleFollowToggle = () => {
-    if (isFollowed) {
-      dispatch(unfollowUserAsync(userId))
-    } else {
-      dispatch(toggleFollowAsync(userId))
-    }
-    setIsFollowed(!isFollowed)
+  // Update follow status live after follow/unfollow
+const handleFollowToggle = async () => {
+  if (currentFollowStatus === "following" || isFollowed) {
+    await dispatch(unfollowUserAsync(userId))
+  } else {
+    await dispatch(toggleFollowAsync(userId))
   }
+  // Re-fetch follow status and following list
+  dispatch(getFollowStatusAsync(userId))
+  dispatch(getFollowingAsync(signedUser))
+}
 
   const handleProfilePicClick = () => {
     setIsProfilePicZoomed(!isProfilePicZoomed)
@@ -189,7 +197,7 @@ const UserPage = () => {
                       : "bg-blue-500 hover:bg-blue-600 text-white"
                       } font-medium py-2 px-6 rounded-full transition duration-300`}
                   >
-                    {isFollowed ? "Following" : "Follow"}
+                    {followStatus === "pending" ? "Cancel Request" : isFollowed ? "Unfollow" : "Follow"}
                   </motion.button>
                 </div>
               )}

@@ -14,11 +14,16 @@ function Header() {
   // Store the last scroll position using useRef to prevent re-renders
   const lastScrollY = useRef(0);
   // Define a threshold (in pixels) before we update the header visibility
-  const threshold = 10;
+  const threshold = 20;
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      if (currentScrollY === 0) {
+        setShowHeader(true);
+        lastScrollY.current = 0;
+        return;
+      }
       // Check if the scroll difference is larger than the threshold
       if (Math.abs(currentScrollY - lastScrollY.current) < threshold) {
         return; // Ignore minor scroll changes
@@ -30,7 +35,7 @@ function Header() {
       } else {
         setShowHeader(true);
       }
-      
+
       // Update the last scroll position
       lastScrollY.current = currentScrollY;
     };

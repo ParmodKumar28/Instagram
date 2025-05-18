@@ -183,9 +183,15 @@ export const getFollowStatus = async (req, res, next) => {
       return next(new ErrorHandler(400, "Please, enter user id in params!"));
     }
     const response = await getFollowStatusDb(req.user._id, userId);
+    if(response === "not-following"){
+      return res.status(200).json({
+        success: true,
+        followStatus: response,
+      });
+    }
     return res.status(200).json({
       success: true,
-      followStatus: response,
+      followStatus: response.status,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

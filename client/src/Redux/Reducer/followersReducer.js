@@ -146,11 +146,39 @@ export const unfollowUserAsync = createAsyncThunk(
   }
 );
 
+export const getFollowStatusAsync = createAsyncThunk(
+  "followers/getFollowStatus",
+  async (userId) => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL_FOLLOWERS}/follow-status/${userId}`,
+        {
+          headers: {
+            "auth-token": localStorage.getItem("auth-token"),
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("An error occurred. Please try again later.");
+      }
+      throw error;
+    }
+  }
+)
+
 const initialState = {
   followers: [],
   following: [],
   loading: false,
   error: null,
+  followStatus: ""
 };
 
 const followersSlice = createSlice({
@@ -199,7 +227,10 @@ const followersSlice = createSlice({
       .addCase(unfollowUserAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload; // Set the error message
-      });
+      })
+      .addCase(getFollowStatusAsync.fulfilled, (state, action) => {
+        state.followStatus = action.payload.followStatus;
+      })
   },
 });
 
