@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Instagram">
+  <defs>
+    <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f58529"/>
+      <stop offset="30%" stop-color="#dd2a7b"/>
+      <stop offset="60%" stop-color="#8134af"/>
+      <stop offset="100%" stop-color="#515bd4"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(0,0,0,0.25)"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" ry="96" fill="url(#igGrad)" filter="url(#softShadow)"/>
+
+  <!-- Camera outer ring -->
+  <circle cx="256" cy="268" r="108" fill="none" stroke="white" stroke-width="36"/>
+
+  <!-- Camera inner lens -->
+  <circle cx="256" cy="268" r="60" fill="none" stroke="white" stroke-width="28" opacity="0.85"/>
+
+  <!-- Viewfinder dot -->
+  <circle cx="356" cy="156" r="20" fill="white"/>
+</svg>
+
