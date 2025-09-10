@@ -1,7 +1,6 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
 import { filePath } from "../../../app.js";
-import uploadCloudinary from "../../../utils/cloudinary.js";
 import { sendResetPasswordMail } from "../../../utils/email/PasswordResetEmail.js";
 import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
@@ -69,16 +68,17 @@ export const signIn = async (req, res, next) => {
     const { identifier, password } = req.body;
     if (!identifier || !password) {
       return next(
-        new ErrorHandler(400, "Please provide both email or username or phone number & password!")
+        new ErrorHandler(
+          400,
+          "Please provide both email or username or phone number & password!"
+        )
       );
     }
 
     // Checking if the credentials are correct or not
     const user = await userByIdentifierDb(identifier);
     if (!user) {
-      return next(
-        new ErrorHandler(401, "User not found register yourself!")
-      );
+      return next(new ErrorHandler(401, "User not found register yourself!"));
     }
     // Comparing password
     const isValidPassword = await user.comparePassword(password);
@@ -143,17 +143,14 @@ export const addProfilePic = async (req, res, next) => {
     }
     // User
     const user = req.user;
-    // Uploading image on the cloudinary and then adding to database
-    const imageUrl = await uploadCloudinary(req.file.path);
-    // const imageUrl = `http://localhost:8000/${req.file.path}`;
-    if (!imageUrl) {
-      return next(
-        new ErrorHandler(
-          400,
-          "Image not uploaded on cloudinary something went wrong!"
-        )
-      );
+    // Build local URL for the uploaded file served via /images
+    let host;
+    if (process.env.MODE === "production") {
+      host = process.env.PRODUCTION;
+    } else {
+      host = process.env.LOCALHOST;
     }
+    const imageUrl = `${host}/images/${req.file.filename}`;
     user.profilePic = imageUrl;
     await user.save();
     res.status(200).json({
