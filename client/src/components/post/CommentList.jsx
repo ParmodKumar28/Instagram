@@ -1,68 +1,104 @@
-export function CommentList({ comments = [], commentsLoading = false }) {
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { usersSelector } from "../../redux/slices/usersSlice";
+import { commentService } from "../../services";
+import toast from "react-hot-toast";
+
+function formatTimeAgo(dateString) {
+  if (!dateString) return "just now";
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return `${Math.max(1, seconds)}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  return `${Math.floor(days / 7)}w`;
+}
+
+export function CommentList({
+  comments = [],
+  commentsLoading = false,
+  onCommentDeleted,
+}) {
+  const { userId: currentUserId } = useSelector(usersSelector);
+
   if (commentsLoading) {
     return (
-      <div className="flex justify-center items-center py-4">
-        <div className="w-5 h-5 border-2 border-t-gray-400 border-gray-200 rounded-full animate-spin mr-2"></div>
-        <p className="text-gray-500 text-sm font-medium">Loading comments...</p>
+      <div className="flex justify-center items-center py-3">
+        <p className="text-gray-400 text-xs">Loading comments...</p>
+      </div>
+    );
+  }
+
+  const handleDelete = async (commentId) => {
+    try {
+      await commentService.deleteComment(commentId);
+      toast.success("Comment deleted");
+      if (onCommentDeleted) onCommentDeleted();
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error("Failed to delete comment");
+    }
+  };
+
+  if (!comments || comments.length === 0) {
+    return (
+      <div className="py-2 text-center text-xs text-gray-400">
+        No comments yet.
       </div>
     );
   }
 
   return (
-    <div className="max-h-[320px] overflow-y-auto pr-1">
-      {comments && comments.length > 0 ? (
-        <div className="space-y-3">
-          {comments.map((comment, index) => (
-            <div
-              key={comment._id || index}
-              className="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-3"
+    <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+      {comments.map((comment, index) => {
+        const user = comment.user || {};
+        const username = user.username || user.name || "user";
+        const isAuthor = currentUserId && (user._id === currentUserId || user === currentUserId);
+
+        return (
+          <div key={comment._id || index} className="flex items-start space-x-2.5 text-xs group">
+            <Link
+              to={`/profile/${user._id || ""}`}
+              className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
             >
-              <div className="flex items-start">
-                <img
-                  src={comment.user?.profilePic || "https://placekitten.com/100/100"}
-                  alt={comment.user?.name || "User"}
-                  className="w-8 h-8 rounded-full object-cover border border-gray-200"
-                />
+              <img
+                src={user.profilePic || "https://placekitten.com/100/100"}
+                alt={username}
+                className="w-full h-full object-cover"
+              />
+            </Link>
 
-                <div className="ml-3 flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-semibold text-sm text-gray-900">
-                        {comment.user?.name || comment.user?.username || "User"}
-                      </span>
-                      <span className="text-xs text-gray-400 ml-2">
-                        {comment.timestamp || "Just now"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-700 mt-1 leading-relaxed">
-                    {comment.content}
-                  </p>
-                </div>
+            <div className="flex-1 leading-snug">
+              <p>
+                <Link
+                  to={`/profile/${user._id || ""}`}
+                  className="font-semibold mr-1.5 text-gray-900 hover:underline"
+                >
+                  {username}
+                </Link>
+                <span className="text-gray-800">{comment.content || comment.comment}</span>
+              </p>
+              <div className="flex items-center space-x-2.5 text-[11px] text-gray-400 mt-0.5">
+                <span>{formatTimeAgo(comment.createdAt || comment.timestamp)}</span>
+                {isAuthor && (
+                  <button
+                    onClick={() => handleDelete(comment._id)}
+                    className="hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-8 px-4 text-center border border-gray-200 rounded-lg bg-gray-50">
-          <svg
-            className="w-8 h-8 text-gray-400 mb-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z"
-            />
-          </svg>
-          <p className="font-medium text-gray-600">No comments yet</p>
-          <p className="text-xs text-gray-500 mt-1">Start the conversation</p>
-        </div>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 }

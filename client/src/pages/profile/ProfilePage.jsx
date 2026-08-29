@@ -19,9 +19,8 @@ import {
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../redux/slices/followersSlice";
-import { IoSettingsOutline, IoLockClosedOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoLockClosedOutline, IoLinkOutline } from "react-icons/io5";
 import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
-import { FaLink } from "react-icons/fa";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 
 export function ProfilePage() {
@@ -199,7 +198,7 @@ export function ProfilePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FaLink className="mr-1 text-xs" />
+                <IoLinkOutline className="mr-1 text-sm" />
                 <span>{user.website.replace(/^https?:\/\//, "")}</span>
               </a>
             )}

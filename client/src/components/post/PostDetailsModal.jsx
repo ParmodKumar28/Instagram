@@ -1,24 +1,27 @@
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  FaHeart,
-  FaRegHeart,
-  FaRegComment,
-  FaRegBookmark,
-  FaEllipsisH,
-} from "react-icons/fa";
-import { RiRepeatLine } from "react-icons/ri";
-import { FiSend } from "react-icons/fi";
-import { IoClose } from "react-icons/io5";
+  IoHeartOutline,
+  IoHeartSharp,
+  IoChatbubbleOutline,
+  IoPaperPlaneOutline,
+  IoBookmarkOutline,
+  IoBookmarkSharp,
+  IoEllipsisHorizontal,
+  IoClose,
+} from "react-icons/io5";
+import { FaHeart } from "react-icons/fa";
+import { BsEmojiSmile } from "react-icons/bs";
 import { commentService, likeService, postService } from "../../services";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { deletePostAsync } from "../../redux/slices/postsSlice";
 import OptionsList from "./OptionsList";
+import InstagramVideoPlayer from "./InstagramVideoPlayer";
+import toast from "react-hot-toast";
 
 function formatTimeAgo(dateString) {
-  if (!dateString) return "";
+  if (!dateString) return "just now";
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
@@ -34,18 +37,23 @@ function formatTimeAgo(dateString) {
   return `${weeks}w`;
 }
 
-export function PostDetailsModal({ post: initialPost, onClose }) {
+export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) {
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState("");
   const [likeList, setLikeList] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [commentText, setCommentText] = useState("");
   const [showHeart, setShowHeart] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
+
+  useEffect(() => {
+    setPost(initialPost);
+  }, [initialPost]);
 
   // Fetch full fresh post data from backend
   const fetchFullPost = useCallback(async () => {
@@ -121,7 +129,7 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
   const handleDoubleTap = () => {
     if (!isLiked) handleToggleLike();
     setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 800);
+    setTimeout(() => setShowHeart(false), 900);
   };
 
   const handleAddComment = async () => {
@@ -137,24 +145,35 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
     }
   };
 
-  const handleDeletePost = async () => {
+  const handleDeleteComment = async (commentId) => {
     try {
-      await dispatch(deletePostAsync(post._id)).unwrap();
-      toast.success("Post deleted successfully");
-      onClose();
+      await commentService.deleteComment(commentId);
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+      toast.success("Comment deleted");
     } catch (error) {
-      toast.error(error.customMessage || "Failed to delete post");
+      console.error("Error deleting comment:", error);
+      toast.error("Failed to delete comment");
     }
   };
 
-  const author = post?.user || {};
-  const isAuthor = currentUserId && (author._id || author) === currentUserId;
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      await dispatch(deletePostAsync(post._id));
+      onClose();
+    }
+  };
+
+  if (!isOpen || (!post && !initialPost)) return null;
+
+  const currentPostData = post || initialPost;
+  const author = currentPostData.user || {};
+  const isAuthor = currentUserId && (author._id === currentUserId || author === currentUserId);
   const username = author.username || author.name || "user";
-  const timeAgo = formatTimeAgo(post?.createdAt);
+  const timeAgo = formatTimeAgo(currentPostData.createdAt);
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-6 backdrop-blur-[2px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
       onClick={onClose}
     >
       {/* Top Right Close Button */}
@@ -171,16 +190,26 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
         className="bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row max-w-[1000px] w-full max-h-[90vh] md:h-[620px] shadow-2xl relative select-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Column: Media Image */}
+        {/* Left Column: Media (Video or Image) */}
         <div
           className="flex-1 bg-black flex items-center justify-center relative overflow-hidden md:h-full cursor-pointer select-none min-h-[300px]"
           onDoubleClick={handleDoubleTap}
         >
-          <img
-            src={post?.media}
-            alt={post?.caption || "Post media"}
-            className="w-full h-full object-contain max-h-[620px]"
-          />
+          {currentPostData?.mediaType === "video" ||
+          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(currentPostData?.media || "") ||
+          (typeof currentPostData?.media === "string" && currentPostData.media.includes("/video/upload/")) ? (
+            <InstagramVideoPlayer
+              src={currentPostData.media}
+              onDoubleTap={handleDoubleTap}
+              className="w-full h-full object-contain max-h-[620px] bg-black"
+            />
+          ) : (
+            <img
+              src={currentPostData?.media}
+              alt={currentPostData?.caption || "Post media"}
+              className="w-full h-full object-contain max-h-[620px]"
+            />
+          )}
 
           {/* Double tap Heart popup */}
           {showHeart && (
@@ -220,7 +249,7 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
                 onClick={() => setShowOptions(!showOptions)}
                 className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
               >
-                <FaEllipsisH className="w-3.5 h-3.5" />
+                <IoEllipsisHorizontal className="text-lg" />
               </button>
               {showOptions && isAuthor && (
                 <OptionsList onDelete={handleDeletePost} onEdit={() => {}} />
@@ -231,7 +260,7 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
           {/* Scrollable Caption & Comments Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm text-gray-900 scrollbar-none">
             {/* Caption Item */}
-            {post?.caption && (
+            {currentPostData?.caption && (
               <div className="flex items-start space-x-3">
                 <Link
                   to={`/profile/${author._id || ""}`}
@@ -244,7 +273,7 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
                     className="w-full h-full object-cover"
                   />
                 </Link>
-                <div className="leading-snug">
+                <div className="leading-snug flex-1">
                   <p>
                     <Link
                       to={`/profile/${author._id || ""}`}
@@ -253,13 +282,9 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
                     >
                       {username}
                     </Link>
-                    <span>{post.caption}</span>
+                    <span>{currentPostData.caption}</span>
                   </p>
-                  {timeAgo && (
-                    <span className="text-gray-400 text-xs mt-1 block">
-                      {timeAgo}
-                    </span>
-                  )}
+                  <span className="text-gray-400 text-xs mt-1 block">{timeAgo}</span>
                 </div>
               </div>
             )}
@@ -268,40 +293,55 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
             {commentsLoading ? (
               <div className="py-6 text-center text-xs text-gray-400">Loading comments...</div>
             ) : comments.length === 0 ? (
-              <div className="py-10 text-center text-gray-400 text-xs">
-                No comments yet. Start the conversation.
+              <div className="py-12 text-center text-gray-400 text-xs">
+                No comments yet. Start the conversation!
               </div>
             ) : (
-              comments.map((comment) => (
-                <div key={comment._id} className="flex items-start space-x-3">
-                  <Link
-                    to={`/profile/${comment.user?._id || ""}`}
-                    onClick={onClose}
-                    className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
-                  >
-                    <img
-                      src={comment.user?.profilePic || "https://placekitten.com/100/100"}
-                      alt={comment.user?.username || "user"}
-                      className="w-full h-full object-cover"
-                    />
-                  </Link>
-                  <div className="flex-1 leading-snug">
-                    <p>
-                      <Link
-                        to={`/profile/${comment.user?._id || ""}`}
-                        onClick={onClose}
-                        className="font-semibold mr-1.5 hover:underline"
-                      >
-                        {comment.user?.username || comment.user?.name || "user"}
-                      </Link>
-                      <span>{comment.comment}</span>
-                    </p>
-                    <span className="text-gray-400 text-xs mt-1 block">
-                      {formatTimeAgo(comment.createdAt)}
-                    </span>
+              comments.map((comment) => {
+                const commentUser = comment.user || {};
+                const commentUsername = commentUser.username || commentUser.name || "user";
+                const isCommentAuthor = currentUserId && (commentUser._id === currentUserId || commentUser === currentUserId);
+                const canDelete = isCommentAuthor || isAuthor;
+
+                return (
+                  <div key={comment._id} className="flex items-start space-x-3 group">
+                    <Link
+                      to={`/profile/${commentUser._id || ""}`}
+                      onClick={onClose}
+                      className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
+                    >
+                      <img
+                        src={commentUser.profilePic || "https://placekitten.com/100/100"}
+                        alt={commentUsername}
+                        className="w-full h-full object-cover"
+                      />
+                    </Link>
+                    <div className="flex-1 leading-snug">
+                      <p>
+                        <Link
+                          to={`/profile/${commentUser._id || ""}`}
+                          onClick={onClose}
+                          className="font-semibold mr-1.5 hover:underline"
+                        >
+                          {commentUsername}
+                        </Link>
+                        <span className="text-gray-900">{comment.content || comment.comment}</span>
+                      </p>
+                      <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
+                        <span>{formatTimeAgo(comment.createdAt)}</span>
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="hover:text-red-500 font-medium transition opacity-0 group-hover:opacity-100"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -316,27 +356,30 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
                   aria-label={isLiked ? "Unlike" : "Like"}
                 >
                   {isLiked ? (
-                    <FaHeart className="w-6 h-6 text-[#FF3040] transition-colors" />
+                    <IoHeartSharp className="text-[26px] text-[#FF3040] transition-colors" />
                   ) : (
-                    <FaRegHeart className="w-6 h-6 text-gray-900 hover:text-gray-500 transition-colors" />
+                    <IoHeartOutline className="text-[26px] text-gray-900 hover:text-gray-500 transition-colors" />
                   )}
                 </button>
 
                 <button className="text-gray-900 hover:text-gray-500 transition">
-                  <FaRegComment className="w-6 h-6" />
+                  <IoChatbubbleOutline className="text-[24px]" />
                 </button>
 
                 <button className="text-gray-900 hover:text-gray-500 transition">
-                  <RiRepeatLine className="w-6 h-6" />
-                </button>
-
-                <button className="text-gray-900 hover:text-gray-500 transition">
-                  <FiSend className="w-5 h-5" />
+                  <IoPaperPlaneOutline className="text-[24px]" />
                 </button>
               </div>
 
-              <button className="text-gray-900 hover:text-gray-500 transition">
-                <FaRegBookmark className="w-5 h-5" />
+              <button
+                onClick={() => setIsSaved(!isSaved)}
+                className="text-gray-900 hover:text-gray-500 transition"
+              >
+                {isSaved ? (
+                  <IoBookmarkSharp className="text-[24px] text-black" />
+                ) : (
+                  <IoBookmarkOutline className="text-[24px]" />
+                )}
               </button>
             </div>
 
@@ -356,19 +399,24 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
             <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
               <input
                 type="text"
-                className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1"
+                className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1 mr-2"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Add a comment..."
-                onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAddComment();
+                }}
               />
-              <button
-                onClick={handleAddComment}
-                disabled={!commentText.trim()}
-                className="text-sky-500 hover:text-sky-700 disabled:opacity-30 text-sm font-semibold ml-2"
-              >
-                Post
-              </button>
+              {commentText.trim() ? (
+                <button
+                  onClick={handleAddComment}
+                  className="text-[#0095F6] hover:text-[#1877F2] text-sm font-semibold"
+                >
+                  Post
+                </button>
+              ) : (
+                <BsEmojiSmile className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer" />
+              )}
             </div>
           </div>
         </div>

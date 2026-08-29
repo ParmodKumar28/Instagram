@@ -27,6 +27,7 @@ export const addCommentDb = async (postId, userId, comment) => {
     post.comments.push(new ObjectId(newComment._id));
     await post.save();
 
+    await newComment.populate("user", "name username profilePic _id");
     return newComment;
   } catch (error) {
     throw error;
@@ -88,7 +89,9 @@ export const getCommentsDb = async (postId) => {
     }
     const comments = await CommentModel.find({
       post: new ObjectId(postId),
-    }).populate("user", "name profilePic _id");
+    })
+      .populate("user", "name username profilePic _id")
+      .sort({ createdAt: 1 });
     return comments;
   } catch (error) {
     throw error;

@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import {
-  FaHeart,
-  FaRegHeart,
-  FaRegComment,
-  FaRegBookmark,
-  FaEllipsisH,
-} from "react-icons/fa";
-import { RiRepeatLine } from "react-icons/ri";
-import { FiSend } from "react-icons/fi";
+  IoHeartOutline,
+  IoHeartSharp,
+  IoChatbubbleOutline,
+  IoPaperPlaneOutline,
+  IoBookmarkOutline,
+  IoBookmarkSharp,
+  IoEllipsisHorizontal,
+} from "react-icons/io5";
+import { FaHeart } from "react-icons/fa";
+import { BsEmojiSmile } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { deletePostAsync, updatePostAsync } from "../../redux/slices/postsSlice";
@@ -17,6 +19,7 @@ import { commentService, likeService } from "../../services";
 import CommentList from "./CommentList";
 import LikeList from "./LikeList";
 import OptionsList from "./OptionsList";
+import InstagramVideoPlayer from "./InstagramVideoPlayer";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "";
@@ -38,39 +41,41 @@ function formatTimeAgo(dateString) {
 export function PostCard({ post }) {
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
-  const [likeList, setLikeList] = useState([]);
-  const [isLiked, setIsLiked] = useState(false);
-  const [showLikeList, setShowLikeList] = useState(false);
-  const [lastTap, setLastTap] = useState(0);
-  const [showHeart, setShowHeart] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [likeList, setLikeList] = useState([]);
+  const [showLikes, setShowLikes] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(post?.caption || "");
-  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
 
   const fetchLikes = useCallback(async () => {
-    if (!post?._id) return;
     try {
       const response = await likeService.getLikes(post._id, "Post");
-      setLikeList(response.data?.likes || []);
+      if (response.status === 200) {
+        setLikeList(response.data?.likes || []);
+      }
     } catch (error) {
       console.error("Error fetching likes:", error);
     }
   }, [post?._id]);
 
   const getComments = useCallback(async () => {
-    if (!post?._id) return;
     setCommentsLoading(true);
     try {
       const response = await commentService.getComments(post._id);
-      setComments(response.data?.comments || []);
+      if (response.status === 200) {
+        setComments(response.data?.comments || []);
+      }
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      console.error("Error getting comments:", error);
     } finally {
       setCommentsLoading(false);
     }
@@ -85,7 +90,11 @@ export function PostCard({ post }) {
 
   useEffect(() => {
     if (likeList && currentUserId) {
-      setIsLiked(likeList.some((like) => like.user?._id === currentUserId));
+      setIsLiked(
+        likeList.some(
+          (like) => (like.user?._id || like.user) === currentUserId
+        )
+      );
     }
   }, [likeList, currentUserId]);
 
@@ -162,7 +171,7 @@ export function PostCard({ post }) {
   return (
     <article className="w-full max-w-[480px] mx-auto bg-white border border-gray-200 rounded-2xl mb-8 select-none shadow-sm overflow-hidden">
       {/* Header with comfortable side padding */}
-      <div className="flex items-center justify-between px-4 py-3.5 sm:px-4 sm:py-4 border-b border-gray-50">
+      <div className="flex items-center justify-between px-4 py-3 sm:px-4 sm:py-3.5 border-b border-gray-50">
         <div className="flex items-center space-x-3">
           <Link
             to={`/profile/${post?.user?._id || ""}`}
@@ -191,10 +200,10 @@ export function PostCard({ post }) {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="text-gray-700 hover:text-black p-2 rounded-full hover:bg-gray-50 transition"
+            className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
             aria-label="Post options"
           >
-            <FaEllipsisH className="w-4 h-4" />
+            <IoEllipsisHorizontal className="text-lg" />
           </button>
           {showOptions && isAuthor && (
             <OptionsList onDelete={handleDeletePost} onEdit={handleEditPost} />
@@ -202,16 +211,25 @@ export function PostCard({ post }) {
         </div>
       </div>
 
-      {/* Media Image */}
+      {/* Media (Video or Image) */}
       {post?.media && (
         <div className="relative select-none bg-black flex items-center justify-center min-h-[340px] max-h-[620px] overflow-hidden cursor-pointer">
-          <img
-            className="w-full object-cover max-h-[620px]"
-            src={post.media}
-            alt="Post media"
-            onDoubleClick={handleDoubleTap}
-            onTouchEnd={handleImageTap}
-          />
+          {post?.mediaType === "video" ||
+          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(post.media) ||
+          (typeof post.media === "string" && post.media.includes("/video/upload/")) ? (
+            <InstagramVideoPlayer
+              src={post.media}
+              onDoubleTap={handleDoubleTap}
+            />
+          ) : (
+            <img
+              className="w-full object-cover max-h-[620px]"
+              src={post.media}
+              alt="Post media"
+              onDoubleClick={handleDoubleTap}
+              onTouchEnd={handleImageTap}
+            />
+          )}
 
           {/* Double tap heart animation */}
           {showHeart && (
@@ -223,7 +241,7 @@ export function PostCard({ post }) {
       )}
 
       {/* Actions Bar with left/right padding */}
-      <div className="flex justify-between items-center px-4 pt-3.5 pb-1">
+      <div className="flex justify-between items-center px-4 pt-3 pb-1">
         <div className="flex items-center space-x-4">
           <button
             onClick={handleToggleLike}
@@ -231,9 +249,9 @@ export function PostCard({ post }) {
             aria-label={isLiked ? "Unlike post" : "Like post"}
           >
             {isLiked ? (
-              <FaHeart className="w-[26px] h-[26px] text-[#FF3040] transition-colors" />
+              <IoHeartSharp className="text-[27px] text-[#FF3040] transition-colors" />
             ) : (
-              <FaRegHeart className="w-[26px] h-[26px] text-gray-900 hover:text-gray-500 transition-colors" />
+              <IoHeartOutline className="text-[27px] text-gray-900 hover:text-gray-500 transition-colors" />
             )}
             {likeList.length > 0 && (
               <span className="text-[13px] font-semibold text-gray-900">
@@ -247,29 +265,27 @@ export function PostCard({ post }) {
             className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Comments"
           >
-            <FaRegComment className="w-[25px] h-[25px]" />
-          </button>
-
-          <button
-            className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
-            aria-label="Repost"
-          >
-            <RiRepeatLine className="w-[26px] h-[26px]" />
+            <IoChatbubbleOutline className="text-[25px]" />
           </button>
 
           <button
             className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Share"
           >
-            <FiSend className="w-[23px] h-[23px]" />
+            <IoPaperPlaneOutline className="text-[25px]" />
           </button>
         </div>
 
         <button
+          onClick={() => setIsSaved(!isSaved)}
           className="text-gray-900 hover:text-gray-500 focus:outline-none transition"
           aria-label="Bookmark"
         >
-          <FaRegBookmark className="w-[23px] h-[23px]" />
+          {isSaved ? (
+            <IoBookmarkSharp className="text-[25px] text-black" />
+          ) : (
+            <IoBookmarkOutline className="text-[25px]" />
+          )}
         </button>
       </div>
 
@@ -280,83 +296,92 @@ export function PostCard({ post }) {
             <textarea
               value={editedCaption}
               onChange={(e) => setEditedCaption(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-gray-400 focus:outline-none"
-              rows={2}
+              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black"
+              rows={3}
             />
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded hover:bg-gray-200"
+                className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdatePost}
-                className="bg-blue-500 text-white text-xs px-3.5 py-1.5 rounded hover:bg-blue-600 font-semibold"
+                className="px-3 py-1 bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold rounded-lg"
               >
-                Update
+                Save
               </button>
             </div>
           </div>
         ) : (
           post?.caption && (
-            <div>
-              <p className="leading-snug text-sm">
-                <span className="font-semibold mr-1.5">{username}</span>
-                <span>{post.caption}</span>
-                {!isCaptionExpanded && post.caption.length > 90 && (
-                  <button
-                    onClick={() => setIsCaptionExpanded(true)}
-                    className="text-gray-500 hover:text-gray-800 ml-1 font-normal"
-                  >
-                    ... more
-                  </button>
-                )}
-              </p>
+            <div className="leading-snug">
+              <Link
+                to={`/profile/${post?.user?._id || ""}`}
+                className="font-semibold mr-2 text-[13px] hover:underline"
+              >
+                {username}
+              </Link>
+              <span className="text-[13px] font-normal text-gray-900">
+                {post.caption}
+              </span>
             </div>
           )
         )}
 
-        {/* View Comments Expander */}
+        {/* View all comments link */}
         {comments.length > 0 && !showComments && (
           <button
             onClick={() => setShowComments(true)}
-            className="text-xs text-gray-400 hover:text-gray-600 block pt-1"
+            className="text-xs text-gray-400 font-medium hover:text-gray-600 transition block pt-0.5"
           >
-            View all {comments.length} comments
+            View all {comments.length} comment{comments.length > 1 ? "s" : ""}
           </button>
         )}
 
-        {/* Comments Section */}
+        {/* Comments drawer */}
         {showComments && (
-          <div className="pt-2 border-t border-gray-100 mt-2">
-            <CommentList comments={comments} commentsLoading={commentsLoading} />
+          <div className="mt-3 pt-3 border-t border-gray-100 max-h-48 overflow-y-auto space-y-2">
+            {commentsLoading ? (
+              <p className="text-xs text-gray-400 text-center py-2">Loading comments...</p>
+            ) : (
+              <CommentList
+                comments={comments}
+                postId={post._id}
+                onCommentDeleted={getComments}
+              />
+            )}
           </div>
         )}
 
-        {/* Add comment row */}
-        <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 mt-1.5">
+        {/* Add comment input */}
+        <div className="pt-2 flex items-center border-t border-gray-100">
           <input
             type="text"
-            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1"
+            placeholder="Add a comment..."
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="Add a comment..."
-            onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAddComment();
+            }}
+            className="flex-1 text-xs text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none py-1 mr-2"
           />
-          <button
-            onClick={handleAddComment}
-            disabled={!commentText.trim()}
-            className="text-sky-500 hover:text-sky-700 disabled:opacity-30 text-sm font-semibold"
-          >
-            Post
-          </button>
+          {commentText.trim() ? (
+            <button
+              onClick={handleAddComment}
+              className="text-[#0095F6] hover:text-[#1877F2] text-xs font-semibold"
+            >
+              Post
+            </button>
+          ) : (
+            <BsEmojiSmile className="text-gray-400 hover:text-gray-600 text-sm cursor-pointer" />
+          )}
         </div>
       </div>
 
-      {/* Likes Modal */}
-      {showLikeList && (
-        <LikeList likeList={likeList} onClose={() => setShowLikeList(false)} />
+      {showLikes && (
+        <LikeList likes={likeList} onClose={() => setShowLikes(false)} />
       )}
     </article>
   );

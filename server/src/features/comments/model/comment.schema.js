@@ -25,7 +25,7 @@ const commentSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestapms: true }
+  { timestamps: true }
 );
 
 // Like model

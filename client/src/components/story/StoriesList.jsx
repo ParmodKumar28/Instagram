@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import StoryItem from "./StoryItem";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 export function StoriesList({ stories }) {
   const scrollRef = useRef(null);
@@ -144,10 +144,10 @@ export function StoriesList({ stories }) {
       {canScrollLeft && (
         <button
           onClick={() => handleScroll("left")}
-          className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white shadow-md border border-gray-100 rounded-full p-1.5 text-gray-700 hover:text-black z-20 transition duration-150 focus:outline-none hidden sm:flex items-center justify-center"
+          className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white shadow-md border border-gray-100 rounded-full p-1.5 text-gray-700 hover:text-black z-20 transition duration-150 focus:outline-none hidden sm:flex items-center justify-center text-sm"
           aria-label="Previous stories"
         >
-          <ChevronLeft size={18} />
+          <IoChevronBack className="text-base" />
         </button>
       )}
 
@@ -165,10 +165,10 @@ export function StoriesList({ stories }) {
       {canScrollRight && (
         <button
           onClick={() => handleScroll("right")}
-          className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white shadow-md border border-gray-100 rounded-full p-1.5 text-gray-700 hover:text-black z-20 transition duration-150 focus:outline-none hidden sm:flex items-center justify-center"
+          className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white shadow-md border border-gray-100 rounded-full p-1.5 text-gray-700 hover:text-black z-20 transition duration-150 focus:outline-none hidden sm:flex items-center justify-center text-sm"
           aria-label="Next stories"
         >
-          <ChevronRight size={18} />
+          <IoChevronForward className="text-base" />
         </button>
       )}
     </div>
