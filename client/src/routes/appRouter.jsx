@@ -1,62 +1,59 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import { ColorRing } from "react-loader-spinner";
-import ProtectedRoute from "../Pages/Misc/Protected Routes/ProtectedRoute";
+import PageLoader from "../components/common/PageLoader";
+import ProtectedRoute from "../components/common/ProtectedRoute";
+import MainLayout from "../components/layout/MainLayout";
 
-const RegisterPage = lazy(() => import("../Pages/App/Register Page/Register-Page"));
-const LoginPage = lazy(() => import("../Pages/App/Login Page/Login-Page"));
-const ForgotPasswordPage = lazy(() => import("../Pages/App/Forgot-Password Page/Forgot-Password-Page"));
-const ResetPasswordPage = lazy(() => import("../Pages/App/Reset Password Page/Reset-Password-Page"));
-const HomePage = lazy(() => import("../Pages/App/Home Page/Home-Page"));
-const Home = lazy(() => import("../Components/Home/Home"));
-const PostForm = lazy(() => import("../Components/Post Form/PostForm"));
-const UserPage = lazy(() => import("../Pages/App/User Page/UserPage"));
-const PostPage = lazy(() => import("../Pages/App/PostPage/PostPage"));
-const EditProfileForm = lazy(() => import("../Components/Edit Profile Form/EditProfileForm"));
-const FollowerList = lazy(() => import("../Components/FollowerList/FollowerList"));
-const FollowingList = lazy(() => import("../Components/FollowingList/FollowingList"));
-const NotFound = lazy(() => import("../Pages/Misc/404Page"));
+// Lazy-loaded Views
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const SignupPage = lazy(() => import("../pages/auth/SignupPage"));
+const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 
-const PageLoader = () => (
-  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh" }}>
-    <ColorRing
-      visible={true}
-      height="60"
-      width="60"
-      ariaLabel="loading"
-      colors={["#e15b64", "#f47e60", "#f8b26a", "#abbd81", "#849b87"]}
-    />
-  </div>
-);
+const HomePage = lazy(() => import("../pages/feed/HomePage"));
+const CreatePostPage = lazy(() => import("../pages/post/CreatePostPage"));
+const PostDetailsPage = lazy(() => import("../pages/post/PostDetailsPage"));
 
-const withSuspense = (Element) => (
-  <Suspense fallback={<PageLoader />}>{Element}</Suspense>
+const ProfilePage = lazy(() => import("../pages/profile/ProfilePage"));
+const EditProfilePage = lazy(() => import("../pages/profile/EditProfilePage"));
+const FollowersPage = lazy(() => import("../pages/profile/FollowersPage"));
+const FollowingPage = lazy(() => import("../pages/profile/FollowingPage"));
+
+const NotFoundPage = lazy(() => import("../pages/misc/NotFoundPage"));
+
+const withSuspense = (Component) => (
+  <Suspense fallback={<PageLoader />}>{Component}</Suspense>
 );
 
 export const router = createBrowserRouter([
-  { path: "/sign-up", element: withSuspense(<RegisterPage />) },
+  // Public Auth Routes
   { path: "/login", element: withSuspense(<LoginPage />) },
+  { path: "/sign-up", element: withSuspense(<SignupPage />) },
   { path: "/forgot-password", element: withSuspense(<ForgotPasswordPage />) },
   { path: "/reset-password", element: withSuspense(<ResetPasswordPage />) },
+
+  // Protected App Routes wrapped in MainLayout
   {
     path: "/",
-    element: withSuspense(
+    element: (
       <ProtectedRoute>
-        <HomePage />
+        <MainLayout />
       </ProtectedRoute>
     ),
-    errorElement: withSuspense(<NotFound />),
+    errorElement: withSuspense(<NotFoundPage />),
     children: [
-      { index: true, element: withSuspense(<Home />) },
-      { path: "new-post", element: withSuspense(<PostForm />) },
-      { path: "profile/:userId", element: withSuspense(<UserPage />) },
-      { path: "post/:postId", element: withSuspense(<PostPage />) },
-      { path: "edit-profile", element: withSuspense(<EditProfileForm />) },
-      { path: "followers/:userId", element: withSuspense(<FollowerList />) },
-      { path: "following/:userId", element: withSuspense(<FollowingList />) },
+      { index: true, element: withSuspense(<HomePage />) },
+      { path: "new-post", element: withSuspense(<CreatePostPage />) },
+      { path: "post/:postId", element: withSuspense(<PostDetailsPage />) },
+      { path: "profile/:userId", element: withSuspense(<ProfilePage />) },
+      { path: "edit-profile", element: withSuspense(<EditProfilePage />) },
+      { path: "followers/:userId", element: withSuspense(<FollowersPage />) },
+      { path: "following/:userId", element: withSuspense(<FollowingPage />) },
     ],
   },
-  { path: "*", element: withSuspense(<NotFound />) },
+
+  // 404 Fallback
+  { path: "*", element: withSuspense(<NotFoundPage />) },
 ]);
 
 export default router;

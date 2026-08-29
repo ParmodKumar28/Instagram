@@ -39,6 +39,7 @@ export const auth = async (req, res, next) => {
 
     // 4. Attach user to request object
     req.user = user;
+    req.userId = user._id;
     next();
   } catch (error) {
     return next(new ErrorHandler(500, error.message || "Authentication error"));

@@ -152,9 +152,12 @@ export const addProfilePic = async (req, res, next) => {
 // Get user data
 export const userData = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    let userId = req.params.userId;
+    if (!userId || userId === "undefined" || userId === "null") {
+      userId = req.user?._id || req.userId;
+    }
     if (!userId) {
-      return next(new ErrorHandler(404, "User id not recieved!"));
+      return next(new ErrorHandler(400, "User id not received!"));
     }
     const user = await getUserDataDb(userId);
     if (!user) {

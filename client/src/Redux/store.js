@@ -1,11 +1,9 @@
-// Configured Redux Store
 import { configureStore } from "@reduxjs/toolkit";
+import { usersReducer } from "./slices/usersSlice";
+import { postsReducer } from "./slices/postsSlice";
+import { followersReducer } from "./slices/followersSlice";
 
-import { usersReducer } from "./Reducer/usersReducer";
-import { postsReducer } from "./Reducer/postsReducer";
-import { followersReducer } from "./Reducer/followersReducer";
-
-const store = configureStore({
+export const store = configureStore({
   reducer: {
     usersReducer,
     postsReducer,
@@ -14,4 +12,3 @@ const store = configureStore({
 });
 
 export default store;
-

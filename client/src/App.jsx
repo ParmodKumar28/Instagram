@@ -2,7 +2,7 @@ import { RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 
-import store from "./Redux/store";
+import store from "./redux/store";
 import router from "./routes/appRouter";
 import "./App.css";
 

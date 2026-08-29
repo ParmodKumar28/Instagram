@@ -1,5 +1,5 @@
 import axios from "axios";
-import BASE_URL from "../Redux/baseUrl";
+import BASE_URL from "../redux/baseUrl";
 
 // Create configured Axios instance
 const apiClient = axios.create({
