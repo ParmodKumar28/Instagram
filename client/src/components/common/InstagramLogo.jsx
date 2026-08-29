@@ -1,11 +1,11 @@
-export function InstagramLogo({ className = "" }) {
+export function InstagramLogo({ className = "", size = "text-4xl" }) {
   return (
-    <h1
-      className={`bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-600 to-gray-800 text-[3.2rem] mb-4 select-none font-bold text-center ${className}`}
-      style={{ fontFamily: "'Lobster Two', cursive" }}
+    <span
+      className={`bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-purple-600 to-gray-800 font-bold select-none inline-block tracking-normal px-2 pt-1 pb-3 leading-normal ${size} ${className}`}
+      style={{ fontFamily: "'Lobster Two', 'Grand Hotel', cursive" }}
     >
       Instagram
-    </h1>
+    </span>
   );
 }
 

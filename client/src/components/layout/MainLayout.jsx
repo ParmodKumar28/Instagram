@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
+import LeftSidebar from "./LeftSidebar";
+import FloatingMessagesPill from "../feed/FloatingMessagesPill";
 import { userDataAsync } from "../../redux/slices/usersSlice";
 
 export function MainLayout() {
@@ -13,12 +13,17 @@ export function MainLayout() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
-      <Header />
-      <main className="flex-1 pb-20 max-w-4xl w-full mx-auto px-2 sm:px-4">
+    <div className="min-h-screen bg-white flex">
+      {/* Fixed Left Navigation Rail */}
+      <LeftSidebar />
+
+      {/* Main Content View (Zero top header offset) */}
+      <main className="flex-1 ml-[72px] min-h-screen bg-white">
         <Outlet />
       </main>
-      <Footer />
+
+      {/* Floating Bottom-Right Messages Widget */}
+      <FloatingMessagesPill />
     </div>
   );
 }

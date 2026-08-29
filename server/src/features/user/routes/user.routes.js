@@ -5,6 +5,7 @@ import {
   addProfilePic,
   deleteAccount,
   forgotPasswordOtp,
+  getSuggestedUsers,
   logout,
   resetPassword,
   signIn,
@@ -40,6 +41,9 @@ userRouter.post(
   upload.single("profilePic"),
   addProfilePic
 );
+
+// Getting suggested users
+userRouter.get("/suggested-users", auth, getSuggestedUsers);
 
 // Getting user data
 userRouter.get("/user-data/:userId", auth, userData);
