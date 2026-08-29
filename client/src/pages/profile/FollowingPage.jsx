@@ -10,6 +10,8 @@ import { usersSelector } from "../../redux/slices/usersSlice";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search, UserX } from "lucide-react";
 
+import UserListSkeleton from "../../components/common/skeletons/UserListSkeleton";
+
 export function FollowingPage() {
   const dispatch = useDispatch();
   const { loading, following: initialFollowing } = useSelector(followersSelector);
@@ -32,7 +34,7 @@ export function FollowingPage() {
   const handleUnfollow = async (followingId) => {
     setIsUnfollowing((prev) => ({ ...prev, [followingId]: true }));
     setFollowing(
-      following.filter((item) => item.following?._id !== followingId)
+      following.filter((user) => user.following?._id !== followingId)
     );
     await dispatch(unfollowUserAsync(followingId));
     setIsUnfollowing((prev) => ({ ...prev, [followingId]: false }));
@@ -59,8 +61,10 @@ export function FollowingPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen py-4 px-2">
+        <div className="max-w-2xl mx-auto">
+          <UserListSkeleton count={6} />
+        </div>
       </div>
     );
   }

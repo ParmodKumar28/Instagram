@@ -27,6 +27,8 @@ import {
 } from "../../redux/slices/followersSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
+import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
+
 export function ProfilePage() {
   const dispatch = useDispatch();
   const { userData, userLoading, userId: currentUserId } = useSelector(usersSelector);
@@ -88,11 +90,7 @@ export function ProfilePage() {
   const isLocked = isPrivate && !isOwnProfile;
 
   if (userLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (!user) {
@@ -275,8 +273,13 @@ export function ProfilePage() {
                   exit={{ opacity: 0 }}
                 >
                   {userPostsLoading ? (
-                    <div className="flex justify-center py-12">
-                      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="grid grid-cols-3 gap-1 sm:gap-4 md:gap-6 animate-pulse">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <div
+                          key={index}
+                          className="aspect-square bg-gray-200 rounded-md sm:rounded-lg"
+                        />
+                      ))}
                     </div>
                   ) : (
                     <UserPostList posts={userPosts} />

@@ -5,8 +5,8 @@ import {
   fetchSinglePostAsync,
   postsSelector,
 } from "../../redux/slices/postsSlice";
-import { ColorRing } from "react-loader-spinner";
 import PostCard from "../../components/post/PostCard";
+import PostSkeleton from "../../components/common/skeletons/PostSkeleton";
 
 export function PostDetailsPage() {
   const { postId } = useParams();
@@ -21,14 +21,8 @@ export function PostDetailsPage() {
 
   if (singlePostLoading || !singlePost) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <ColorRing
-          visible={true}
-          height={70}
-          width={70}
-          ariaLabel="color-ring-loading"
-          colors={["#e15b64", "#f47e60", "#f8b26a", "#abbd81", "#849b87"]}
-        />
+      <div className="py-4 max-w-lg mx-auto">
+        <PostSkeleton />
       </div>
     );
   }

@@ -10,6 +10,8 @@ import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search, Users } from "lucide-react";
 
+import UserListSkeleton from "../../components/common/skeletons/UserListSkeleton";
+
 export function FollowersPage() {
   const dispatch = useDispatch();
   const { loading, followers: initialFollowers } = useSelector(followersSelector);
@@ -59,8 +61,10 @@ export function FollowersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen py-4 px-2">
+        <div className="max-w-2xl mx-auto">
+          <UserListSkeleton count={6} />
+        </div>
       </div>
     );
   }

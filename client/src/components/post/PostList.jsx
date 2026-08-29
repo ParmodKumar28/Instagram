@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPostsAsync, postsSelector } from "../../redux/slices/postsSlice";
-import { ColorRing } from "react-loader-spinner";
 import PostCard from "./PostCard";
+import PostSkeleton from "../common/skeletons/PostSkeleton";
 
 export function PostList() {
   const { posts, postsLoading } = useSelector(postsSelector);
@@ -14,14 +14,9 @@ export function PostList() {
 
   if (postsLoading) {
     return (
-      <div className="flex justify-center items-center py-20 min-h-[50vh]">
-        <ColorRing
-          visible={true}
-          height="60"
-          width="60"
-          ariaLabel="loading-posts"
-          colors={["#e15b64", "#f47e60", "#f8b26a", "#abbd81", "#849b87"]}
-        />
+      <div className="flex flex-col space-y-4 my-2">
+        <PostSkeleton />
+        <PostSkeleton />
       </div>
     );
   }

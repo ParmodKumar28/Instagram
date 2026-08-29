@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import {
   FaHeart,
+  FaRegHeart,
   FaRegComment,
   FaRegBookmark,
   FaEllipsisH,
@@ -186,7 +187,7 @@ export function PostCard({ post }) {
             onTouchEnd={handleImageTap}
           />
           {showHeart && (
-            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-ig-like w-24 h-24 animate-heart-beat drop-shadow-lg" />
+            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#FF3040] w-24 h-24 animate-heart-beat drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]" />
           )}
         </div>
       )}
@@ -196,13 +197,16 @@ export function PostCard({ post }) {
         <div className="flex items-center space-x-4">
           <button
             onClick={handleToggleLike}
-            className={`flex items-center space-x-1 transition duration-150 ${
-              isLiked ? "text-ig-like scale-110" : "text-ig-text-primary hover:text-gray-600"
-            }`}
+            className="flex items-center space-x-1 transition duration-150 transform active:scale-125 focus:outline-none"
+            aria-label={isLiked ? "Unlike post" : "Like post"}
           >
-            <FaHeart className="w-5 h-5" />
+            {isLiked ? (
+              <FaHeart className="w-6 h-6 text-[#FF3040] transition-colors duration-150" />
+            ) : (
+              <FaRegHeart className="w-6 h-6 text-gray-800 hover:text-gray-500 transition-colors duration-150" />
+            )}
             <span
-              className="text-xs font-semibold text-ig-text-primary ml-1 cursor-pointer"
+              className="text-xs font-semibold text-gray-900 ml-1 cursor-pointer"
               onClick={handleLikeCountClick}
             >
               {likeList.length}
