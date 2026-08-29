@@ -8,7 +8,7 @@ export const toggleFollowAsync = createAsyncThunk(
     try {
       const response = await followerService.toggleFollow(followingId);
       if (response.status === 200) {
-        return response.data;
+        return { followingId, msg: response.data?.msg };
       }
     } catch (error) {
       toast.error(error.customMessage || "Failed to toggle follow status");
@@ -47,6 +47,68 @@ export const getFollowingAsync = createAsyncThunk(
   }
 );
 
+export const getFollowRequestsAsync = createAsyncThunk(
+  "followers/getFollowRequests",
+  async () => {
+    try {
+      const response = await followerService.getFollowRequests();
+      if (response.status === 200) {
+        return response.data.requests || [];
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }
+);
+
+export const getActivityAsync = createAsyncThunk(
+  "followers/getActivity",
+  async () => {
+    try {
+      const response = await followerService.getActivity();
+      if (response.status === 200) {
+        return response.data.activities || [];
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }
+);
+
+export const acceptFollowRequestAsync = createAsyncThunk(
+  "followers/acceptFollowRequest",
+  async (followerId) => {
+    try {
+      const response = await followerService.acceptFollowRequest(followerId);
+      if (response.status === 200) {
+        toast.success("Follow request accepted");
+        return followerId;
+      }
+    } catch (error) {
+      toast.error(error.customMessage || "Failed to accept request");
+      throw error;
+    }
+  }
+);
+
+export const rejectFollowRequestAsync = createAsyncThunk(
+  "followers/rejectFollowRequest",
+  async (followerId) => {
+    try {
+      const response = await followerService.rejectFollowRequest(followerId);
+      if (response.status === 200) {
+        toast.success("Follow request removed");
+        return followerId;
+      }
+    } catch (error) {
+      toast.error(error.customMessage || "Failed to reject request");
+      throw error;
+    }
+  }
+);
+
 export const removeFollowerAsync = createAsyncThunk(
   "followers/removeFollower",
   async (followerId, { rejectWithValue }) => {
@@ -68,7 +130,7 @@ export const unfollowUserAsync = createAsyncThunk(
     try {
       const response = await followerService.unfollowUser(followingId);
       if (response.status === 200) {
-        return response.data.msg;
+        return followingId;
       }
     } catch (error) {
       toast.error(error.customMessage || "Failed to unfollow user");
@@ -86,8 +148,7 @@ export const getFollowStatusAsync = createAsyncThunk(
         return response.data;
       }
     } catch (error) {
-      toast.error(error.customMessage || "Failed to fetch follow status");
-      throw error;
+      return { followStatus: "not-following" };
     }
   }
 );
@@ -95,6 +156,8 @@ export const getFollowStatusAsync = createAsyncThunk(
 const initialState = {
   followers: [],
   following: [],
+  requests: [],
+  activity: [],
   loading: false,
   error: null,
   followStatus: "",
@@ -111,7 +174,19 @@ const followersSlice = createSlice({
       })
       .addCase(toggleFollowAsync.fulfilled, (state, action) => {
         state.loading = false;
-        toast.success(action.payload.msg);
+        const msg = action.payload?.msg || "";
+        if (msg.includes("Followed") || msg.includes("accepted")) {
+          state.followStatus = "accepted";
+          toast.success(msg);
+        } else if (msg.includes("Request sent")) {
+          state.followStatus = "pending";
+          toast.success("Follow request sent");
+        } else if (msg.includes("cancelled")) {
+          state.followStatus = "not-following";
+          toast.success("Request cancelled");
+        } else {
+          toast.success(msg || "Updated");
+        }
       })
       .addCase(toggleFollowAsync.rejected, (state, action) => {
         state.loading = false;
@@ -125,29 +200,37 @@ const followersSlice = createSlice({
         state.loading = false;
         state.following = action.payload || [];
       })
-      .addCase(removeFollowerAsync.pending, (state) => {
-        state.loading = true;
+      .addCase(getFollowRequestsAsync.fulfilled, (state, action) => {
+        state.requests = action.payload || [];
       })
-      .addCase(removeFollowerAsync.fulfilled, (state) => {
-        state.loading = false;
+      .addCase(getActivityAsync.fulfilled, (state, action) => {
+        state.activity = action.payload || [];
+      })
+      .addCase(acceptFollowRequestAsync.fulfilled, (state, action) => {
+        state.requests = state.requests.filter(
+          (req) => (req.follower?._id || req.follower) !== action.payload
+        );
+      })
+      .addCase(rejectFollowRequestAsync.fulfilled, (state, action) => {
+        state.requests = state.requests.filter(
+          (req) => (req.follower?._id || req.follower) !== action.payload
+        );
+      })
+      .addCase(removeFollowerAsync.fulfilled, (state, action) => {
+        state.followers = state.followers.filter(
+          (f) => (f.follower?._id || f._id) !== action.payload
+        );
         toast.success("Follower removed!");
       })
-      .addCase(removeFollowerAsync.rejected, (state) => {
-        state.loading = false;
-      })
-      .addCase(unfollowUserAsync.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(unfollowUserAsync.fulfilled, (state) => {
-        state.loading = false;
-        toast.success("User unfollowed!");
-      })
-      .addCase(unfollowUserAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+      .addCase(unfollowUserAsync.fulfilled, (state, action) => {
+        state.following = state.following.filter(
+          (f) => (f.following?._id || f._id) !== action.payload
+        );
+        state.followStatus = "not-following";
+        toast.success("Unfollowed");
       })
       .addCase(getFollowStatusAsync.fulfilled, (state, action) => {
-        state.followStatus = action.payload.followStatus;
+        state.followStatus = action.payload?.followStatus || "not-following";
       });
   },
 });

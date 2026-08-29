@@ -7,8 +7,8 @@ import { userService, followerService } from "../../services";
 export function FeedSuggestionsSidebar() {
   const [suggestions, setSuggestions] = useState([]);
   const [followingMap, setFollowingMap] = useState({});
-  const { userData, signedUser } = useSelector(usersSelector);
-  const currentUser = userData?.user || signedUser;
+  const { signedUser } = useSelector(usersSelector);
+  const currentUser = signedUser;
 
   useEffect(() => {
     const fetchSuggestions = async () => {

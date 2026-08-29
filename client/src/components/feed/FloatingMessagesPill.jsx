@@ -3,8 +3,8 @@ import { usersSelector } from "../../redux/slices/usersSlice";
 import { PiPaperPlaneTiltFill } from "react-icons/pi";
 
 export function FloatingMessagesPill() {
-  const { userData, signedUser } = useSelector(usersSelector);
-  const currentUser = userData?.user || signedUser;
+  const { signedUser } = useSelector(usersSelector);
+  const currentUser = signedUser;
 
   return (
     <div className="fixed bottom-5 right-6 z-30 hidden md:flex items-center space-x-3 bg-white border border-gray-200 rounded-full shadow-lg py-2.5 px-4 cursor-pointer hover:shadow-xl transition-all duration-200 select-none">

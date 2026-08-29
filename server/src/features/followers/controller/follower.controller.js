@@ -11,6 +11,7 @@ import {
   removeFollowerDb,
   toggleSendRequestDb,
   unfollowDb,
+  getActivityDb,
 } from "../model/follower.repository.js";
 
 // Toggle follower
@@ -136,11 +137,11 @@ export const removeFollower = async (req, res, next) => {
 // Get request's
 export const getRequests = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user._id;
     const requests = await getRequestsDb(userId);
     return res.status(200).json({
       success: true,
-      requests: requests,
+      requests: requests || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));
@@ -192,6 +193,20 @@ export const getFollowStatus = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       followStatus: response.status,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get notifications/activity
+export const getActivity = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const activities = await getActivityDb(userId);
+    return res.status(200).json({
+      success: true,
+      activities: activities || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

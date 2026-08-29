@@ -4,8 +4,8 @@ import { usersSelector } from "../../redux/slices/usersSlice";
 
 export function Footer() {
   const location = useLocation();
-  const { userData, signedUser, userId } = useSelector(usersSelector);
-  const currentUser = userData?.user || signedUser;
+  const { signedUser, userId } = useSelector(usersSelector);
+  const currentUser = signedUser;
   const currentPath = location.pathname;
 
   const navTabs = [

@@ -7,19 +7,19 @@ import FollowerModel from "./follower.schema.js";
 // Function to handle toggling of sending follow requests
 export const toggleSendRequestDb = async (user, following) => {
   try {
-    // Check if the user is trying to follow itself
     if (following.toString() === user._id.toString()) {
       throw new ErrorHandler(400, "User cannot follow itself!");
     }
 
-    // Check if the user being followed exists
     const followerUser = await UserModel.findById(following);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
     // Check if the user is already followed
-    const isAlreadyFollowed = followerUser.followers.includes(user._id);
+    const isAlreadyFollowed = followerUser.followers.some(
+      (f) => f.toString() === user._id.toString()
+    );
     if (isAlreadyFollowed) {
       throw new ErrorHandler(400, "You are already following this user!");
     }
@@ -32,10 +32,17 @@ export const toggleSendRequestDb = async (user, following) => {
         status: "accepted",
       });
       await sendRequest.save();
-      followerUser.followers.push(user._id);
-      await followerUser.save();
-      user.following.push(following);
-      await user.save();
+
+      if (!followerUser.followers.some((f) => f.toString() === user._id.toString())) {
+        followerUser.followers.push(user._id);
+        await followerUser.save();
+      }
+
+      if (!user.following.some((f) => f.toString() === following.toString())) {
+        user.following.push(following);
+        await user.save();
+      }
+
       return "Followed successfully!";
     } else {
       // If the user's account type is private, handle follow requests
@@ -52,21 +59,24 @@ export const toggleSendRequestDb = async (user, following) => {
           following: following,
           status: "pending",
         });
-        const index = followerUser.requests.indexOf(user._id);
-        if (index !== -1) {
-          followerUser.requests.splice(index, 1);
-          await followerUser.save();
-        }
+        followerUser.requests = followerUser.requests.filter(
+          (reqId) => reqId.toString() !== user._id.toString()
+        );
+        await followerUser.save();
         return "Request cancelled!";
       } else {
         // If no pending request exists, send a new request
         const sendRequest = new FollowerModel({
           follower: user._id,
           following: following,
+          status: "pending",
         });
         await sendRequest.save();
-        followerUser.requests.push(user._id);
-        await followerUser.save();
+
+        if (!followerUser.requests.some((r) => r.toString() === user._id.toString())) {
+          followerUser.requests.push(user._id);
+          await followerUser.save();
+        }
         return "Request sent!";
       }
     }
@@ -78,17 +88,15 @@ export const toggleSendRequestDb = async (user, following) => {
 // Function to accept a follow request
 export const acceptRequestDb = async (user, follower) => {
   try {
-    // Check if the follower exists
     const followerUser = await UserModel.findById(follower);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    // Update the document in FollowerModel
     const updatedFollower = await FollowerModel.findOneAndUpdate(
       {
         follower: follower,
-        following: user,
+        following: user._id,
         status: "pending",
       },
       { $set: { status: "accepted" } },
@@ -102,14 +110,18 @@ export const acceptRequestDb = async (user, follower) => {
       );
     }
 
-    // Add to both follow and following arrays
-    user.followers.push(new ObjectId(follower));
-    // After accepting request removing from the request here
-    const requestIndex = user.requests.indexOf(new ObjectId(follower));
-    user.requests.splice(requestIndex, 1);
-    followerUser.following.push(new ObjectId(user._id));
+    if (!user.followers.some((f) => f.toString() === follower.toString())) {
+      user.followers.push(follower);
+    }
+    user.requests = user.requests.filter(
+      (r) => r.toString() !== follower.toString()
+    );
     await user.save();
-    await followerUser.save();
+
+    if (!followerUser.following.some((f) => f.toString() === user._id.toString())) {
+      followerUser.following.push(user._id);
+      await followerUser.save();
+    }
 
     return "Request accepted!";
   } catch (error) {
@@ -120,37 +132,27 @@ export const acceptRequestDb = async (user, follower) => {
 // Reject request of a user in the db
 export const rejectRequestDb = async (user, follower) => {
   try {
-    // Check if the follower exists
     const followerUser = await UserModel.findById(follower);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    // Rejected
-    const rejectedRequest = await FollowerModel.findOneAndUpdate(
-      {
-        follower: new ObjectId(follower),
-        following: new ObjectId(user._id),
-        status: "pending",
-      },
-      {
-        $set: {
-          status: "rejected",
-        },
-      },
-      { new: true }
-    );
+    const rejectedRequest = await FollowerModel.findOneAndDelete({
+      follower: follower,
+      following: user._id,
+      status: "pending",
+    });
 
-    // If not request exist here
     if (!rejectedRequest) {
       throw new ErrorHandler(400, "No request found by this follower id!");
-    } else {
-      // Remvoing request from user request's array after rejecting request here
-      const requestIndex = user.requests.indexOf(new ObjectId(follower));
-      user.requests.splice(requestIndex, 1);
-      await user.save();
-      return "request rejected!";
     }
+
+    user.requests = user.requests.filter(
+      (r) => r.toString() !== follower.toString()
+    );
+    await user.save();
+
+    return "Request rejected!";
   } catch (error) {
     throw error;
   }
@@ -159,41 +161,25 @@ export const rejectRequestDb = async (user, follower) => {
 // Function to unfollow a user
 export const unfollowDb = async (user, following) => {
   try {
-    // Check if the user being followed exists
     const followingUser = await UserModel.findById(following);
     if (!followingUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    // Check if there's an existing relationship between the user and the follower
-    const isFollowing = await FollowerModel.findOne({
-      follower: user._id,
-      following: following,
-    });
-
-    if (!isFollowing) {
-      throw new ErrorHandler(400, "You are not following this user!");
-    }
-
-    // Find and delete the corresponding entry in the FollowerModel
     await FollowerModel.findOneAndDelete({
       follower: user._id,
       following: following,
     });
 
-    // Remove the user being followed from the 'following' array of the current user
-    const index = user.following.indexOf(following);
-    if (index !== -1) {
-      user.following.splice(index, 1);
-      await user.save();
-    }
+    user.following = user.following.filter(
+      (f) => f.toString() !== following.toString()
+    );
+    await user.save();
 
-    // Remove the current user from the 'followers' array of the user being followed
-    const index2 = followingUser.followers.indexOf(user._id);
-    if (index2 !== -1) {
-      followingUser.followers.splice(index2, 1);
-      await followingUser.save();
-    }
+    followingUser.followers = followingUser.followers.filter(
+      (f) => f.toString() !== user._id.toString()
+    );
+    await followingUser.save();
 
     return "User unfollowed!";
   } catch (error) {
@@ -204,43 +190,26 @@ export const unfollowDb = async (user, following) => {
 // Function to remove a follower
 export const removeFollowerDb = async (user, follower) => {
   try {
-    // Check if the follower exists
     const followerUser = await UserModel.findById(follower);
     if (!followerUser) {
       throw new ErrorHandler(400, "No user found by this id!");
     }
 
-    // Check if there's an accepted follower relationship between the user and the follower
-    const isFollower = await FollowerModel.findOne({
-      follower: follower,
-      following: user._id,
-      status: "accepted",
-    });
-
-    if (!isFollower) {
-      throw new ErrorHandler(400, "No follower found to remove!");
-    }
-
-    // Find and delete the corresponding entry in the FollowerModel
     await FollowerModel.findOneAndDelete({
       follower: follower,
       following: user._id,
       status: "accepted",
     });
 
-    // Remove the follower from the 'followers' array of the current user
-    const index = user.followers.indexOf(follower);
-    if (index !== -1) {
-      user.followers.splice(index, 1);
-      await user.save();
-    }
+    user.followers = user.followers.filter(
+      (f) => f.toString() !== follower.toString()
+    );
+    await user.save();
 
-    // Remove the current user from the 'following' array of the follower
-    const index2 = followerUser.following.indexOf(user._id);
-    if (index2 !== -1) {
-      followerUser.following.splice(index2, 1);
-      await followerUser.save();
-    }
+    followerUser.following = followerUser.following.filter(
+      (f) => f.toString() !== user._id.toString()
+    );
+    await followerUser.save();
 
     return "Follower removed!";
   } catch (error) {
@@ -251,14 +220,13 @@ export const removeFollowerDb = async (user, follower) => {
 // Get requests from database
 export const getRequestsDb = async (userId) => {
   try {
-    // Getting user follow request's here
     const requests = await FollowerModel.find({
-      following: new ObjectId(userId),
+      following: userId,
       status: "pending",
     })
-      .select("follower createdAt")
-      .populate("follower", "name email id");
-    return requests;
+      .select("follower createdAt status")
+      .populate("follower", "name username email profilePic");
+    return requests || [];
   } catch (error) {
     throw error;
   }
@@ -267,9 +235,8 @@ export const getRequestsDb = async (userId) => {
 // Get followers
 export const getFollowersDb = async (userId) => {
   try {
-    // Getting user follower's here
     const followers = await FollowerModel.find({
-      following: new ObjectId(userId),
+      following: userId,
       status: "accepted",
     })
       .select("follower createdAt")
@@ -277,7 +244,7 @@ export const getFollowersDb = async (userId) => {
         path: "follower",
         select: "profilePic username name",
       });
-    return followers;
+    return followers || [];
   } catch (error) {
     throw error;
   }
@@ -286,17 +253,16 @@ export const getFollowersDb = async (userId) => {
 // Get following's
 export const getfollowingDb = async (userId) => {
   try {
-    // Getting user following here
     const following = await FollowerModel.find({
-      follower: new ObjectId(userId),
+      follower: userId,
       status: "accepted",
     })
       .select("following createdAt")
       .populate({
         path: "following",
-        select: "profilePic username name email ",
+        select: "profilePic username name email",
       });
-    return following;
+    return following || [];
   } catch (error) {
     throw error;
   }
@@ -305,15 +271,64 @@ export const getfollowingDb = async (userId) => {
 // Get follow status db
 export const getFollowStatusDb = async (userId, followingId) => {
   try {
-    // Getting user follow status here
     const followStatus = await FollowerModel.findOne({
       follower: userId,
-      following: new ObjectId(followingId),
+      following: followingId,
     }).select("status");
+
     if (!followStatus) {
       return "not-following";
     }
     return followStatus;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get activity/notifications db
+export const getActivityDb = async (userId) => {
+  try {
+    // 1. Users who accepted current user's request
+    const acceptedRequests = await FollowerModel.find({
+      follower: userId,
+      status: "accepted",
+    })
+      .select("following createdAt updatedAt")
+      .populate("following", "name username profilePic")
+      .sort({ updatedAt: -1 })
+      .limit(15);
+
+    // 2. Users who started following the current user
+    const newFollowers = await FollowerModel.find({
+      following: userId,
+      status: "accepted",
+    })
+      .select("follower createdAt updatedAt")
+      .populate("follower", "name username profilePic")
+      .sort({ createdAt: -1 })
+      .limit(15);
+
+    const activities = [
+      ...acceptedRequests.map((item) => ({
+        _id: item._id,
+        user: item.following,
+        type: "accepted_request",
+        text: "accepted your follow request.",
+        createdAt: item.updatedAt || item.createdAt,
+      })),
+      ...newFollowers.map((item) => ({
+        _id: item._id,
+        user: item.follower,
+        type: "new_follower",
+        text: "started following you.",
+        createdAt: item.createdAt,
+      })),
+    ].filter((item) => item.user && item.user._id);
+
+    // Sort combined activities by latest first
+    activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return activities.slice(0, 20);
   } catch (error) {
     throw error;
   }

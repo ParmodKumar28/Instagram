@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 
 export function EditProfilePage() {
   const dispatch = useDispatch();
-  const { userData, userLoading: profileLoading, userId } = useSelector(usersSelector);
+  const { signedUser, userLoading: profileLoading, userId } = useSelector(usersSelector);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,8 +34,8 @@ export function EditProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userData?.user) {
-      const user = userData.user;
+    if (signedUser) {
+      const user = signedUser;
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -52,7 +52,7 @@ export function EditProfilePage() {
         setPreviewImage(user.profilePic);
       }
     }
-  }, [userData]);
+  }, [signedUser]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -144,7 +144,7 @@ export function EditProfilePage() {
 
   const removeSelectedImage = () => {
     setProfilePic(null);
-    setPreviewImage(userData?.user?.profilePic || null);
+    setPreviewImage(signedUser?.profilePic || null);
   };
 
   const handleDeleteProfile = async () => {

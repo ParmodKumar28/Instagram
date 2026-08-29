@@ -39,13 +39,16 @@ export default {
         dropdown: "0 4px 16px rgba(0, 0, 0, 0.12)",
       },
       animation: {
-        "heart-beat": "heartBeat 0.8s ease-in-out",
+        "heart-beat": "heartBeat 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
       },
       keyframes: {
         heartBeat: {
-          "0%": { transform: "scale(0)", opacity: "0" },
-          "50%": { transform: "scale(1.2)", opacity: "0.9" },
-          "100%": { transform: "scale(1)", opacity: "0" },
+          "0%": { transform: "translate(-50%, -50%) scale(0)", opacity: "0" },
+          "20%": { transform: "translate(-50%, -50%) scale(1.2)", opacity: "1" },
+          "35%": { transform: "translate(-50%, -50%) scale(0.95)", opacity: "1" },
+          "50%": { transform: "translate(-50%, -50%) scale(1)", opacity: "1" },
+          "80%": { transform: "translate(-50%, -50%) scale(1)", opacity: "0.9" },
+          "100%": { transform: "translate(-50%, -50%) scale(0)", opacity: "0" },
         },
       },
     },

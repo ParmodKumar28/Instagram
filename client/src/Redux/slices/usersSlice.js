@@ -58,22 +58,31 @@ export const logoutAsync = createAsyncThunk("users/logout", async () => {
   }
 });
 
+// Fetches either a specific profile user (when userId provided) or refreshes the logged-in user
 export const userDataAsync = createAsyncThunk(
   "users/details",
-  async ({ userId } = {}, { getState }) => {
+  async (params = {}, { getState }) => {
     try {
       const state = getState().usersReducer;
-      const targetId = userId || state.userId || state.signedUser?._id;
+      const isSpecificTarget = Boolean(params && params.userId);
+      const targetId = isSpecificTarget
+        ? params.userId
+        : state.userId || state.signedUser?._id;
+
       if (!targetId || targetId === "undefined") {
         return null;
       }
       const response = await userService.getUserData(targetId);
       if (response && response.status === 200) {
-        return response.data;
+        return {
+          data: response.data,
+          isSpecificTarget,
+          userId: targetId,
+        };
       }
+      return null;
     } catch (error) {
-      toast.error(error.customMessage || "Failed to fetch user details");
-      throw error;
+      return null;
     }
   }
 );
@@ -168,7 +177,8 @@ const INITIAL_STATE = {
   signUpLoading: false,
   loginLoading: false,
   userLoading: false,
-  userData: null,
+  profileUser: null, // Specific profile user currently being viewed
+  userData: storedUser ? { user: storedUser } : null,
 };
 
 const handleAuthSuccess = (state, action, message) => {
@@ -176,6 +186,7 @@ const handleAuthSuccess = (state, action, message) => {
   state.token = action.payload.token;
   state.signedUser = action.payload.user;
   state.userId = action.payload.user?._id || "";
+  state.userData = { user: action.payload.user };
 
   localStorage.setItem("auth-token", action.payload.token);
   localStorage.setItem("signedUser", JSON.stringify(action.payload.user));
@@ -189,6 +200,7 @@ const handleAuthClear = (state, message) => {
   state.userId = "";
   state.token = "";
   state.userData = null;
+  state.profileUser = null;
 
   localStorage.removeItem("auth-token");
   localStorage.removeItem("signedUser");
@@ -199,7 +211,11 @@ const handleAuthClear = (state, message) => {
 const usersSlice = createSlice({
   name: "users",
   initialState: INITIAL_STATE,
-  reducers: {},
+  reducers: {
+    clearProfileUser: (state) => {
+      state.profileUser = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(signUpAsync.pending, (state) => {
@@ -229,7 +245,26 @@ const usersSlice = createSlice({
       })
       .addCase(userDataAsync.fulfilled, (state, action) => {
         state.userLoading = false;
-        state.userData = action.payload;
+        if (!action.payload) return;
+
+        const { data, isSpecificTarget, userId } = action.payload;
+        if (isSpecificTarget) {
+          // If a specific profile is being inspected
+          state.profileUser = data?.user || null;
+          // If viewing own profile, also keep signedUser fresh
+          if (userId === state.userId && data?.user) {
+            state.signedUser = { ...state.signedUser, ...data.user };
+            state.userData = { user: state.signedUser };
+            localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
+          }
+        } else {
+          // Refreshing the logged-in user
+          if (data?.user) {
+            state.signedUser = { ...state.signedUser, ...data.user };
+            state.userData = { user: state.signedUser };
+            localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
+          }
+        }
       })
       .addCase(userDataAsync.rejected, (state) => {
         state.userLoading = false;
@@ -251,12 +286,13 @@ const usersSlice = createSlice({
       })
       .addCase(updateProfileAsync.fulfilled, (state, action) => {
         state.userLoading = false;
-        if (action.payload.updatedUser) {
+        if (action.payload?.updatedUser) {
           state.signedUser = { ...state.signedUser, ...action.payload.updatedUser };
           state.userId = state.signedUser?._id || "";
+          state.userData = { user: state.signedUser };
           localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
         }
-        toast.success(action.payload.msg || "Profile updated successfully!");
+        toast.success(action.payload?.msg || "Profile updated successfully!");
       })
       .addCase(updateProfileAsync.rejected, (state) => {
         state.userLoading = false;
@@ -267,14 +303,15 @@ const usersSlice = createSlice({
       })
       .addCase(uploadProfilePicAsync.fulfilled, (state, action) => {
         state.userLoading = false;
-        if (action.payload.profilePic) {
+        if (action.payload?.profilePic) {
           state.signedUser = {
             ...state.signedUser,
             profilePic: action.payload.profilePic,
           };
+          state.userData = { user: state.signedUser };
           localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
         }
-        toast.success(action.payload.message || "Profile picture uploaded successfully!");
+        toast.success(action.payload?.message || "Profile picture uploaded successfully!");
       })
       .addCase(uploadProfilePicAsync.rejected, (state) => {
         state.userLoading = false;
@@ -286,6 +323,7 @@ const usersSlice = createSlice({
   },
 });
 
+export const { clearProfileUser } = usersSlice.actions;
 export const usersReducer = usersSlice.reducer;
 export const usersSelector = (state) => state.usersReducer;
 export default usersSlice.reducer;

@@ -7,6 +7,7 @@ import {
 import {
   userDataAsync,
   usersSelector,
+  clearProfileUser,
 } from "../../redux/slices/usersSlice";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,14 +19,14 @@ import {
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../redux/slices/followersSlice";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoLockClosedOutline } from "react-icons/io5";
 import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
 import { FaLink } from "react-icons/fa";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 
 export function ProfilePage() {
   const dispatch = useDispatch();
-  const { userData, userLoading, userId: currentUserId } = useSelector(usersSelector);
+  const { profileUser, signedUser, userLoading, userId: currentUserId } = useSelector(usersSelector);
   const { userPosts, userPostsLoading } = useSelector(postsSelector);
   const { userId } = useParams();
   const { following, followStatus } = useSelector(followersSelector);
@@ -35,6 +36,7 @@ export function ProfilePage() {
   useEffect(() => {
     if (userId) {
       dispatch(clearUserPosts());
+      dispatch(clearProfileUser());
       dispatch(userDataAsync({ userId }));
       dispatch(fetchUserPostsAsync(userId));
       if (currentUserId) {
@@ -44,35 +46,43 @@ export function ProfilePage() {
     }
   }, [dispatch, userId, currentUserId]);
 
-  const [isFollowed, setIsFollowed] = useState(false);
-  useEffect(() => {
-    if (following && userId) {
-      setIsFollowed(following.some((u) => (u.following?._id || u.following) === userId));
-    }
-  }, [following, userId]);
+  const isOwnProfile = !userId || currentUserId === userId;
+  const user = isOwnProfile ? signedUser : profileUser;
+  
+  const isFollowed =
+    followStatus === "accepted" ||
+    (user?.followers && user.followers.some((f) => (f._id || f).toString() === (currentUserId || "").toString())) ||
+    (following && following.some((u) => (u.following?._id || u.following || u._id).toString() === (userId || "").toString()));
 
-  const handleFollowToggle = async () => {
-    if (followStatus === "following" || isFollowed) {
+  const isPending =
+    !isFollowed &&
+    (followStatus === "pending" ||
+      (user?.requests && user.requests.some((r) => (r._id || r).toString() === (currentUserId || "").toString())));
+
+  const isPrivate = user?.accountType === "private";
+  const isLocked = isPrivate && !isOwnProfile && !isFollowed;
+
+  const handleFollowAction = async () => {
+    if (isFollowed) {
       await dispatch(unfollowUserAsync(userId));
     } else {
       await dispatch(toggleFollowAsync(userId));
+      if (!isPrivate) {
+        dispatch(fetchUserPostsAsync(userId));
+      }
     }
     dispatch(getFollowStatusAsync(userId));
+    dispatch(userDataAsync({ userId }));
     if (currentUserId) {
       dispatch(getFollowingAsync(currentUserId));
     }
   };
 
-  const { user } = userData || {};
-  const isOwnProfile = currentUserId === userId;
-  const isPrivate = user?.accountType === "private";
-  const isLocked = isPrivate && !isOwnProfile && !isFollowed;
-
-  if (userLoading) {
+  if (userLoading && !user) {
     return <ProfileSkeleton />;
   }
 
-  if (!user) {
+  if (!user && !userLoading) {
     return (
       <div className="flex justify-center items-center py-20 px-4">
         <div className="bg-white p-8 rounded-2xl border border-gray-200 text-center max-w-sm">
@@ -93,7 +103,7 @@ export function ProfilePage() {
 
   return (
     <div className="w-full max-w-[935px] mx-auto pt-4 md:pt-8 px-4 sm:px-6 select-none">
-      {/* Profile Header (Authentic Instagram Desktop / Mobile) */}
+      {/* Profile Header */}
       <header className="flex flex-col sm:flex-row items-center sm:items-start mb-8 md:mb-12">
         {/* Profile Picture */}
         <div className="flex-shrink-0 sm:w-[290px] flex justify-center mb-4 sm:mb-0">
@@ -102,8 +112,8 @@ export function ProfilePage() {
             className="w-24 h-24 sm:w-36 sm:h-36 md:w-38 md:h-38 rounded-full border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 transition"
           >
             <img
-              src={user.profilePic || "https://placekitten.com/200/200"}
-              alt={user.username}
+              src={user?.profilePic || "https://placekitten.com/200/200"}
+              alt={user?.username || "Profile"}
               className="w-full h-full object-cover"
             />
           </div>
@@ -114,7 +124,7 @@ export function ProfilePage() {
           {/* Top Row: Username + Actions */}
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-4">
             <h1 className="text-xl md:text-2xl font-normal text-gray-900">
-              {user.username}
+              {user?.username}
             </h1>
 
             {isOwnProfile ? (
@@ -136,18 +146,14 @@ export function ProfilePage() {
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={handleFollowToggle}
+                  onClick={handleFollowAction}
                   className={`${
-                    isFollowed
+                    isFollowed || isPending
                       ? "bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900"
                       : "bg-[#0095F6] hover:bg-[#1877F2] text-white"
-                  } text-sm font-semibold px-5 py-1.5 rounded-lg transition`}
+                  } text-sm font-semibold px-5 py-1.5 rounded-lg transition shadow-sm`}
                 >
-                  {followStatus === "pending"
-                    ? "Requested"
-                    : isFollowed
-                    ? "Following"
-                    : "Follow"}
+                  {isPending ? "Requested" : isFollowed ? "Following" : "Follow"}
                 </button>
                 <Link
                   to="#messages"
@@ -162,31 +168,31 @@ export function ProfilePage() {
           {/* Middle Row: Stats (Desktop inline) */}
           <div className="hidden sm:flex items-center space-x-10 mb-4 text-sm text-gray-900">
             <div>
-              <span className="font-semibold">{user.posts?.length || userPosts?.length || 0}</span> posts
+              <span className="font-semibold">{user?.posts?.length || userPosts?.length || 0}</span> posts
             </div>
             <Link
-              to={isLocked ? "#" : `/followers/${user._id}`}
-              className={isLocked ? "cursor-default" : "hover:opacity-75"}
+              to={isLocked ? "#" : `/followers/${user?._id || userId}`}
+              className={isLocked ? "cursor-default pointer-events-none" : "hover:opacity-75"}
             >
-              <span className="font-semibold">{user.followers?.length || 0}</span> followers
+              <span className="font-semibold">{user?.followers?.length || 0}</span> followers
             </Link>
             <Link
-              to={isLocked ? "#" : `/following/${user._id}`}
-              className={isLocked ? "cursor-default" : "hover:opacity-75"}
+              to={isLocked ? "#" : `/following/${user?._id || userId}`}
+              className={isLocked ? "cursor-default pointer-events-none" : "hover:opacity-75"}
             >
-              <span className="font-semibold">{user.following?.length || 0}</span> following
+              <span className="font-semibold">{user?.following?.length || 0}</span> following
             </Link>
           </div>
 
           {/* Bottom Row: Name, Bio, and Website */}
           <div className="text-sm text-gray-900 leading-snug">
-            {user.name && <p className="font-semibold">{user.name}</p>}
-            {user.bio && (
+            {user?.name && <p className="font-semibold">{user.name}</p>}
+            {user?.bio && (
               <p className="whitespace-pre-line text-gray-900 mt-1 font-normal">
                 {user.bio}
               </p>
             )}
-            {user.website && (
+            {user?.website && (
               <a
                 href={user.website.startsWith("http") ? user.website : `https://${user.website}`}
                 className="inline-flex items-center text-[#00376B] hover:underline font-semibold mt-1.5"
@@ -205,25 +211,31 @@ export function ProfilePage() {
       <div className="sm:hidden flex justify-around border-t border-b border-gray-200 py-3 mb-4 text-center text-xs text-gray-500">
         <div>
           <span className="block text-sm font-semibold text-gray-900">
-            {user.posts?.length || userPosts?.length || 0}
+            {user?.posts?.length || userPosts?.length || 0}
           </span>
           posts
         </div>
-        <Link to={isLocked ? "#" : `/followers/${user._id}`}>
+        <Link
+          to={isLocked ? "#" : `/followers/${user?._id || userId}`}
+          className={isLocked ? "cursor-default pointer-events-none" : ""}
+        >
           <span className="block text-sm font-semibold text-gray-900">
-            {user.followers?.length || 0}
+            {user?.followers?.length || 0}
           </span>
           followers
         </Link>
-        <Link to={isLocked ? "#" : `/following/${user._id}`}>
+        <Link
+          to={isLocked ? "#" : `/following/${user?._id || userId}`}
+          className={isLocked ? "cursor-default pointer-events-none" : ""}
+        >
           <span className="block text-sm font-semibold text-gray-900">
-            {user.following?.length || 0}
+            {user?.following?.length || 0}
           </span>
           following
         </Link>
       </div>
 
-      {/* Tab Navigation Bar (Exact Instagram Border-top Tabs) */}
+      {/* Tab Navigation Bar & Posts */}
       {!isLocked ? (
         <div>
           <div className="flex justify-center border-t border-gray-200">
@@ -303,10 +315,14 @@ export function ProfilePage() {
           </div>
         </div>
       ) : (
-        <div className="mt-8 text-center py-16 bg-white border border-gray-200 rounded-xl shadow-sm">
-          <h3 className="text-base font-bold text-gray-900">This Account is Private</h3>
-          <p className="text-xs text-gray-500 mt-1">
-            Follow this account to see their photos and videos.
+        /* Private Account Locked Banner */
+        <div className="mt-6 py-16 px-6 bg-white border border-gray-200 rounded-xl text-center shadow-sm">
+          <div className="w-14 h-14 rounded-full border-2 border-gray-900 mx-auto flex items-center justify-center mb-4">
+            <IoLockClosedOutline className="text-2xl text-gray-900" />
+          </div>
+          <h3 className="text-base font-bold text-gray-900 mb-1">This account is private</h3>
+          <p className="text-sm text-gray-500 max-w-xs mx-auto">
+            Follow to see their photos and videos.
           </p>
         </div>
       )}
@@ -319,8 +335,8 @@ export function ProfilePage() {
         >
           <img
             className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl animate-in zoom-in-95 duration-150"
-            src={user.profilePic || "https://placekitten.com/200/200"}
-            alt={user.username}
+            src={user?.profilePic || "https://placekitten.com/200/200"}
+            alt={user?.username || "Profile"}
           />
         </div>
       )}

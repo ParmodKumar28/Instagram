@@ -184,7 +184,9 @@ export function PostDetailsModal({ post: initialPost, onClose }) {
 
           {/* Double tap Heart popup */}
           {showHeart && (
-            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#FF3040] w-28 h-28 animate-heart-beat drop-shadow-2xl pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 pointer-events-none z-30">
+              <FaHeart className="text-white fill-white w-28 h-28 animate-heart-beat drop-shadow-[0_0_25px_rgba(0,0,0,0.6)]" />
+            </div>
           )}
         </div>
 
