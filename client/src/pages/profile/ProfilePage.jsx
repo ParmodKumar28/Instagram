@@ -294,7 +294,7 @@ export function ProfilePage() {
                 >
                   <p className="text-sm font-semibold text-gray-700">Saved Items</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    Only you can see what you've saved
+                    Only you can see what you&apos;ve saved
                   </p>
                 </motion.div>
               )}

@@ -40,7 +40,7 @@ export function ForgotPasswordPage() {
           Trouble with logging in?
         </h2>
         <p className="text-center text-xs text-gray-500 mb-6 leading-relaxed">
-          Enter your email address and we'll send you an OTP to reset and get back into your account.
+          Enter your email address and we&apos;ll send you an OTP to reset and get back into your account.
         </p>
 
         <form onSubmit={handleSendEmail} className="w-full flex flex-col space-y-3">

@@ -4,7 +4,6 @@ import { CiSearch } from "react-icons/ci";
 import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { logoutAsync } from "../../redux/slices/usersSlice";
-import InstagramLogo from "../common/InstagramLogo";
 import { IoIosArrowDown } from "react-icons/io";
 
 export function Header() {

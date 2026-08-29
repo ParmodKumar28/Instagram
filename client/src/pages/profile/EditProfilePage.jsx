@@ -7,7 +7,7 @@ import {
   usersSelector,
 } from "../../redux/slices/usersSlice";
 import { motion } from "framer-motion";
-import { Camera, Check, ChevronLeft, Info, Loader2, Upload, X } from "lucide-react";
+import { Camera, Check, ChevronLeft, Loader2, Upload, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -31,7 +31,6 @@ export function EditProfilePage() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [activeSection, setActiveSection] = useState("basic");
   const [formErrors, setFormErrors] = useState({});
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,7 +91,6 @@ export function EditProfilePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormSubmitted(true);
 
     if (!validateForm()) {
       return;
@@ -100,7 +98,6 @@ export function EditProfilePage() {
 
     try {
       await dispatch(updateProfileAsync(formData)).unwrap();
-      setFormSubmitted(false);
     } catch (err) {
       console.error("Error updating profile:", err);
     }

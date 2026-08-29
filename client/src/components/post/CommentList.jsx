@@ -1,8 +1,4 @@
-import { useState } from "react";
-
 export function CommentList({ comments = [], commentsLoading = false }) {
-  const [activeComment, setActiveComment] = useState(null);
-
   if (commentsLoading) {
     return (
       <div className="flex justify-center items-center py-4">
@@ -20,8 +16,6 @@ export function CommentList({ comments = [], commentsLoading = false }) {
             <div
               key={comment._id || index}
               className="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-3"
-              onMouseEnter={() => setActiveComment(index)}
-              onMouseLeave={() => setActiveComment(null)}
             >
               <div className="flex items-start">
                 <img

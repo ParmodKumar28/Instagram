@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import styles from "./PostCard.module.css";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import {
   FaHeart,
@@ -33,16 +32,18 @@ export function PostCard({ post }) {
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
 
-  const fetchLikes = async () => {
+  const fetchLikes = useCallback(async () => {
+    if (!post?._id) return;
     try {
       const response = await likeService.getLikes(post._id, "Post");
       setLikeList(response.data?.likes || []);
     } catch (error) {
       console.error("Error fetching likes:", error);
     }
-  };
+  }, [post?._id]);
 
-  const getComments = async () => {
+  const getComments = useCallback(async () => {
+    if (!post?._id) return;
     setCommentsLoading(true);
     try {
       const response = await commentService.getComments(post._id);
@@ -52,14 +53,14 @@ export function PostCard({ post }) {
     } finally {
       setCommentsLoading(false);
     }
-  };
+  }, [post?._id]);
 
   useEffect(() => {
     if (post?._id) {
       fetchLikes();
       getComments();
     }
-  }, [post?._id]);
+  }, [post?._id, fetchLikes, getComments]);
 
   useEffect(() => {
     if (likeList && currentUserId) {
@@ -132,24 +133,26 @@ export function PostCard({ post }) {
   const isAuthor = currentUserId && post?.user?._id === currentUserId;
 
   return (
-    <div className="relative my-4 w-full max-w-lg mx-auto bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden">
+    <div className="relative my-4 w-full max-w-lg mx-auto ig-card">
       {/* Header: User Info */}
-      <div className="flex items-center justify-between p-3.5 border-b border-gray-100">
+      <div className="flex items-center justify-between p-3.5 border-b border-ig-border-light">
         <Link
           to={`/profile/${post?.user?._id}`}
           className="flex items-center space-x-3 hover:opacity-80 transition"
         >
-          <img
-            className="w-9 h-9 rounded-full object-cover border border-gray-200"
-            src={post?.user?.profilePic || "https://placekitten.com/100/100"}
-            alt={post?.user?.username || "User"}
-          />
+          <div className="w-9 h-9 rounded-full p-[1.5px] ig-story-ring">
+            <img
+              className="w-full h-full rounded-full object-cover border border-white"
+              src={post?.user?.profilePic || "https://placekitten.com/100/100"}
+              alt={post?.user?.username || "User"}
+            />
+          </div>
           <div>
-            <p className="text-sm font-semibold text-gray-900 leading-tight">
+            <p className="text-sm font-semibold text-ig-text-primary leading-tight">
               {post?.user?.username || post?.user?.name || "Instagram User"}
             </p>
             {post?.user?.name && (
-              <p className="text-xs text-gray-400">{post.user.name}</p>
+              <p className="text-xs text-ig-text-muted">{post.user.name}</p>
             )}
           </div>
         </Link>
@@ -157,7 +160,7 @@ export function PostCard({ post }) {
         {isAuthor && (
           <div className="relative">
             <button
-              className="text-gray-500 hover:text-gray-900 p-1.5 rounded-full hover:bg-gray-100 transition"
+              className="text-ig-text-secondary hover:text-ig-text-primary p-1.5 rounded-full hover:bg-gray-100 transition"
               onClick={() => setShowOptions(!showOptions)}
             >
               <FaEllipsisH className="w-4 h-4" />
@@ -183,7 +186,7 @@ export function PostCard({ post }) {
             onTouchEnd={handleImageTap}
           />
           {showHeart && (
-            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-red-500 w-24 h-24 animate-ping drop-shadow-lg" />
+            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-ig-like w-24 h-24 animate-heart-beat drop-shadow-lg" />
           )}
         </div>
       )}
@@ -194,12 +197,12 @@ export function PostCard({ post }) {
           <button
             onClick={handleToggleLike}
             className={`flex items-center space-x-1 transition duration-150 ${
-              isLiked ? "text-red-500 scale-110" : "text-gray-700 hover:text-gray-900"
+              isLiked ? "text-ig-like scale-110" : "text-ig-text-primary hover:text-gray-600"
             }`}
           >
             <FaHeart className="w-5 h-5" />
             <span
-              className="text-xs font-semibold text-gray-800 ml-1 cursor-pointer"
+              className="text-xs font-semibold text-ig-text-primary ml-1 cursor-pointer"
               onClick={handleLikeCountClick}
             >
               {likeList.length}
