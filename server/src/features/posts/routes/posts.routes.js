@@ -9,7 +9,9 @@ import {
   getAllPosts,
   getPost,
   getUserPosts,
-  updatePost, 
+  updatePost,
+  toggleSavePost,
+  getSavedPosts,
 } from "../controller/posts.controller.js";
 
 // Router
@@ -25,6 +27,12 @@ postsRouter.delete("/delete-post/:postId", auth, deletePost);
 
 // Update post
 postsRouter.put("/update-post/:postId", upload.none(), auth, updatePost);
+
+// Toggle save post
+postsRouter.post("/save/:postId", auth, toggleSavePost);
+
+// Get saved posts
+postsRouter.get("/saved/all", auth, getSavedPosts);
 
 // Getting user posts
 postsRouter.get("/user-posts/:userId", auth, getUserPosts);

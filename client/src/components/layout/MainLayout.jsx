@@ -6,12 +6,14 @@ import Header from "./Header";
 import Footer from "./Footer";
 import FloatingMessagesPill from "../feed/FloatingMessagesPill";
 import { userDataAsync } from "../../redux/slices/usersSlice";
+import { fetchSavedPostsAsync } from "../../redux/slices/postsSlice";
 
 export function MainLayout() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(userDataAsync());
+    dispatch(fetchSavedPostsAsync());
   }, [dispatch]);
 
   return (

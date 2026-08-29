@@ -13,7 +13,12 @@ import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { deletePostAsync, updatePostAsync } from "../../redux/slices/postsSlice";
+import {
+  deletePostAsync,
+  updatePostAsync,
+  toggleSavePostAsync,
+  postsSelector,
+} from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { commentService, likeService } from "../../services";
 import CommentList from "./CommentList";
@@ -46,7 +51,6 @@ export function PostCard({ post }) {
   const [likeList, setLikeList] = useState([]);
   const [showLikes, setShowLikes] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +59,14 @@ export function PostCard({ post }) {
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
+  const { savedPostIds = [] } = useSelector(postsSelector);
+  const isSaved = savedPostIds.includes(post?._id);
+
+  const handleToggleSave = () => {
+    if (post?._id) {
+      dispatch(toggleSavePostAsync(post._id));
+    }
+  };
 
   const fetchLikes = useCallback(async () => {
     try {
@@ -277,7 +289,7 @@ export function PostCard({ post }) {
         </div>
 
         <button
-          onClick={() => setIsSaved(!isSaved)}
+          onClick={handleToggleSave}
           className="text-gray-900 hover:text-gray-500 focus:outline-none transition"
           aria-label="Bookmark"
         >

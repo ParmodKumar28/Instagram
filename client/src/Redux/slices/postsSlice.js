@@ -93,12 +93,46 @@ export const fetchSinglePostAsync = createAsyncThunk(
   }
 );
 
+export const toggleSavePostAsync = createAsyncThunk(
+  "posts/toggleSavePost",
+  async (postId) => {
+    try {
+      const response = await postService.toggleSavePost(postId);
+      if (response.status === 200) {
+        return { postId, isSaved: response.data.isSaved, savedPosts: response.data.savedPosts };
+      }
+    } catch (error) {
+      toast.error(error.customMessage || "Failed to save post");
+      throw error;
+    }
+  }
+);
+
+export const fetchSavedPostsAsync = createAsyncThunk(
+  "posts/fetchSavedPosts",
+  async () => {
+    try {
+      const response = await postService.getSavedPosts();
+      if (response.status === 200) {
+        return response.data.savedPosts || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("Failed to fetch saved posts:", error);
+      return [];
+    }
+  }
+);
+
 const INITIAL_STATE = {
   postsLoading: true,
   addPostLoad: false,
   posts: [],
   userPostsLoading: false,
   userPosts: [],
+  savedPostsLoading: false,
+  savedPosts: [],
+  savedPostIds: [],
   singlePostLoading: false,
   singlePost: null,
 };
@@ -171,7 +205,42 @@ const postsSlice = createSlice({
         state.userPosts = state.userPosts.filter(
           (post) => (post._id || post.id) !== deletedId
         );
+        state.savedPosts = state.savedPosts.filter(
+          (post) => (post._id || post.id) !== deletedId
+        );
+        state.savedPostIds = state.savedPostIds.filter((id) => id !== deletedId);
         toast.success("Post deleted successfully!");
+      })
+
+      .addCase(toggleSavePostAsync.fulfilled, (state, action) => {
+        const { postId, isSaved, savedPosts } = action.payload;
+        if (isSaved) {
+          if (!state.savedPostIds.includes(postId)) {
+            state.savedPostIds.push(postId);
+          }
+          toast.success("Post saved!");
+        } else {
+          state.savedPostIds = state.savedPostIds.filter((id) => id !== postId);
+          state.savedPosts = state.savedPosts.filter(
+            (p) => (p._id || p.id || p) !== postId
+          );
+          toast.success("Post removed from saved");
+        }
+        if (Array.isArray(savedPosts)) {
+          state.savedPostIds = savedPosts.map((p) => p._id || p.toString());
+        }
+      })
+
+      .addCase(fetchSavedPostsAsync.pending, (state) => {
+        state.savedPostsLoading = true;
+      })
+      .addCase(fetchSavedPostsAsync.fulfilled, (state, action) => {
+        state.savedPostsLoading = false;
+        state.savedPosts = action.payload || [];
+        state.savedPostIds = (action.payload || []).map((p) => p._id || p.toString());
+      })
+      .addCase(fetchSavedPostsAsync.rejected, (state) => {
+        state.savedPostsLoading = false;
       });
   },
 });

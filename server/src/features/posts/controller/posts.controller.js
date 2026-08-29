@@ -9,6 +9,8 @@ import {
   getPostDb,
   getUserPostsDb,
   updatePostDb,
+  toggleSavePostDb,
+  getSavedPostsDb,
 } from "../model/posts.repository.js";
 
 // Create new post
@@ -156,6 +158,40 @@ export const getAllPosts = async (req, res, next) => {
       success: true,
       msg: "Post's found successfully!",
       posts: posts,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Toggle Save Post
+export const toggleSavePost = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { postId } = req.params;
+    if (!postId) {
+      return next(new ErrorHandler(400, "Enter postId in params!"));
+    }
+    const result = await toggleSavePostDb(postId, userId);
+    return res.status(200).json({
+      success: true,
+      msg: result.isSaved ? "Post saved!" : "Post removed from saved!",
+      isSaved: result.isSaved,
+      savedPosts: result.savedPosts,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get Saved Posts
+export const getSavedPosts = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const savedPosts = await getSavedPostsDb(userId);
+    return res.status(200).json({
+      success: true,
+      savedPosts: savedPosts || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   fetchUserPostsAsync,
+  fetchSavedPostsAsync,
   postsSelector,
   clearUserPosts,
 } from "../../redux/slices/postsSlice";
@@ -26,11 +27,14 @@ import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 export function ProfilePage() {
   const dispatch = useDispatch();
   const { profileUser, signedUser, userLoading, userId: currentUserId } = useSelector(usersSelector);
-  const { userPosts, userPostsLoading } = useSelector(postsSelector);
+  const { userPosts, userPostsLoading, savedPosts = [], savedPostsLoading } = useSelector(postsSelector);
   const { userId } = useParams();
   const { following, followStatus } = useSelector(followersSelector);
   const [activeTab, setActiveTab] = useState("posts");
   const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
+
+  const isOwnProfile = !userId || currentUserId === userId;
+  const user = isOwnProfile ? signedUser : profileUser;
 
   useEffect(() => {
     if (userId) {
@@ -45,8 +49,11 @@ export function ProfilePage() {
     }
   }, [dispatch, userId, currentUserId]);
 
-  const isOwnProfile = !userId || currentUserId === userId;
-  const user = isOwnProfile ? signedUser : profileUser;
+  useEffect(() => {
+    if (activeTab === "saved" && isOwnProfile) {
+      dispatch(fetchSavedPostsAsync());
+    }
+  }, [dispatch, activeTab, isOwnProfile]);
   
   const isFollowed =
     followStatus === "accepted" ||
@@ -295,12 +302,40 @@ export function ProfilePage() {
             )}
 
             {activeTab === "saved" && (
-              <div className="text-center py-16 bg-white border border-gray-100 rounded-xl">
-                <p className="text-sm font-semibold text-gray-800">Saved Posts</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Only you can see what you&apos;ve saved
-                </p>
-              </div>
+              !isOwnProfile ? (
+                <div className="text-center py-16 bg-white border border-gray-100 rounded-xl">
+                  <p className="text-sm font-semibold text-gray-800">Saved Posts</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Only {user?.username || "this user"} can see what they&apos;ve saved
+                  </p>
+                </div>
+              ) : savedPostsLoading ? (
+                <div className="grid grid-cols-3 gap-1 sm:gap-6 animate-pulse">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square bg-gray-200 rounded-sm sm:rounded-md"
+                    />
+                  ))}
+                </div>
+              ) : savedPosts.length > 0 ? (
+                <div>
+                  <div className="flex justify-between items-center mb-4 px-1">
+                    <span className="text-xs text-gray-400 font-medium">Only you can see what you&apos;ve saved</span>
+                  </div>
+                  <UserPostList posts={savedPosts} />
+                </div>
+              ) : (
+                <div className="py-20 text-center text-gray-500 select-none">
+                  <div className="w-16 h-16 rounded-full border-2 border-gray-300 mx-auto flex items-center justify-center mb-3">
+                    <BsBookmark className="text-2xl text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Save</h3>
+                  <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                    Save photos and videos that you want to see again. No one is notified, and only you can see what you&apos;ve saved.
+                  </p>
+                </div>
+              )
             )}
 
             {activeTab === "tagged" && (

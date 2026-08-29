@@ -1,7 +1,8 @@
-// Creating posts repository here for the database
 // Imports
+import { ObjectId } from "mongodb";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import PostModel from "./posts.schema.js";
+import UserModel from "../../user/model/user.schema.js";
 
 // Create new post in the db
 export const createPostDb = async (post, user) => {
@@ -145,6 +146,46 @@ export const getAllPostsDb = async () => {
           model: "User",
         },
       });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Toggle save post in user's savedPosts
+export const toggleSavePostDb = async (postId, userId) => {
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) throw new ErrorHandler(404, "User not found");
+    if (!user.savedPosts) user.savedPosts = [];
+
+    const strPostId = postId.toString();
+    const isSaved = user.savedPosts.some((id) => id.toString() === strPostId);
+
+    if (isSaved) {
+      user.savedPosts = user.savedPosts.filter((id) => id.toString() !== strPostId);
+    } else {
+      user.savedPosts.push(new ObjectId(postId));
+    }
+    await user.save();
+    return { isSaved: !isSaved, savedPosts: user.savedPosts };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get saved posts for user
+export const getSavedPostsDb = async (userId) => {
+  try {
+    const user = await UserModel.findById(userId).populate({
+      path: "savedPosts",
+      populate: [
+        { path: "user", select: "name username profilePic" },
+        { path: "likes", select: "user" },
+        { path: "comments", select: "user content likes" },
+      ],
+    });
+    if (!user) throw new ErrorHandler(404, "User not found");
+    return user.savedPosts || [];
   } catch (error) {
     throw error;
   }

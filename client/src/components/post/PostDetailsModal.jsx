@@ -15,7 +15,7 @@ import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
 import { commentService, likeService, postService } from "../../services";
 import { usersSelector } from "../../redux/slices/usersSlice";
-import { deletePostAsync } from "../../redux/slices/postsSlice";
+import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux/slices/postsSlice";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import toast from "react-hot-toast";
@@ -42,7 +42,6 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [comments, setComments] = useState([]);
   const [likeList, setLikeList] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [showHeart, setShowHeart] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -50,6 +49,16 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
+  const { savedPostIds = [] } = useSelector(postsSelector);
+
+  const currentPostId = post?._id || initialPost?._id;
+  const isSaved = savedPostIds.includes(currentPostId);
+
+  const handleToggleSave = () => {
+    if (currentPostId) {
+      dispatch(toggleSavePostAsync(currentPostId));
+    }
+  };
 
   useEffect(() => {
     setPost(initialPost);
@@ -372,7 +381,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
               </div>
 
               <button
-                onClick={() => setIsSaved(!isSaved)}
+                onClick={handleToggleSave}
                 className="text-gray-900 hover:text-gray-500 transition"
               >
                 {isSaved ? (

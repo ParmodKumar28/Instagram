@@ -11,6 +11,8 @@ export const postService = {
   updatePost: (postId, postData) =>
     apiClient.put(`/post/update-post/${postId}`, postData),
   deletePost: (postId) => apiClient.delete(`/post/delete-post/${postId}`),
+  toggleSavePost: (postId) => apiClient.post(`/post/save/${postId}`),
+  getSavedPosts: () => apiClient.get("/post/saved/all"),
 };
 
 export default postService;
