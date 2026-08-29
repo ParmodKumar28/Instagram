@@ -1,499 +1,295 @@
-// User's reducer is here here all state management is handled related to users and handlers
-// Imports
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { toast } from 'react-hot-toast';
-import BASE_URL from "../baseUrl";
+import { toast } from "react-hot-toast";
+import { userService } from "../../services";
 
-// Base url for user's
-const BASE_URL_USERS = `${BASE_URL}/user`;
-
-// Setting Axios default for credentials
-axios.defaults.withCredentials = true;
+// Helper to safely load stored user from localStorage
+const getStoredUser = () => {
+  try {
+    const user = localStorage.getItem("signedUser");
+    return user ? JSON.parse(user) : {};
+  } catch {
+    return {};
+  }
+};
 
 // Async Thunks
-// Sign up
 export const signUpAsync = createAsyncThunk(
   "users/signup",
   async ({ email, fullName, username, password }) => {
     try {
-      // Sending request to the server
-      const response = await axios.post(`${BASE_URL_USERS}/signup`, {
+      const response = await userService.signup({
         name: fullName,
         email,
         username,
         password,
       });
-      // If response is ok then return response.data
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Signup failed");
       throw error;
     }
   }
 );
-// Sign up ends
 
-// Login
 export const loginAsync = createAsyncThunk(
   "users/login",
   async ({ identifier, password }) => {
     try {
-      // Sending request to the server
-      const response = await axios.post(`${BASE_URL_USERS}/signin`, {
-        identifier,
-        password,
-      });
-      // If response is ok then return response.data
+      const response = await userService.login({ identifier, password });
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Login failed");
       throw error;
     }
   }
 );
-// Login ends
 
-// Logout start's
 export const logoutAsync = createAsyncThunk("users/logout", async () => {
   try {
-    // Sending request to the server
-    const response = await axios.get(`${BASE_URL_USERS}/logout`, {
-      headers: {
-        "auth-token": `${localStorage.getItem("auth-token")}`,
-      },
-    });
-    // If response is ok then return repsonse.data
+    const response = await userService.logout();
     if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
-    console.log(error);
-    if (error.response && error.response.data && error.response.data.error) {
-      toast.error(error.response.data.error); // Display the error message in a toast
-    } else {
-      toast.error("An error occurred. Please try again later.");
-    }
+    toast.error(error.customMessage || "Logout failed");
     throw error;
   }
 });
-// Logout end's
 
-// Get user details
 export const userDataAsync = createAsyncThunk(
   "users/details",
   async ({ userId }) => {
     try {
-      // Sending request to the server
-      const response = await axios.get(
-        `${BASE_URL_USERS}/user-data/${userId}`,
-        {
-          headers: {
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
-      // If response is ok then return response.data
+      const response = await userService.getUserData(userId);
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to fetch user details");
       throw error;
     }
   }
 );
-// Get user details end's
 
-// Forgot password otp
 export const forgotPasswordOtpAsync = createAsyncThunk(
   "users/forgotPassword",
   async ({ email }) => {
     try {
-      // Sending request to the server
-      const response = await axios.post(
-        `${BASE_URL_USERS}/forgot-password-otp`,
-        { email },
-        {
-          headers: {
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
-      // If response is ok then return response.data
+      const response = await userService.forgotPasswordOtp({ email });
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to send reset email");
       throw error;
     }
   }
 );
-// Forgot password otp end's
 
-// Reset password start's
 export const resetPasswordAsync = createAsyncThunk(
   "users/reset-password",
   async ({ newPassword, confirmPassword, otp }) => {
     try {
-      // Sending request to the server
-      const response = await axios.put(
-        `${BASE_URL_USERS}/reset-password`,
-        {
-          password: newPassword,
-          confirmPassword: confirmPassword,
-          resetToken: otp,
-        },
-        {
-          headers: {
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
-      // If response is ok then return response.data
+      const response = await userService.resetPassword({
+        password: newPassword,
+        confirmPassword,
+        resetToken: otp,
+      });
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to reset password");
       throw error;
     }
   }
 );
-// Reset password start's end's
 
-// Update profile
 export const updateProfileAsync = createAsyncThunk(
   "users/updateProfile",
   async (userData) => {
     try {
-      // Sending request to the server
-      const response = await axios.put(
-        `${BASE_URL_USERS}/update-profile`,
-        userData,
-        {
-          headers: {
-            Accept: "application/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      // If response is ok then return response.data
-      if (response.status === 200) {
+      const response = await userService.updateProfile(userData);
+      if (response.status === 200 || response.status === 201) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to update profile");
       throw error;
     }
   }
 );
-// Update profile ends
 
-// Upload profile picture
 export const uploadProfilePicAsync = createAsyncThunk(
   "users/uploadProfilePic",
   async (formData) => {
     try {
-      // Sending request to the server
-      const response = await axios.post(
-        `${BASE_URL_USERS}/upload-profile-pic`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
-      // If response is ok then return response.data
+      const response = await userService.uploadProfilePic(formData);
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to upload profile picture");
       throw error;
     }
   }
 );
-// Upload profile picture ends
 
-// Delete account
 export const deleteAccountAsync = createAsyncThunk(
   "users/deleteAccount",
   async () => {
     try {
-      // Sending request to the server
-      const response = await axios.delete(`${BASE_URL_USERS}/delete-account`, {
-        headers: {
-          "auth-token": `${localStorage.getItem("auth-token")}`,
-        },
-      });
-      // If response is ok then return response.data
+      const response = await userService.deleteAccount();
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error); // Display the error message in a toast
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to delete account");
       throw error;
     }
   }
 );
-// Delete account ends
 
-// Initial State
+const storedToken = localStorage.getItem("auth-token") || "";
+const storedUser = getStoredUser();
+
 const INITIAL_STATE = {
-  isSignIn: false,
-  token: "",
-  signedUser: {},
+  isSignIn: Boolean(storedToken),
+  token: storedToken,
+  signedUser: storedUser,
+  userId: storedUser?._id || "",
   signUpLoading: false,
   loginLoading: false,
-  userLoading: true,
-  userData: {},
+  userLoading: false,
+  userData: null,
 };
 
-// Slice
+const handleAuthSuccess = (state, action, message) => {
+  state.isSignIn = true;
+  state.token = action.payload.token;
+  state.signedUser = action.payload.user;
+  state.userId = action.payload.user?._id || "";
+
+  localStorage.setItem("auth-token", action.payload.token);
+  localStorage.setItem("signedUser", JSON.stringify(action.payload.user));
+
+  toast.success(message);
+};
+
+const handleAuthClear = (state, message) => {
+  state.isSignIn = false;
+  state.signedUser = {};
+  state.userId = "";
+  state.token = "";
+  state.userData = null;
+
+  localStorage.removeItem("auth-token");
+  localStorage.removeItem("signedUser");
+
+  toast.success(message);
+};
+
 const usersSlice = createSlice({
-  // Slice name
   name: "users",
-
-  // Initial State
   initialState: INITIAL_STATE,
-
-  // Reducers
   reducers: {},
-
-  // Extra reducer's
   extraReducers: (builder) => {
-    // signUpAsync thunk extra reducer's start's here
-    // When pending
-    builder.addCase(signUpAsync.pending, (state) => {
-      state.signUpLoading = true;
-    });
+    builder
+      // Sign up
+      .addCase(signUpAsync.pending, (state) => {
+        state.signUpLoading = true;
+      })
+      .addCase(signUpAsync.fulfilled, (state, action) => {
+        state.signUpLoading = false;
+        handleAuthSuccess(state, action, "Signed In!");
+      })
+      .addCase(signUpAsync.rejected, (state) => {
+        state.signUpLoading = false;
+      })
 
-    // When fulfilled
-    builder.addCase(signUpAsync.fulfilled, (state, action) => {
-      state.signUpLoading = false;
-      state.isSignIn = true;
-      state.token = action.payload.token;
-      state.signedUser = action.payload.user;
-      // Stringify objects before setting them as cookies
-      Cookies.set("token", action.payload.token);
-      Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
-      Cookies.set("signedUser", JSON.stringify(state.signedUser));
-      Cookies.set("userId", state.signedUser._id);
-      localStorage.setItem("auth-token", action.payload.token);
-      toast.success("Signed In!"); // Showing notification
-    });
+      // Login
+      .addCase(loginAsync.pending, (state) => {
+        state.loginLoading = true;
+      })
+      .addCase(loginAsync.fulfilled, (state, action) => {
+        state.loginLoading = false;
+        handleAuthSuccess(state, action, "Login Successful!");
+      })
+      .addCase(loginAsync.rejected, (state) => {
+        state.loginLoading = false;
+      })
 
-    // When rejected
-    builder.addCase(signUpAsync.rejected, (state) => {
-      state.signUpLoading = false; // Set signUpLoading to false in case of rejection
-    });
-    // signUpAsync thunk extra reducer's end's
+      // User details
+      .addCase(userDataAsync.pending, (state) => {
+        state.userLoading = true;
+      })
+      .addCase(userDataAsync.fulfilled, (state, action) => {
+        state.userLoading = false;
+        state.userData = action.payload;
+      })
+      .addCase(userDataAsync.rejected, (state) => {
+        state.userLoading = false;
+      })
 
-    // loginAsync thunk start's here
-    // When pending
-    builder.addCase(loginAsync.pending, (state) => {
-      state.loginLoading = true;
-    });
+      // Logout
+      .addCase(logoutAsync.fulfilled, (state) => {
+        handleAuthClear(state, "Logout Successful!");
+      })
 
-    // When fulfilled
-    builder.addCase(loginAsync.fulfilled, (state, action) => {
-      state.loginLoading = false;
-      state.token = action.payload.token;
-      state.signedUser = action.payload.user;
-      state.isSignIn = true;
-      // Stringify objects before setting them as cookies
-      Cookies.set("token", action.payload.token);
-      Cookies.set("isSignIn", state.isSignIn.toString()); // Convert boolean to string
-      Cookies.set("signedUser", JSON.stringify(state.signedUser));
-      Cookies.set("userId", state.signedUser._id);
-      localStorage.setItem("auth-token", action.payload.token);
-      toast.success("Login Successful!");
-    });
+      // Password recovery
+      .addCase(forgotPasswordOtpAsync.fulfilled, (_, action) => {
+        toast.success(action.payload.msg || "OTP sent successfully!");
+      })
+      .addCase(resetPasswordAsync.fulfilled, (_, action) => {
+        toast.success(action.payload.msg || "Password reset successfully!");
+      })
 
-    // When rejected
-    builder.addCase(loginAsync.rejected, (state) => {
-      state.loginLoading = false;
-    });
-    // loginAsync thunk ends
+      // Profile Update
+      .addCase(updateProfileAsync.pending, (state) => {
+        state.userLoading = true;
+      })
+      .addCase(updateProfileAsync.fulfilled, (state, action) => {
+        state.userLoading = false;
+        if (action.payload.updatedUser) {
+          state.signedUser = { ...state.signedUser, ...action.payload.updatedUser };
+          localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
+        }
+        toast.success(action.payload.msg || "Profile updated successfully!");
+      })
+      .addCase(updateProfileAsync.rejected, (state) => {
+        state.userLoading = false;
+      })
 
-    // Get userDataAsync extra reducer's start's here
-    builder.addCase(userDataAsync.pending, (state) => {
-      state.userLoading = true;
-    });
-    builder.addCase(userDataAsync.fulfilled, (state, action) => {
-      state.userLoading = false;
-      state.userData = action.payload;
-    });
-    builder.addCase(userDataAsync.rejected, (state) => {
-      state.userLoading = false;
-    });
-    // Get userDataAsync ends
+      // Profile Picture Upload
+      .addCase(uploadProfilePicAsync.pending, (state) => {
+        state.userLoading = true;
+      })
+      .addCase(uploadProfilePicAsync.fulfilled, (state, action) => {
+        state.userLoading = false;
+        if (action.payload.profilePic) {
+          state.signedUser = {
+            ...state.signedUser,
+            profilePic: action.payload.profilePic,
+          };
+          localStorage.setItem("signedUser", JSON.stringify(state.signedUser));
+        }
+        toast.success(action.payload.message || "Profile picture uploaded successfully!");
+      })
+      .addCase(uploadProfilePicAsync.rejected, (state) => {
+        state.userLoading = false;
+      })
 
-    // logoutAsync thunk extra reducer's start's here
-    // When pending
-    builder.addCase(logoutAsync.pending, () => {});
-
-    // When fulfilled
-    builder.addCase(logoutAsync.fulfilled, (state) => {
-      // Setting state
-      Cookies.remove("isSignIn"); //Removing isSignin from cookie
-      Cookies.remove("signedUser");
-      Cookies.remove("userId");
-      localStorage.removeItem("auth-token");
-      state.isSignIn = false;
-      state.signedUser = {};
-      state.token = "";
-      toast.success("Logout Successful!"); // Toast notification
-    });
-
-    // When rejected
-    builder.addCase(logoutAsync.rejected, () => {});
-    // logoutAsync thunk extra reducer's end's here
-
-    // Forgot password thunks extra reducer's
-    // When pending
-    builder.addCase(forgotPasswordOtpAsync.pending, () => {});
-
-    // When fulfilled
-    builder.addCase(forgotPasswordOtpAsync.fulfilled, (state, action) => {
-      toast.success(action.payload.msg);
-    });
-
-    // When rejected
-    builder.addCase(forgotPasswordOtpAsync.rejected, () => {});
-    // Forgot password thunks extra reducer's end's
-
-    // Reset password thunks extra reducer's
-    // When pending
-    builder.addCase(resetPasswordAsync.pending, () => {});
-
-    // When fulfilled
-    builder.addCase(resetPasswordAsync.fulfilled, (action) => {
-      toast.success(action.payload.msg);
-    });
-
-    // When rejected
-    builder.addCase(resetPasswordAsync.rejected, () => {});
-    // Reset password thunks extra reducer's end's
-
-    // updateProfileAsync thunk extra reducers start here
-    // When pending
-    builder.addCase(updateProfileAsync.pending, (state) => {
-      state.userLoading = true;
-    });
-
-    // When fulfilled
-    builder.addCase(updateProfileAsync.fulfilled, (state) => {
-      state.userLoading = false;
-      // Update user data in state if necessary
-      // state.userData = action.payload;
-      toast.success("Profile updated successfully!");
-    });
-
-    // When rejected
-    builder.addCase(updateProfileAsync.rejected, (state) => {
-      state.userLoading = false;
-    });
-    // updateProfileAsync thunk extra reducers end here
-
-    // uploadProfilePicAsync thunk extra reducers start here
-    // When pending
-    builder.addCase(uploadProfilePicAsync.pending, (state) => {
-      state.userLoading = true;
-    });
-
-    // When fulfilled
-    builder.addCase(uploadProfilePicAsync.fulfilled, (state) => {
-      state.userLoading = false;
-      // Update user data in state if necessary
-      // state.userData = action.payload;
-      toast.success("Profile picture uploaded successfully!");
-    });
-
-    // When rejected
-    builder.addCase(uploadProfilePicAsync.rejected, (state) => {
-      state.userLoading = false;
-    });
-    // uploadProfilePicAsync thunk extra reducers end here
-    // deleteAccountAsync thunk extra reducers start here
-    // When pending
-    builder.addCase(deleteAccountAsync.pending, (state) => {
-      state.userLoading = true;
-    });
-    // When fulfilled
-    builder.addCase(deleteAccountAsync.fulfilled, (state) => {
-      state.userLoading = false;
-      // Clear user data and cookies
-      Cookies.remove("isSignIn");
-      Cookies.remove("signedUser");
-      Cookies.remove("userId");
-      localStorage.removeItem("auth-token");
-      state.isSignIn = false;
-      state.signedUser = {};
-      state.token = "";
-      toast.success("Account deleted successfully!");
-    });
-    // When rejected
-    builder.addCase(deleteAccountAsync.rejected, (state) => {
-      state.userLoading = false;
-    });
+      // Delete Account
+      .addCase(deleteAccountAsync.fulfilled, (state) => {
+        handleAuthClear(state, "Account deleted successfully!");
+      });
   },
 });
 
-// Extract user reducer from the slice
 export const usersReducer = usersSlice.reducer;
-
-// Extract actions from the slice
-
-// State from the reducer and exporting state
 export const usersSelector = (state) => state.usersReducer;
+

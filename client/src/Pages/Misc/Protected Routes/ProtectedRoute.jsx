@@ -1,15 +1,12 @@
-// Import's
 import { Navigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { useSelector } from 'react-redux';
+import { usersSelector } from '../../../Redux/Reducer/usersReducer';
 
-// Protected Route component which checks if the user is signed in and has a token
 function ProtectedRoute({ children }) {
-    // Check if there is a token in the cookie
-    const token = Cookies.get('token');
-    const isSignIn = Cookies.get('isSignIn');
-    // Returning JSX
-    return token && isSignIn ? children : <Navigate to="/login" />;
+    const { isSignIn, token } = useSelector(usersSelector);
+    const isAuthenticated = (isSignIn && Boolean(token)) || Boolean(localStorage.getItem('auth-token'));
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
-// Exporting ProtectedRoute
 export default ProtectedRoute;
+

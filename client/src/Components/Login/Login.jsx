@@ -1,52 +1,31 @@
-// Imports
-// import styles from "../Login/Login.module.css";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
 import { ClipLoader } from "react-spinners";
 import { RiEyeCloseFill } from "react-icons/ri";
 import { FaEye } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
 
-// Login component is here
 export default function Login() {
-    // States
-    // const [email, setEmail] = useState("");
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
-    // States from the user's reducer here
     const { loginLoading } = useSelector(usersSelector);
-
-    // Navigator
     const navigate = useNavigate();
-
-    // Dispatcher
     const dispatch = useDispatch();
 
-    // Handler's
-    // Handler's
     const handleLogin = async (e) => {
+        e.preventDefault();
         try {
-            // Preventing default behaviour of submit here
-            e.preventDefault();
-
-            // Dispatching loginAsync thunk here
-            await dispatch(loginAsync({ identifier, password }));
-
-            // Redirect to home page after successful login
-            if (Cookies.get("isSignIn")) {
-                // Clear fields
-                // setEmail("");
-                setIdentifier
+            const result = await dispatch(loginAsync({ identifier, password })).unwrap();
+            if (result) {
+                setIdentifier("");
                 setPassword("");
                 navigate("/");
             }
-        } catch (error) {
-            console.error("Login failed:", error);
+        } catch {
+            // Handled in thunk with toast
         }
     };
 

@@ -1,20 +1,21 @@
 // Imports
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { GoHomeFill } from "react-icons/go";
 import { MdExplore } from "react-icons/md";
 import { RiVideoFill } from "react-icons/ri";
 import { MdAddBox } from "react-icons/md";
 import { RiMessage2Fill } from "react-icons/ri";
 import { FaUserAlt } from "react-icons/fa";
-import Cookies from "js-cookie";
 import { useEffect } from "react";
+import { usersSelector } from "../../Redux/Reducer/usersReducer";
 
 // Footer component
 function Footer() {
-    // Get current location
     const location = useLocation();
-    const signedUser = JSON.parse(Cookies.get("signedUser"));
-    const userId = signedUser ? signedUser._id : null;
+    const { signedUser, userId } = useSelector(usersSelector);
+
+
 
     // Active link styles
     const activeStyle = "text-blue-500 scale-110";

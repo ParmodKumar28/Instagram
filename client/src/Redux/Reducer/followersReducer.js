@@ -1,34 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { toast } from 'react-hot-toast';
-import BASE_URL from "../baseUrl";
-
-const BASE_URL_FOLLOWERS = `${BASE_URL}/follower`;
-
-axios.defaults.withCredentials = true;
+import { toast } from "react-hot-toast";
+import { followerService } from "../../services";
 
 export const toggleFollowAsync = createAsyncThunk(
   "followers/toggleFollow",
-  async (followingId, { dispatch }) => {
+  async (followingId) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/follow/${followingId}`,
-        {
-          headers: {
-            "auth-token": localStorage.getItem("auth-token"),
-          },
-        }
-      );
+      const response = await followerService.toggleFollow(followingId);
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to toggle follow status");
       throw error;
     }
   }
@@ -38,24 +21,12 @@ export const getFollowersAsync = createAsyncThunk(
   "followers/getFollowers",
   async (userId) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/followers/${userId}`,
-        {
-          headers: {
-            "auth-token": localStorage.getItem("auth-token"),
-          },
-        }
-      );
+      const response = await followerService.getFollowers(userId);
       if (response.status === 200) {
         return response.data.followers;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to fetch followers");
       throw error;
     }
   }
@@ -65,24 +36,12 @@ export const getFollowingAsync = createAsyncThunk(
   "followers/getFollowing",
   async (userId) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/following/${userId}`,
-        {
-          headers: {
-            "auth-token": localStorage.getItem("auth-token"),
-          },
-        }
-      );
+      const response = await followerService.getFollowing(userId);
       if (response.status === 200) {
         return response.data.following;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to fetch following");
       throw error;
     }
   }
@@ -91,28 +50,15 @@ export const getFollowingAsync = createAsyncThunk(
 // Async thunk to remove a follower
 export const removeFollowerAsync = createAsyncThunk(
   "followers/removeFollower",
-  async (followerId, { getState, rejectWithValue }) => {
+  async (followerId, { rejectWithValue }) => {
     try {
-      const authToken = localStorage.getItem("auth-token");
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/unfollow/${followerId}`,
-        {
-          headers: {
-            "auth-token": authToken,
-          },
-        }
-      );
+      const response = await followerService.removeFollower(followerId);
       if (response.status === 200) {
-        return followerId; // Return the ID of the removed follower upon success
+        return followerId;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
-      return rejectWithValue(error.message); // Reject with the error message
+      toast.error(error.customMessage || "Failed to remove follower");
+      return rejectWithValue(error.customMessage || error.message);
     }
   }
 );
@@ -120,28 +66,15 @@ export const removeFollowerAsync = createAsyncThunk(
 // Async thunk to unfollow a user
 export const unfollowUserAsync = createAsyncThunk(
   "followers/unfollowUser",
-  async (followingId, { getState, rejectWithValue }) => {
+  async (followingId, { rejectWithValue }) => {
     try {
-      const authToken = localStorage.getItem("auth-token");
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/unfollow/${followingId}`,
-        {
-          headers: {
-            "auth-token": authToken,
-          },
-        }
-      );
+      const response = await followerService.unfollowUser(followingId);
       if (response.status === 200) {
-        return response.data.msg; // Return the success message
+        return response.data.msg;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
-      return rejectWithValue(error.message); // Reject with the error message
+      toast.error(error.customMessage || "Failed to unfollow user");
+      return rejectWithValue(error.customMessage || error.message);
     }
   }
 );
@@ -150,28 +83,16 @@ export const getFollowStatusAsync = createAsyncThunk(
   "followers/getFollowStatus",
   async (userId) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL_FOLLOWERS}/follow-status/${userId}`,
-        {
-          headers: {
-            "auth-token": localStorage.getItem("auth-token"),
-          },
-        }
-      );
+      const response = await followerService.getFollowStatus(userId);
       if (response.status === 200) {
         return response.data;
       }
     } catch (error) {
-      console.error(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to fetch follow status");
       throw error;
     }
   }
-)
+);
 
 const initialState = {
   followers: [],

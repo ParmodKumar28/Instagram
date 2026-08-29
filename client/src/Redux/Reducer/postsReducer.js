@@ -1,170 +1,96 @@
 // Post's reducer is here here all state management is handled related to post's and handlers
 // Imports
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-import { toast } from 'react-hot-toast';
-import BASE_URL from "../baseUrl";
-
-// Base url for post's
-const BASE_URL_POSTS = `${BASE_URL}/post`;
-
-// Setting Axios default for credentials
-axios.defaults.withCredentials = true;
+import { toast } from "react-hot-toast";
+import { postService } from "../../services";
 
 // Async Thunks
-// Create new post starts here
+// Create new post
 export const createPostAsync = createAsyncThunk(
   "posts/create",
   async (formData, { dispatch }) => {
     try {
-      const response = await fetch(`${BASE_URL_POSTS}/create-post`, {
-        method: "POST",
-        headers: {
-          "auth-token": `${localStorage.getItem("auth-token")}`,
-        },
-        body: formData,
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      const response = await postService.createPost(formData);
+      if (response.status === 201 || response.status === 200) {
         dispatch(fetchPostsAsync());
-        return data;
-      } else {
-        const errorData = await response.json();
-        if (errorData.error) {
-          toast.error(errorData.error);
-        } else {
-          toast.error("An error occurred. Please try again later.");
-        }
-        throw new Error("Failed to create post");
+        return response.data;
       }
     } catch (error) {
-      console.log(error);
-      toast.error("An error occurred. Please try again later.");
+      toast.error(error.customMessage || "Failed to create post");
       throw error;
     }
   }
 );
-// Create new post ends here
 
-// Fetch posts
+// Fetch all posts
 export const fetchPostsAsync = createAsyncThunk("posts/fetch", async () => {
   try {
-    const response = await axios.get(`${BASE_URL_POSTS}/all-posts`, {
-      headers: {
-        "auth-token": `${localStorage.getItem("auth-token")}`,
-      },
-    });
+    const response = await postService.getAllPosts();
     if (response.status === 200) {
       return response.data;
     }
   } catch (error) {
-    console.log(error);
-    if (error.response && error.response.data && error.response.data.error) {
-      toast.error(error.response.data.error);
-    } else {
-      toast.error("An error occurred. Please try again later.");
-    }
+    toast.error(error.customMessage || "Failed to fetch posts");
     throw error;
   }
 });
-// Fetch posts ends
 
-// Async Thunk for updating a post
+// Update post
 export const updatePostAsync = createAsyncThunk(
   "posts/update",
   async ({ postId, postData }, { dispatch }) => {
     try {
-      const response = await axios.put(
-        `${BASE_URL_POSTS}/update-post/${postId}`,
-        postData,
-        {
-          headers: {
-            Accept: "application/form-data",
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await postService.updatePost(postId, postData);
       if (response.status === 200) {
         dispatch(fetchPostsAsync());
         return response.data;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to update post");
       throw error;
     }
   }
 );
 
-// Async Thunk for deleting a post
+// Delete post
 export const deletePostAsync = createAsyncThunk(
   "posts/delete",
   async (postId, { dispatch }) => {
     try {
-      const response = await axios.delete(
-        `${BASE_URL_POSTS}/delete-post/${postId}`,
-        {
-          headers: {
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
+      const response = await postService.deletePost(postId);
       if (response.status === 200) {
         dispatch(fetchPostsAsync());
         return postId;
       }
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("An error occurred. Please try again later.");
-      }
+      toast.error(error.customMessage || "Failed to delete post");
       throw error;
     }
   }
 );
 
-// Async Thunk for fetching user posts
+// Fetch user posts
 export const fetchUserPostsAsync = createAsyncThunk(
   "posts/fetchUserPosts",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${BASE_URL_POSTS}/user-posts/${userId}`,
-        {
-          headers: {
-            "auth-token": `${localStorage.getItem("auth-token")}`,
-          },
-        }
-      );
+      const response = await postService.getUserPosts(userId);
       return response.data.posts;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.customMessage);
     }
   }
 );
 
-// Async Thunk for fetching a single post by ID
+// Fetch single post by ID
 export const fetchSinglePostAsync = createAsyncThunk(
   "posts/fetchSinglePost",
   async (postId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${BASE_URL_POSTS}/${postId}`, {
-        headers: {
-          "auth-token": `${localStorage.getItem("auth-token")}`,
-        },
-      });
+      const response = await postService.getPostById(postId);
       return response.data.post;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.customMessage);
     }
   }
 );
@@ -239,61 +165,38 @@ const postsSlice = createSlice({
       state.singlePostLoading = false;
     });
 
-    // Fetch posts pending state extra reducer
-    builder.addCase(fetchPostsAsync.pending, (state, action) => {
-      state.postsLoading = true; // Set loading state for fetching posts
-    });
+    // Fetch posts
+    builder
+      .addCase(fetchPostsAsync.pending, (state) => {
+        state.postsLoading = true;
+      })
+      .addCase(fetchPostsAsync.fulfilled, (state, action) => {
+        state.postsLoading = false;
+        state.posts = action.payload.posts || action.payload;
+      })
+      .addCase(fetchPostsAsync.rejected, (state) => {
+        state.postsLoading = false;
+      })
 
-    // Fetch posts fulfilled state extra reducer
-    builder.addCase(fetchPostsAsync.fulfilled, (state, action) => {
-      state.postsLoading = false; // Set loading state to false
-      state.posts = action.payload.posts; // Update posts state with fetched data
-    });
+      // Update post
+      .addCase(updatePostAsync.fulfilled, () => {
+        toast.success("Post updated successfully!");
+      })
 
-    // Fetch posts rejected state extra reducer
-    builder.addCase(fetchPostsAsync.rejected, (state, action) => {
-      state.postsLoading = false; // Set loading state to false
-    });
-
-    // Update post pending state extra reducer
-    builder.addCase(updatePostAsync.pending, (state, action) => {
-      // Handle pending state for updating post if needed
-    });
-
-    // Update post fulfilled state extra reducer
-    builder.addCase(updatePostAsync.fulfilled, (state, action) => {
-      // Handle fulfilled state for updating post if needed
-      toast.success("Post updated successfully!"); // Display success message
-    });
-
-    // Update post rejected state extra reducer
-    builder.addCase(updatePostAsync.rejected, (state, action) => {
-      // Handle rejected state for updating post if needed
-    });
-
-    // Delete post pending state extra reducer
-    builder.addCase(deletePostAsync.pending, (state, action) => {
-      // Handle pending state for deleting post if needed
-    });
-
-    // Delete post fulfilled state extra reducer
-    builder.addCase(deletePostAsync.fulfilled, (state, action) => {
-      // Handle fulfilled state for deleting post if needed
-      toast.success("Post deleted successfully!"); // Display success message
-      state.posts = state.posts.filter((post) => post.id !== action.payload); // Remove deleted post from state
-    });
-
-    // Delete post rejected state extra reducer
-    builder.addCase(deletePostAsync.rejected, (state, action) => {
-      // Handle rejected state for deleting post if needed
-    });
+      // Delete post
+      .addCase(deletePostAsync.fulfilled, (state, action) => {
+        const deletedId = action.payload;
+        state.posts = state.posts.filter(
+          (post) => (post._id || post.id) !== deletedId
+        );
+        state.userPosts = state.userPosts.filter(
+          (post) => (post._id || post.id) !== deletedId
+        );
+        toast.success("Post deleted successfully!");
+      });
   },
 });
 
-// Extract post reducer from the slice
 export const postsReducer = postsSlice.reducer;
-
-// Extract actions from the slice
-
-// State from the reducer and exporting state
 export const postsSelector = (state) => state.postsReducer;
+

@@ -2,22 +2,19 @@ import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Link, useParams } from "react-router-dom"
 import { followersSelector, getFollowingAsync, unfollowUserAsync } from "../../Redux/Reducer/followersReducer"
-import Cookies from "js-cookie"
+import { usersSelector } from "../../Redux/Reducer/usersReducer"
 import { motion } from "framer-motion"
 import { UserMinus, ArrowLeft, Search, UserX } from "lucide-react"
 
 const FollowingList = () => {
   const dispatch = useDispatch()
   const { loading, following: initialFollowing } = useSelector(followersSelector)
+  const { userId: currentUserId } = useSelector(usersSelector)
   const { userId } = useParams()
-  const [signedUser, setSignedUser] = useState("")
   const [following, setFollowing] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isUnfollowing, setIsUnfollowing] = useState({})
 
-  useEffect(() => {
-    setSignedUser(Cookies.get("userId"))
-  }, [])
 
   useEffect(() => {
     dispatch(getFollowingAsync(userId))
@@ -179,7 +176,7 @@ const FollowingList = () => {
                       </p>
                     </div>
 
-                    {signedUser === userId && (
+                    {currentUserId === userId && (
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}

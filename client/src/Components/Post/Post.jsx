@@ -1,13 +1,12 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import axios from 'axios';
 import './Post.module.css';
 import { toast } from 'react-hot-toast';
 import { FaHeart, FaRegComment, FaRegBookmark, FaEllipsisH, FaRegPaperPlane } from 'react-icons/fa';
-import { useDispatch } from "react-redux";
-import Cookies from "js-cookie";
+import { useDispatch, useSelector } from "react-redux";
 import { deletePostAsync, updatePostAsync } from '../../Redux/Reducer/postsReducer';
+import { usersSelector } from '../../Redux/Reducer/usersReducer';
 import { Link } from 'react-router-dom';
-import BASE_URL from '../../Redux/baseUrl';
+import { commentService, likeService } from '../../services';
 
 // Lazy-loaded components
 const CommentList = lazy(() => import('./Comments List/CommentList'));
@@ -15,45 +14,36 @@ const LikeList = lazy(() => import('./Like List/LikeList'));
 const OptionsList = lazy(() => import('./Options List/OptionsList'));
 
 function Post({ post }) {
-    // State's
+    // Local State for comments and likes
     const [commentText, setCommentText] = useState('');
     const [showComments, setShowComments] = useState(false);
     const [likeList, setLikeList] = useState([]);
     const [isLiked, setIsLiked] = useState(false);
     const [showLikeList, setShowLikeList] = useState(false);
-    // Removed isDoubleTapped state.
-    const [lastTap, setLastTap] = useState(0); // For double-tap detection
+    const [lastTap, setLastTap] = useState(0);
     const [showHeart, setShowHeart] = useState(false);
     const [comments, setComments] = useState([]);
     const [commentsLoading, setCommentsLoading] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
-    const [likes, setLikes] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editedCaption, setEditedCaption] = useState(post.caption || '');
 
-    // Dispatcher
     const dispatch = useDispatch();
+    const { userId: currentUserId } = useSelector(usersSelector);
 
-    // Get current user id from cookies (adjust if needed)
-    const currentUserId = Cookies.get("userId") || "";
+
 
     // Event handler for adding comment
     const handleAddComment = async () => {
         try {
-            const response = await axios.post(
-                `${BASE_URL}/comment/add/${post._id}`,
-                { comment: commentText },
-                {
-                    headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
-                }
-            );
+            const response = await commentService.addComment(post._id, commentText);
             if (response.status === 201) {
                 getComments();
-                toast.success(response.data.msg);
+                toast.success(response.data.msg || "Comment added");
                 setCommentText('');
             }
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Error adding comment');
+            toast.error(error.customMessage || 'Error adding comment');
         }
     };
 
@@ -65,9 +55,7 @@ function Post({ post }) {
         setTimeout(() => setShowHeart(false), 1000);
 
         try {
-            await axios.get(`${BASE_URL}/like/toggle/${post._id}?type=Post`, {
-                headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
-            });
+            await likeService.toggleLike(post._id, 'Post');
             fetchLikes();
         } catch (error) {
             console.error('Error toggling like:', error);
@@ -77,9 +65,7 @@ function Post({ post }) {
     // Fetch likes for the post
     const fetchLikes = async () => {
         try {
-            const response = await axios.get(`${BASE_URL}/like/${post._id}?type=Post`, {
-                headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
-            });
+            const response = await likeService.getLikes(post._id, 'Post');
             setLikeList(response.data.likes);
         } catch (error) {
             console.error('Error fetching likes:', error);
@@ -97,9 +83,7 @@ function Post({ post }) {
     const getComments = async () => {
         setCommentsLoading(true);
         try {
-            const response = await axios.get(`${BASE_URL}/comment/${post._id}`, {
-                headers: { 'auth-token': `${localStorage.getItem('auth-token')}` },
-            });
+            const response = await commentService.getComments(post._id);
             setComments(response.data.comments);
         } catch (error) {
             console.error('Error fetching comments:', error);

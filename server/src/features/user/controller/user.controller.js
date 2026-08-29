@@ -95,16 +95,9 @@ export const signIn = async (req, res, next) => {
 // Logout user
 export const logout = async (req, res, next) => {
   try {
-    // Removing token from the cookie to logout
-    res
-      .status(200)
-      .cookie("token", null, {
-        expires: new Date(Date.now()),
-        httpOnly: true,
-      })
-      .json({ success: true, msg: "logout successful!" });
+    res.status(200).json({ success: true, msg: "Logout successful!" });
   } catch (error) {
-    return next(new ErrorHandler(400, error));
+    return next(new ErrorHandler(400, error.message || error));
   }
 };
 
@@ -149,6 +142,7 @@ export const addProfilePic = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Profile picture uploaded successfully",
+      profilePic: imageUrl,
     });
   } catch (error) {
     return next(new ErrorHandler(400, error.message));

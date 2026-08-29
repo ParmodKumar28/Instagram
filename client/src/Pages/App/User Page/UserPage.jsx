@@ -5,7 +5,6 @@ import { useNavigate, useParams, Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import UserPostList from "../../../Components/User Post List/UserPostList"
 import { FaHeart, FaComment, FaLink, FaUserEdit, FaSignOutAlt } from "react-icons/fa"
-import Cookies from "js-cookie"
 import {
   followersSelector,
   getFollowingAsync,
@@ -17,27 +16,24 @@ import { motion, AnimatePresence } from "framer-motion"
 
 const UserPage = () => {
   const dispatch = useDispatch()
-  const { userData, userLoading } = useSelector(usersSelector)
+  const { userData, userLoading, userId: currentUserId } = useSelector(usersSelector)
   const { userPosts, userPostsLoading } = useSelector(postsSelector)
-  const [signedUser, setSignedUser] = useState(null)
   const { userId } = useParams()
   const navigate = useNavigate()
   const { following, followStatus } = useSelector(followersSelector)
   const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false)
   const [activeTab, setActiveTab] = useState("posts")
-  // Always use the Redux followStatus for the button
   const currentFollowStatus = followStatus || "none"
 
+
   useEffect(() => {
-    const userIdFromCookies = Cookies.get("userId")
-    setSignedUser(userIdFromCookies)
-    if (userIdFromCookies) {
-      dispatch(userDataAsync({ userId }))
-      dispatch(fetchUserPostsAsync(userId))
-      dispatch(getFollowingAsync(userIdFromCookies))
+    dispatch(userDataAsync({ userId }))
+    dispatch(fetchUserPostsAsync(userId))
+    if (currentUserId) {
+      dispatch(getFollowingAsync(currentUserId))
       dispatch(getFollowStatusAsync(userId))
     }
-  }, [dispatch, userId])
+  }, [dispatch, userId, currentUserId])
 
   // Update following state for UI (optional, can be removed if you use only followStatus)
   const [isFollowed, setIsFollowed] = useState(false)
@@ -50,34 +46,34 @@ const UserPage = () => {
   const handleLogout = async () => {
     try {
       await dispatch(logoutAsync())
-      if (!Cookies.get("isSignIn")) {
-        navigate("/login")
-      }
+      navigate("/login")
     } catch (error) {
       console.error("Logout failed:", error)
     }
   }
 
   // Update follow status live after follow/unfollow
-const handleFollowToggle = async () => {
-  if (currentFollowStatus === "following" || isFollowed) {
-    await dispatch(unfollowUserAsync(userId))
-  } else {
-    await dispatch(toggleFollowAsync(userId))
+  const handleFollowToggle = async () => {
+    if (currentFollowStatus === "following" || isFollowed) {
+      await dispatch(unfollowUserAsync(userId))
+    } else {
+      await dispatch(toggleFollowAsync(userId))
+    }
+    // Re-fetch follow status and following list
+    dispatch(getFollowStatusAsync(userId))
+    if (currentUserId) {
+      dispatch(getFollowingAsync(currentUserId))
+    }
   }
-  // Re-fetch follow status and following list
-  dispatch(getFollowStatusAsync(userId))
-  dispatch(getFollowingAsync(signedUser))
-}
 
   const handleProfilePicClick = () => {
     setIsProfilePicZoomed(!isProfilePicZoomed)
   }
 
   // Private profile logic
-  const { user } = userData
+  const { user } = userData || {}
   const defaultProfilePic = "https://placekitten.com/200/200"
-  const isOwnProfile = signedUser === userId
+  const isOwnProfile = currentUserId === userId
   const isPrivate = user?.accountType === "private"
   const isLocked = isPrivate && !isOwnProfile
 

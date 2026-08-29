@@ -1,58 +1,37 @@
-// Imports
 import styles from "./Signup.module.css";
 import { FaEye, FaFacebookSquare } from "react-icons/fa";
 import iphone from "../../assets/Iphone.png";
-// import iphone2 from "../../assets/Iphone2.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signUpAsync, usersSelector } from "../../Redux/Reducer/usersReducer";
 import { ClipLoader } from "react-spinners";
 import { RiEyeCloseFill } from "react-icons/ri";
-import Cookies from "js-cookie";
 
-// Signup login component is here
 export default function SignUp() {
-    // States
     const [email, setEmail] = useState("");
     const [fullName, setFullName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
-    // States from the user's reducer here
     const { signUpLoading } = useSelector(usersSelector);
-
-    // Dispatcher
     const dispatch = useDispatch();
-
-    // Navigator
     const navigate = useNavigate();
 
-    // Handler's
     const handleSignUp = async (e) => {
+        e.preventDefault();
         try {
-            e.preventDefault(); // Prevent default form submission
-
-            // Dispatch sign-up action and wait for completion
-            const response = await dispatch(signUpAsync({ email, fullName, username, password }));
-
-            // Check if signup was successful (response should contain expected success data)
-            if (response?.payload?.success) {  // Ensure to check payload success
-                // Clear fields only upon successful signup
+            const response = await dispatch(signUpAsync({ email, fullName, username, password })).unwrap();
+            if (response) {
                 setEmail("");
                 setFullName("");
                 setUsername("");
                 setPassword("");
-
-                // Redirect to home page after successful sign-up
-                if (Cookies.get("isSignIn")) {
-                    navigate("/");
-                }
+                navigate("/");
             }
-
-        } catch (error) {
-            console.error("SignUp failed:", error);
+        } catch {
+            // Handled in thunk with toast
         }
     };
 

@@ -5,15 +5,15 @@ import userModel from "../features/user/model/user.schema.js";
 
 export const auth = async (req, res, next) => {
   try {
-    // 1. Extract token from cookies, Authorization header (Bearer), or auth-token header
+    // Extract token strictly from Authorization: Bearer <token>
     const authHeader = req.headers.authorization;
-    const token =
-      req.cookies?.token ||
-      (authHeader && authHeader.startsWith("Bearer ")
-        ? authHeader.split(" ")[1]
-        : authHeader) ||
-      req.header("auth-token");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next(
+        new ErrorHandler(401, "Access denied. Bearer token required in Authorization header!")
+      );
+    }
 
+    const token = authHeader.split(" ")[1];
     if (!token) {
       return next(new ErrorHandler(401, "Login to access this route!"));
     }

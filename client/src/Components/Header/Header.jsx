@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { logoutAsync } from "../../Redux/Reducer/usersReducer";
 import { IoIosArrowDown } from "react-icons/io";
-import Cookies from "js-cookie";
 
 function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -50,9 +49,7 @@ function Header() {
   const handleLogout = async () => {
     try {
       await dispatch(logoutAsync());
-      if (!Cookies.get("isSignIn")) {
-        navigate("/login");
-      }
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
