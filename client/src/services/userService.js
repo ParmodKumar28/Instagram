@@ -12,6 +12,7 @@ export const userService = {
     apiClient.post("/user/upload-profile-pic", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+  getSuggestedUsers: () => apiClient.get("/user/suggested-users"),
   deleteAccount: () => apiClient.delete("/user/delete-account"),
 };
 

@@ -55,3 +55,11 @@ export const findUserForPasswordResetDb = async (hashedToken) => {
 export const deleteUserDb = async (userId) => {
   return await UserModel.findByIdAndDelete(userId);
 };
+
+// Getting suggested users from db
+export const getSuggestedUsersDb = async (currentUserId, limit = 5) => {
+  return await UserModel.find({ _id: { $ne: currentUserId } })
+    .select("_id name username profilePic followers following")
+    .limit(limit)
+    .sort({ createdAt: -1 });
+};

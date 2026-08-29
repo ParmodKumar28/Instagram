@@ -8,6 +8,7 @@ import { sendToken } from "../../../utils/sendToken.js";
 import {
   deleteUserDb,
   findUserForPasswordResetDb,
+  getSuggestedUsersDb,
   getUserDataDb,
   signupDb,
   updateUserDb,
@@ -299,6 +300,20 @@ export const deleteAccount = async (req, res, next) => {
     return res
       .status(200)
       .json({ success: true, msg: "Account deleted successfully!" });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Getting suggested users
+export const getSuggestedUsers = async (req, res, next) => {
+  try {
+    const currentUserId = req.userId || req.user?._id;
+    const users = await getSuggestedUsersDb(currentUserId, 5);
+    return res.status(200).json({
+      success: true,
+      users,
+    });
   } catch (error) {
     return next(new ErrorHandler(400, error.message));
   }
