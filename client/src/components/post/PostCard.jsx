@@ -156,9 +156,9 @@ export function PostCard({ post }) {
   const timeAgo = formatTimeAgo(post?.createdAt);
 
   return (
-    <article className="w-full max-w-[490px] mx-auto bg-white border border-gray-200 rounded-xl mb-7 pb-2 select-none shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-50">
+    <article className="w-full max-w-[480px] mx-auto bg-white border border-gray-200 rounded-2xl mb-8 select-none shadow-sm overflow-hidden">
+      {/* Header with comfortable side padding */}
+      <div className="flex items-center justify-between px-4 py-3.5 sm:px-4 sm:py-4 border-b border-gray-50">
         <div className="flex items-center space-x-3">
           <Link
             to={`/profile/${post?.user?._id || ""}`}
@@ -216,7 +216,7 @@ export function PostCard({ post }) {
         </div>
       )}
 
-      {/* Actions Bar */}
+      {/* Actions Bar with left/right padding */}
       <div className="flex justify-between items-center px-4 pt-3.5 pb-1">
         <div className="flex items-center space-x-4">
           <button
@@ -267,8 +267,8 @@ export function PostCard({ post }) {
         </button>
       </div>
 
-      {/* Caption Section */}
-      <div className="px-4 pt-1.5 space-y-1.5 text-sm text-gray-900">
+      {/* Caption & Comments Section with proper left and right margins */}
+      <div className="px-4 pt-1.5 pb-3.5 space-y-2 text-sm text-gray-900">
         {isEditing ? (
           <div className="space-y-2 mt-2">
             <textarea
