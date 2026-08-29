@@ -134,15 +134,10 @@ export const getUserPosts = async (req, res, next) => {
       return next(new ErrorHandler(400, "Enter user id please!"));
     }
     const posts = await getUserPostsDb(userId);
-    if (posts.length === 0) {
-      return next(
-        new ErrorHandler(400, "No posts found please create some post's!")
-      );
-    }
     return res.status(200).json({
       success: true,
       msg: "Post's found successfully!",
-      posts: posts,
+      posts: posts || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

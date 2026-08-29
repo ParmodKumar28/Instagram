@@ -23,11 +23,12 @@ export const fetchUserPostsAsync = createAsyncThunk(
     try {
       const response = await postService.getUserPosts(userId);
       if (response.status === 200) {
-        return response.data.posts;
+        return response.data.posts || [];
       }
-    } catch (error) {
-      toast.error(error.customMessage || "Failed to fetch user posts");
-      throw error;
+      return [];
+    } catch {
+      // Don't show toast if user has no posts
+      return [];
     }
   }
 );
@@ -105,7 +106,11 @@ const INITIAL_STATE = {
 const postsSlice = createSlice({
   name: "posts",
   initialState: INITIAL_STATE,
-  reducers: {},
+  reducers: {
+    clearUserPosts: (state) => {
+      state.userPosts = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createPostAsync.pending, (state) => {
@@ -121,6 +126,7 @@ const postsSlice = createSlice({
 
       .addCase(fetchUserPostsAsync.pending, (state) => {
         state.userPostsLoading = true;
+        state.userPosts = [];
       })
       .addCase(fetchUserPostsAsync.fulfilled, (state, action) => {
         state.userPostsLoading = false;
@@ -128,6 +134,7 @@ const postsSlice = createSlice({
       })
       .addCase(fetchUserPostsAsync.rejected, (state) => {
         state.userPostsLoading = false;
+        state.userPosts = [];
       })
 
       .addCase(fetchSinglePostAsync.pending, (state) => {
@@ -169,6 +176,7 @@ const postsSlice = createSlice({
   },
 });
 
+export const { clearUserPosts } = postsSlice.actions;
 export const postsReducer = postsSlice.reducer;
 export const postsSelector = (state) => state.postsReducer;
 export default postsSlice.reducer;

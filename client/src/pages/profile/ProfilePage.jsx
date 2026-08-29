@@ -2,22 +2,15 @@ import { useEffect, useState } from "react";
 import {
   fetchUserPostsAsync,
   postsSelector,
+  clearUserPosts,
 } from "../../redux/slices/postsSlice";
 import {
-  logoutAsync,
   userDataAsync,
   usersSelector,
 } from "../../redux/slices/usersSlice";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import UserPostList from "../../components/profile/UserPostList";
-import {
-  FaHeart,
-  FaComment,
-  FaLink,
-  FaUserEdit,
-  FaSignOutAlt,
-} from "react-icons/fa";
 import {
   followersSelector,
   getFollowingAsync,
@@ -25,8 +18,9 @@ import {
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../redux/slices/followersSlice";
-import { motion, AnimatePresence } from "framer-motion";
-
+import { IoSettingsOutline } from "react-icons/io5";
+import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
+import { FaLink } from "react-icons/fa";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 
 export function ProfilePage() {
@@ -34,14 +28,13 @@ export function ProfilePage() {
   const { userData, userLoading, userId: currentUserId } = useSelector(usersSelector);
   const { userPosts, userPostsLoading } = useSelector(postsSelector);
   const { userId } = useParams();
-  const navigate = useNavigate();
   const { following, followStatus } = useSelector(followersSelector);
-  const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
-  const currentFollowStatus = followStatus || "none";
+  const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
 
   useEffect(() => {
     if (userId) {
+      dispatch(clearUserPosts());
       dispatch(userDataAsync({ userId }));
       dispatch(fetchUserPostsAsync(userId));
       if (currentUserId) {
@@ -53,22 +46,13 @@ export function ProfilePage() {
 
   const [isFollowed, setIsFollowed] = useState(false);
   useEffect(() => {
-    if (following) {
-      setIsFollowed(following.some((user) => user.following?._id === userId));
+    if (following && userId) {
+      setIsFollowed(following.some((u) => (u.following?._id || u.following) === userId));
     }
   }, [following, userId]);
 
-  const handleLogout = async () => {
-    try {
-      await dispatch(logoutAsync());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   const handleFollowToggle = async () => {
-    if (currentFollowStatus === "following" || isFollowed) {
+    if (followStatus === "following" || isFollowed) {
       await dispatch(unfollowUserAsync(userId));
     } else {
       await dispatch(toggleFollowAsync(userId));
@@ -79,15 +63,10 @@ export function ProfilePage() {
     }
   };
 
-  const handleProfilePicClick = () => {
-    setIsProfilePicZoomed(!isProfilePicZoomed);
-  };
-
   const { user } = userData || {};
-  const defaultProfilePic = "https://placekitten.com/200/200";
   const isOwnProfile = currentUserId === userId;
   const isPrivate = user?.accountType === "private";
-  const isLocked = isPrivate && !isOwnProfile;
+  const isLocked = isPrivate && !isOwnProfile && !isFollowed;
 
   if (userLoading) {
     return <ProfileSkeleton />;
@@ -95,15 +74,15 @@ export function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center py-16">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center max-w-sm">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">User Not Found</h2>
+      <div className="flex justify-center items-center py-20 px-4">
+        <div className="bg-white p-8 rounded-2xl border border-gray-200 text-center max-w-sm">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">User Not Found</h2>
           <p className="text-gray-500 text-sm mb-6">
             The profile you are looking for does not exist or may have been removed.
           </p>
           <Link
             to="/"
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-6 rounded-full transition"
+            className="bg-[#0095F6] hover:bg-[#1877F2] text-white text-sm font-semibold py-2 px-6 rounded-lg transition"
           >
             Back to Feed
           </Link>
@@ -113,227 +92,238 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen py-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Profile Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
-        >
-          {/* Banner */}
-          <div className="h-36 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 relative">
-            {isOwnProfile && (
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <Link to="/edit-profile">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full flex items-center transition"
-                  >
-                    <FaUserEdit className="mr-1.5" />
-                    Edit Profile
-                  </motion.button>
-                </Link>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white text-xs font-semibold py-2 px-4 rounded-full flex items-center transition"
+    <div className="w-full max-w-[935px] mx-auto pt-4 md:pt-8 px-4 sm:px-6 select-none">
+      {/* Profile Header (Authentic Instagram Desktop / Mobile) */}
+      <header className="flex flex-col sm:flex-row items-center sm:items-start mb-8 md:mb-12">
+        {/* Profile Picture */}
+        <div className="flex-shrink-0 sm:w-[290px] flex justify-center mb-4 sm:mb-0">
+          <div
+            onClick={() => setIsProfilePicZoomed(true)}
+            className="w-24 h-24 sm:w-36 sm:h-36 md:w-38 md:h-38 rounded-full border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 transition"
+          >
+            <img
+              src={user.profilePic || "https://placekitten.com/200/200"}
+              alt={user.username}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Profile Info Section */}
+        <div className="flex-1 text-center sm:text-left sm:pl-4">
+          {/* Top Row: Username + Actions */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-4">
+            <h1 className="text-xl md:text-2xl font-normal text-gray-900">
+              {user.username}
+            </h1>
+
+            {isOwnProfile ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/edit-profile"
+                  className="bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900 text-sm font-semibold px-4 py-1.5 rounded-lg transition"
                 >
-                  <FaSignOutAlt className="mr-1.5" />
-                  Logout
-                </motion.button>
+                  Edit profile
+                </Link>
+                <Link
+                  to="/edit-profile"
+                  className="p-2 text-gray-900 hover:text-gray-600 transition"
+                  aria-label="Settings"
+                >
+                  <IoSettingsOutline className="text-2xl" />
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleFollowToggle}
+                  className={`${
+                    isFollowed
+                      ? "bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900"
+                      : "bg-[#0095F6] hover:bg-[#1877F2] text-white"
+                  } text-sm font-semibold px-5 py-1.5 rounded-lg transition`}
+                >
+                  {followStatus === "pending"
+                    ? "Requested"
+                    : isFollowed
+                    ? "Following"
+                    : "Follow"}
+                </button>
+                <Link
+                  to="#messages"
+                  className="bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900 text-sm font-semibold px-4 py-1.5 rounded-lg transition"
+                >
+                  Message
+                </Link>
               </div>
             )}
           </div>
 
-          {/* Profile Details */}
-          <div className="px-6 pb-6 relative">
-            <div className="flex flex-col md:flex-row md:items-end -mt-16 mb-6">
-              <motion.div whileHover={{ scale: 1.03 }} className="relative self-start md:self-auto">
-                <img
-                  className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white object-cover shadow-md cursor-pointer bg-white"
-                  onClick={handleProfilePicClick}
-                  src={user.profilePic || defaultProfilePic}
-                  alt={user.username}
-                />
-              </motion.div>
-
-              <div className="md:ml-6 mt-3 md:mt-0 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                    {user.username}
-                  </h1>
-                  {!isOwnProfile && (
-                    <div className="mt-2 sm:mt-0">
-                      <button
-                        onClick={handleFollowToggle}
-                        className={`${
-                          isFollowed
-                            ? "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                            : "bg-blue-500 hover:bg-blue-600 text-white"
-                        } text-xs font-semibold py-1.5 px-5 rounded-lg transition`}
-                      >
-                        {followStatus === "pending"
-                          ? "Requested"
-                          : isFollowed
-                          ? "Following"
-                          : "Follow"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <p className="text-sm text-gray-800 font-medium mt-1">{user.name}</p>
-                <p className="text-sm text-gray-600 mt-1 max-w-lg whitespace-pre-line">
-                  {user.bio || "No bio yet"}
-                </p>
-
-                {user.website && (
-                  <a
-                    href={user.website.startsWith("http") ? user.website : `https://${user.website}`}
-                    className="inline-flex items-center text-blue-600 hover:underline text-xs font-medium mt-2"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FaLink className="mr-1" size={12} />
-                    <span>{user.website.replace(/^https?:\/\//, "")}</span>
-                  </a>
-                )}
-              </div>
+          {/* Middle Row: Stats (Desktop inline) */}
+          <div className="hidden sm:flex items-center space-x-10 mb-4 text-sm text-gray-900">
+            <div>
+              <span className="font-semibold">{user.posts?.length || userPosts?.length || 0}</span> posts
             </div>
-
-            {/* Stats Row */}
-            <div className="flex justify-around md:justify-start md:space-x-10 border-t border-b border-gray-100 py-3 -mx-6 px-6">
-              <div className="text-center md:text-left">
-                <span className="block text-lg font-bold text-gray-900">
-                  {user.posts?.length || 0}
-                </span>
-                <span className="text-xs text-gray-500">posts</span>
-              </div>
-
-              <Link
-                to={isLocked ? "#" : `/followers/${user._id}`}
-                className={`text-center md:text-left ${isLocked ? "cursor-default" : "hover:opacity-75"}`}
-              >
-                <span className="block text-lg font-bold text-gray-900">
-                  {user.followers?.length || 0}
-                </span>
-                <span className="text-xs text-gray-500">followers</span>
-              </Link>
-
-              <Link
-                to={isLocked ? "#" : `/following/${user._id}`}
-                className={`text-center md:text-left ${isLocked ? "cursor-default" : "hover:opacity-75"}`}
-              >
-                <span className="block text-lg font-bold text-gray-900">
-                  {user.following?.length || 0}
-                </span>
-                <span className="text-xs text-gray-500">following</span>
-              </Link>
-            </div>
+            <Link
+              to={isLocked ? "#" : `/followers/${user._id}`}
+              className={isLocked ? "cursor-default" : "hover:opacity-75"}
+            >
+              <span className="font-semibold">{user.followers?.length || 0}</span> followers
+            </Link>
+            <Link
+              to={isLocked ? "#" : `/following/${user._id}`}
+              className={isLocked ? "cursor-default" : "hover:opacity-75"}
+            >
+              <span className="font-semibold">{user.following?.length || 0}</span> following
+            </Link>
           </div>
-        </motion.div>
 
-        {/* Content Tabs & Posts */}
-        {!isLocked ? (
-          <div className="mt-6">
-            <div className="flex justify-center border-b border-gray-200 mb-6">
-              <button
-                onClick={() => setActiveTab("posts")}
-                className={`flex items-center py-3 px-6 font-semibold text-xs tracking-wider uppercase transition relative ${
-                  activeTab === "posts"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-400 hover:text-gray-700"
-                }`}
+          {/* Bottom Row: Name, Bio, and Website */}
+          <div className="text-sm text-gray-900 leading-snug">
+            {user.name && <p className="font-semibold">{user.name}</p>}
+            {user.bio && (
+              <p className="whitespace-pre-line text-gray-900 mt-1 font-normal">
+                {user.bio}
+              </p>
+            )}
+            {user.website && (
+              <a
+                href={user.website.startsWith("http") ? user.website : `https://${user.website}`}
+                className="inline-flex items-center text-[#00376B] hover:underline font-semibold mt-1.5"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <FaHeart className="mr-1.5" />
-                POSTS
-              </button>
-              <button
-                onClick={() => setActiveTab("saved")}
-                className={`flex items-center py-3 px-6 font-semibold text-xs tracking-wider uppercase transition relative ${
-                  activeTab === "saved"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-400 hover:text-gray-700"
-                }`}
-              >
-                <FaComment className="mr-1.5" />
-                SAVED
-              </button>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {activeTab === "posts" && (
-                <motion.div
-                  key="posts"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  {userPostsLoading ? (
-                    <div className="grid grid-cols-3 gap-1 sm:gap-4 md:gap-6 animate-pulse">
-                      {Array.from({ length: 6 }).map((_, index) => (
-                        <div
-                          key={index}
-                          className="aspect-square bg-gray-200 rounded-md sm:rounded-lg"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <UserPostList posts={userPosts} />
-                  )}
-                </motion.div>
-              )}
-
-              {activeTab === "saved" && (
-                <motion.div
-                  key="saved"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-center py-12 bg-white rounded-xl border border-gray-200"
-                >
-                  <p className="text-sm font-semibold text-gray-700">Saved Items</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Only you can see what you&apos;ve saved
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                <FaLink className="mr-1 text-xs" />
+                <span>{user.website.replace(/^https?:\/\//, "")}</span>
+              </a>
+            )}
           </div>
-        ) : (
-          <div className="mt-6 text-center py-16 bg-white rounded-xl border border-gray-200 shadow-sm">
-            <h3 className="text-base font-bold text-gray-800">This Account is Private</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              Follow this account to see their photos and videos.
-            </p>
-          </div>
-        )}
+        </div>
+      </header>
+
+      {/* Mobile Stats Row (Visible on small screens) */}
+      <div className="sm:hidden flex justify-around border-t border-b border-gray-200 py-3 mb-4 text-center text-xs text-gray-500">
+        <div>
+          <span className="block text-sm font-semibold text-gray-900">
+            {user.posts?.length || userPosts?.length || 0}
+          </span>
+          posts
+        </div>
+        <Link to={isLocked ? "#" : `/followers/${user._id}`}>
+          <span className="block text-sm font-semibold text-gray-900">
+            {user.followers?.length || 0}
+          </span>
+          followers
+        </Link>
+        <Link to={isLocked ? "#" : `/following/${user._id}`}>
+          <span className="block text-sm font-semibold text-gray-900">
+            {user.following?.length || 0}
+          </span>
+          following
+        </Link>
       </div>
 
-      {/* Profile Picture Modal */}
-      <AnimatePresence>
-        {isProfilePicZoomed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex justify-center items-center z-50 p-4"
-            onClick={handleProfilePicClick}
-          >
-            <motion.img
-              initial={{ scale: 0.85 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.85 }}
-              className="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl"
-              src={user.profilePic || defaultProfilePic}
-              alt={user.username}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Tab Navigation Bar (Exact Instagram Border-top Tabs) */}
+      {!isLocked ? (
+        <div>
+          <div className="flex justify-center border-t border-gray-200">
+            <button
+              onClick={() => setActiveTab("posts")}
+              className={`flex items-center space-x-1.5 py-3.5 px-6 text-xs font-semibold tracking-wider uppercase transition ${
+                activeTab === "posts"
+                  ? "border-t border-black -mt-[1px] text-black"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              <BsGrid3X3 className="text-sm" />
+              <span>POSTS</span>
+            </button>
+
+            {isOwnProfile && (
+              <button
+                onClick={() => setActiveTab("saved")}
+                className={`flex items-center space-x-1.5 py-3.5 px-6 text-xs font-semibold tracking-wider uppercase transition ${
+                  activeTab === "saved"
+                    ? "border-t border-black -mt-[1px] text-black"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                <BsBookmark className="text-sm" />
+                <span>SAVED</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => setActiveTab("tagged")}
+              className={`flex items-center space-x-1.5 py-3.5 px-6 text-xs font-semibold tracking-wider uppercase transition ${
+                activeTab === "tagged"
+                  ? "border-t border-black -mt-[1px] text-black"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              <BsPersonSquare className="text-sm" />
+              <span>TAGGED</span>
+            </button>
+          </div>
+
+          {/* Posts Grid */}
+          <div className="mt-4 pb-12">
+            {activeTab === "posts" && (
+              userPostsLoading ? (
+                <div className="grid grid-cols-3 gap-1 sm:gap-6 animate-pulse">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square bg-gray-200 rounded-sm sm:rounded-md"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <UserPostList posts={userPosts} />
+              )
+            )}
+
+            {activeTab === "saved" && (
+              <div className="text-center py-16 bg-white border border-gray-100 rounded-xl">
+                <p className="text-sm font-semibold text-gray-800">Saved Posts</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Only you can see what you&apos;ve saved
+                </p>
+              </div>
+            )}
+
+            {activeTab === "tagged" && (
+              <div className="text-center py-16 bg-white border border-gray-100 rounded-xl">
+                <p className="text-sm font-semibold text-gray-800">Photos of you</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  When people tag you in photos, they&apos;ll appear here.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-8 text-center py-16 bg-white border border-gray-200 rounded-xl shadow-sm">
+          <h3 className="text-base font-bold text-gray-900">This Account is Private</h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Follow this account to see their photos and videos.
+          </p>
+        </div>
+      )}
+
+      {/* Profile Picture Fullscreen Preview */}
+      {isProfilePicZoomed && (
+        <div
+          className="fixed inset-0 bg-black/85 flex justify-center items-center z-50 p-4"
+          onClick={() => setIsProfilePicZoomed(false)}
+        >
+          <img
+            className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl animate-in zoom-in-95 duration-150"
+            src={user.profilePic || "https://placekitten.com/200/200"}
+            alt={user.username}
+          />
+        </div>
+      )}
     </div>
   );
 }
