@@ -156,13 +156,13 @@ export function PostCard({ post }) {
   const timeAgo = formatTimeAgo(post?.createdAt);
 
   return (
-    <article className="w-full max-w-[470px] mx-auto bg-white border border-gray-200 rounded-xl mb-6 pb-2 select-none shadow-sm overflow-hidden">
+    <article className="w-full max-w-[490px] mx-auto bg-white border border-gray-200 rounded-xl mb-7 pb-2 select-none shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-3.5 border-b border-gray-50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-50">
         <div className="flex items-center space-x-3">
           <Link
             to={`/profile/${post?.user?._id || ""}`}
-            className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden"
+            className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
           >
             <img
               className="w-full h-full rounded-full object-cover"
@@ -174,7 +174,7 @@ export function PostCard({ post }) {
           <div className="flex items-center space-x-1.5 leading-tight">
             <Link
               to={`/profile/${post?.user?._id || ""}`}
-              className="text-xs font-semibold text-gray-900 hover:opacity-75 transition"
+              className="text-[13px] font-semibold text-gray-900 hover:opacity-75 transition"
             >
               {username}
             </Link>
@@ -187,10 +187,10 @@ export function PostCard({ post }) {
         <div className="relative">
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
+            className="text-gray-700 hover:text-black p-2 rounded-full hover:bg-gray-50 transition"
             aria-label="Post options"
           >
-            <FaEllipsisH className="w-3.5 h-3.5" />
+            <FaEllipsisH className="w-4 h-4" />
           </button>
           {showOptions && isAuthor && (
             <OptionsList onDelete={handleDeletePost} onEdit={handleEditPost} />
@@ -200,9 +200,9 @@ export function PostCard({ post }) {
 
       {/* Media Image */}
       {post?.media && (
-        <div className="relative select-none bg-black flex items-center justify-center min-h-[300px] max-h-[580px] overflow-hidden">
+        <div className="relative select-none bg-black flex items-center justify-center min-h-[340px] max-h-[620px] overflow-hidden">
           <img
-            className="w-full object-cover max-h-[580px]"
+            className="w-full object-cover max-h-[620px]"
             src={post.media}
             alt="Post media"
             onDoubleClick={handleToggleLike}
@@ -211,13 +211,13 @@ export function PostCard({ post }) {
 
           {/* Double tap heart animation */}
           {showHeart && (
-            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#FF3040] w-24 h-24 animate-heart-beat drop-shadow-2xl pointer-events-none" />
+            <FaHeart className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#FF3040] w-28 h-28 animate-heart-beat drop-shadow-2xl pointer-events-none" />
           )}
         </div>
       )}
 
       {/* Actions Bar */}
-      <div className="flex justify-between items-center px-4 pt-3 pb-1">
+      <div className="flex justify-between items-center px-4 pt-3.5 pb-1">
         <div className="flex items-center space-x-4">
           <button
             onClick={handleToggleLike}
@@ -225,12 +225,12 @@ export function PostCard({ post }) {
             aria-label={isLiked ? "Unlike post" : "Like post"}
           >
             {isLiked ? (
-              <FaHeart className="w-6 h-6 text-[#FF3040] transition-colors" />
+              <FaHeart className="w-[26px] h-[26px] text-[#FF3040] transition-colors" />
             ) : (
-              <FaRegHeart className="w-6 h-6 text-gray-900 hover:text-gray-500 transition-colors" />
+              <FaRegHeart className="w-[26px] h-[26px] text-gray-900 hover:text-gray-500 transition-colors" />
             )}
             {likeList.length > 0 && (
-              <span className="text-xs font-semibold text-gray-900">
+              <span className="text-[13px] font-semibold text-gray-900">
                 {likeList.length}
               </span>
             )}
@@ -241,21 +241,21 @@ export function PostCard({ post }) {
             className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Comments"
           >
-            <FaRegComment className="w-6 h-6" />
+            <FaRegComment className="w-[25px] h-[25px]" />
           </button>
 
           <button
             className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Repost"
           >
-            <RiRepeatLine className="w-6 h-6" />
+            <RiRepeatLine className="w-[26px] h-[26px]" />
           </button>
 
           <button
             className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Share"
           >
-            <FiSend className="w-5 h-5" />
+            <FiSend className="w-[23px] h-[23px]" />
           </button>
         </div>
 
@@ -263,30 +263,30 @@ export function PostCard({ post }) {
           className="text-gray-900 hover:text-gray-500 focus:outline-none transition"
           aria-label="Bookmark"
         >
-          <FaRegBookmark className="w-5 h-5" />
+          <FaRegBookmark className="w-[23px] h-[23px]" />
         </button>
       </div>
 
       {/* Caption Section */}
-      <div className="px-4 pt-1 space-y-1 text-xs text-gray-900">
+      <div className="px-4 pt-1.5 space-y-1.5 text-sm text-gray-900">
         {isEditing ? (
           <div className="space-y-2 mt-2">
             <textarea
               value={editedCaption}
               onChange={(e) => setEditedCaption(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-gray-400 focus:outline-none"
+              className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-gray-400 focus:outline-none"
               rows={2}
             />
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded hover:bg-gray-200"
+                className="bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdatePost}
-                className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 font-semibold"
+                className="bg-blue-500 text-white text-xs px-3.5 py-1.5 rounded hover:bg-blue-600 font-semibold"
               >
                 Update
               </button>
@@ -295,10 +295,10 @@ export function PostCard({ post }) {
         ) : (
           post?.caption && (
             <div>
-              <p className="leading-snug">
+              <p className="leading-snug text-sm">
                 <span className="font-semibold mr-1.5">{username}</span>
                 <span>{post.caption}</span>
-                {!isCaptionExpanded && post.caption.length > 80 && (
+                {!isCaptionExpanded && post.caption.length > 90 && (
                   <button
                     onClick={() => setIsCaptionExpanded(true)}
                     className="text-gray-500 hover:text-gray-800 ml-1 font-normal"
@@ -315,7 +315,7 @@ export function PostCard({ post }) {
         {comments.length > 0 && !showComments && (
           <button
             onClick={() => setShowComments(true)}
-            className="text-[11px] text-gray-400 hover:text-gray-600 block pt-1"
+            className="text-xs text-gray-400 hover:text-gray-600 block pt-1"
           >
             View all {comments.length} comments
           </button>
@@ -329,10 +329,10 @@ export function PostCard({ post }) {
         )}
 
         {/* Add comment row */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-1">
+        <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 mt-1.5">
           <input
             type="text"
-            className="flex-1 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none py-1"
+            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             placeholder="Add a comment..."
@@ -341,7 +341,7 @@ export function PostCard({ post }) {
           <button
             onClick={handleAddComment}
             disabled={!commentText.trim()}
-            className="text-sky-500 hover:text-sky-700 disabled:opacity-30 text-xs font-semibold"
+            className="text-sky-500 hover:text-sky-700 disabled:opacity-30 text-sm font-semibold"
           >
             Post
           </button>

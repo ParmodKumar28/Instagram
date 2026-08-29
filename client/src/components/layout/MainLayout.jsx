@@ -17,8 +17,8 @@ export function MainLayout() {
       {/* Fixed Left Navigation Rail */}
       <LeftSidebar />
 
-      {/* Main Content View (Zero top header offset) */}
-      <main className="flex-1 ml-[72px] min-h-screen bg-white">
+      {/* Main Content View with comfortable left margin */}
+      <main className="flex-1 ml-[84px] min-h-screen bg-white">
         <Outlet />
       </main>
 

@@ -4,9 +4,9 @@ import FeedSuggestionsSidebar from "../../components/feed/FeedSuggestionsSidebar
 
 export function HomePage() {
   return (
-    <div className="w-full max-w-[1020px] mx-auto flex justify-center pt-6 px-4">
+    <div className="w-full max-w-[1100px] mx-auto flex justify-center pt-6 px-4">
       {/* Main Center Feed Column */}
-      <div className="w-full max-w-[630px] flex flex-col items-center">
+      <div className="w-full max-w-[650px] flex flex-col items-center">
         {/* Top Stories Bar */}
         <StoriesList />
 

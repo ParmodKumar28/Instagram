@@ -48,24 +48,24 @@ export function FeedSuggestionsSidebar() {
   };
 
   return (
-    <aside className="w-[320px] hidden lg:block pt-4 select-none">
+    <aside className="w-[340px] hidden lg:block pt-5 select-none">
       {/* Current User Profile Row */}
       {currentUser && (
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-6">
           <Link
             to={`/profile/${currentUser._id}`}
-            className="flex items-center space-x-3 hover:opacity-85 transition group"
+            className="flex items-center space-x-3.5 hover:opacity-85 transition group"
           >
             <img
               src={currentUser.profilePic || "https://placekitten.com/100/100"}
               alt={currentUser.username}
-              className="w-11 h-11 rounded-full object-cover border border-gray-200"
+              className="w-12 h-12 rounded-full object-cover border border-gray-200"
             />
             <div className="leading-tight">
-              <p className="font-semibold text-gray-900 text-xs group-hover:underline">
+              <p className="font-semibold text-gray-900 text-sm group-hover:underline">
                 {currentUser.username}
               </p>
-              <p className="text-gray-400 text-xs truncate max-w-[150px] font-normal mt-0.5">
+              <p className="text-gray-400 text-xs truncate max-w-[160px] font-normal mt-0.5">
                 {currentUser.name}
               </p>
             </div>
@@ -81,8 +81,8 @@ export function FeedSuggestionsSidebar() {
 
       {/* Suggestions Header */}
       {suggestions.length > 0 && (
-        <div className="flex justify-between items-center mb-3">
-          <span className="font-semibold text-gray-500 text-xs">Suggested for you</span>
+        <div className="flex justify-between items-center mb-4">
+          <span className="font-semibold text-gray-500 text-sm">Suggested for you</span>
           <Link
             to="/suggested"
             className="font-semibold text-gray-900 text-xs hover:text-gray-500 transition"
@@ -93,25 +93,25 @@ export function FeedSuggestionsSidebar() {
       )}
 
       {/* Suggestions List */}
-      <div className="space-y-3 mb-7">
+      <div className="space-y-4 mb-7">
         {suggestions.map((item) => {
           const isFollowing = !!followingMap[item._id];
           return (
             <div key={item._id} className="flex items-center justify-between">
               <Link
                 to={`/profile/${item._id}`}
-                className="flex items-center space-x-3 group"
+                className="flex items-center space-x-3.5 group"
               >
                 <img
                   src={item.profilePic || "https://placekitten.com/100/100"}
                   alt={item.username}
-                  className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                  className="w-10 h-10 rounded-full object-cover border border-gray-200"
                 />
                 <div className="leading-tight">
-                  <p className="font-semibold text-gray-900 text-xs group-hover:underline">
+                  <p className="font-semibold text-gray-900 text-sm group-hover:underline">
                     {item.username}
                   </p>
-                  <p className="text-gray-400 text-[11px] truncate max-w-[150px] mt-0.5">
+                  <p className="text-gray-400 text-xs truncate max-w-[160px] mt-0.5">
                     {item.name || "Suggested for you"}
                   </p>
                 </div>

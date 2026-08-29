@@ -54,28 +54,28 @@ export function StoriesList({ stories }) {
 
   const handleScrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 200, behavior: "smooth" });
+      scrollRef.current.scrollBy({ left: 240, behavior: "smooth" });
     }
   };
 
   return (
-    <div className="relative w-full max-w-[630px] mx-auto pt-4 pb-2 mb-2 select-none">
+    <div className="relative w-full max-w-[650px] mx-auto pt-2 pb-4 mb-3 select-none">
       <div
         ref={scrollRef}
-        className="flex items-center space-x-4 overflow-x-auto scrollbar-none px-2 py-1"
+        className="flex items-center space-x-5 overflow-x-auto scrollbar-none px-2 py-1"
       >
         {displayStories.map((story, index) => (
           <StoryItem key={story._id || index} story={story} />
         ))}
       </div>
 
-      {/* Right Scroll Arrow Button matching screenshot */}
+      {/* Right Scroll Arrow Button */}
       <button
         onClick={handleScrollRight}
-        className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-md border border-gray-100 rounded-full p-1 text-gray-700 hover:text-black z-10 transition duration-150 focus:outline-none"
+        className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white shadow-md border border-gray-100 rounded-full p-1.5 text-gray-700 hover:text-black z-10 transition duration-150 focus:outline-none"
         aria-label="Next stories"
       >
-        <ChevronRight size={16} />
+        <ChevronRight size={18} />
       </button>
     </div>
   );
