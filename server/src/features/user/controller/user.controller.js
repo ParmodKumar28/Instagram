@@ -1,9 +1,9 @@
 // Creating here user controller to handle communication between routes and the model/database
 // Imports
-import { filePath } from "../../../app.js";
 import { sendResetPasswordMail } from "../../../utils/email/PasswordResetEmail.js";
 import { sendWelcomeMail } from "../../../utils/email/WelcomeEmail.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
+import { uploadMedia } from "../../../utils/cloudinary.js";
 import { sendToken } from "../../../utils/sendToken.js";
 import {
   deleteUserDb,
@@ -143,14 +143,7 @@ export const addProfilePic = async (req, res, next) => {
     }
     // User
     const user = req.user;
-    // Build local URL for the uploaded file served via /images
-    let host;
-    if (process.env.MODE === "production") {
-      host = process.env.PRODUCTION;
-    } else {
-      host = process.env.LOCALHOST;
-    }
-    const imageUrl = `${host}/images/${req.file.filename}`;
+    const imageUrl = await uploadMedia(req.file);
     user.profilePic = imageUrl;
     await user.save();
     res.status(200).json({

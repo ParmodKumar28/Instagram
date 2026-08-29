@@ -40,12 +40,9 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 
-// Creating upload Endpoint for images
-app.use("/images", express.static("upload/images"));
-// Set static folder for serving images
-// const __dirname = path.resolve();
-// app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
-export const filePath = `http://localhost:${process.env.PORT}`;
+// Static folder for serving uploaded images
+app.use("/images", express.static(path.join(path.resolve(), "upload/images")));
+
 
 // Configuring cloudinary
 cloudinary.config({
