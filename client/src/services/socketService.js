@@ -14,6 +14,8 @@ export const getSocket = () => socket;
 export const connectSocket = (userId) => {
   if (!userId) return null;
 
+  const token = localStorage.getItem("auth-token");
+
   if (socket && socket.connected) {
     socket.emit("register_user", { userId });
     return socket;
@@ -22,6 +24,10 @@ export const connectSocket = (userId) => {
   // Use relative path or proxy to connect cleanly
   socket = io(window.location.origin, {
     path: "/socket.io",
+    auth: {
+      token,
+      userId,
+    },
     withCredentials: true,
     transports: ["websocket", "polling"],
     reconnection: true,

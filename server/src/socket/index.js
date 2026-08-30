@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
 
 let io = null;
 
@@ -15,7 +16,7 @@ export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
       origin: (origin, callback) => {
-        // Allow all origins with credentials for local dev and production
+        // Allow connections from valid origins
         callback(null, true);
       },
       credentials: true,
@@ -25,10 +26,43 @@ export const initSocket = (httpServer) => {
     pingInterval: 25000,
   });
 
+  // Socket Authentication Middleware
+  io.use((socket, next) => {
+    try {
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.headers?.authorization?.replace("Bearer ", "");
+
+      if (token && process.env.JWT_Secret) {
+        try {
+          const decoded = jwt.verify(token, process.env.JWT_Secret);
+          socket.authenticatedUserId = decoded.id;
+        } catch (err) {
+          // Token expired or invalid
+        }
+      }
+      next();
+    } catch (err) {
+      next();
+    }
+  });
+
   io.on("connection", (socket) => {
+    // Auto-register authenticated user if handshake token was provided
+    if (socket.authenticatedUserId) {
+      const userId = socket.authenticatedUserId.toString();
+      socketToUser.set(socket.id, userId);
+
+      if (!userSockets.has(userId)) {
+        userSockets.set(userId, new Set());
+      }
+      userSockets.get(userId).add(socket.id);
+      socket.join(`user_${userId}`);
+    }
+
     // 1. User Registration / Online Presence
     socket.on("register_user", (data) => {
-      const userId = data?.userId ? data.userId.toString() : null;
+      const userId = (socket.authenticatedUserId || data?.userId)?.toString();
       if (!userId) return;
 
       socketToUser.set(socket.id, userId);

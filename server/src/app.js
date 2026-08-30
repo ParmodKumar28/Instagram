@@ -4,10 +4,16 @@ import "./dotenv.js";
 
 // Imports
 import express from "express";
+import helmet from "helmet";
 import {
   errorHandlerMiddleware,
   handleUncaughtError,
 } from "./middlewares/errorHandlerMiddleware.js";
+import {
+  authLimiter,
+  contentCreationLimiter,
+  generalApiLimiter,
+} from "./middlewares/security.js";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 import cors from "cors";
@@ -25,15 +31,50 @@ import chatRouter from "./features/chat/routes/chat.routes.js";
 // Server
 const app = express();
 
-// Setting up cors
+// Security HTTP headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false, // Allow external avatars / video CDN streams
+  })
+);
+
+// Setting up cors with support for dev and production origins
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+].filter(Boolean);
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      callback(null, true);
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS policy violation"));
+      }
     },
     credentials: true,
   })
 );
+
+// General baseline rate limiting for all API routes
+app.use("/api/", generalApiLimiter);
+
+// Specific strict rate limits for authentication and password recovery
+app.use("/api/user/signin", authLimiter);
+app.use("/api/user/signup", authLimiter);
+app.use("/api/user/forgotPassword", authLimiter);
+app.use("/api/user/resetPassword", authLimiter);
+
+// Content creation rate limits to prevent spam
+app.use("/api/post/create", contentCreationLimiter);
+app.use("/api/comment/add", contentCreationLimiter);
+app.use("/api/story/create", contentCreationLimiter);
+app.use("/api/chat/send", contentCreationLimiter);
+app.use("/api/message/send", contentCreationLimiter);
 
 // Parsing cookies
 app.use(cookieParser());
@@ -44,7 +85,6 @@ app.use(express.json({ limit: "50mb" }));
 
 // Static folder for serving uploaded images
 app.use("/images", express.static(path.join(path.resolve(), "upload/images")));
-
 
 // Configuring cloudinary
 cloudinary.config({
