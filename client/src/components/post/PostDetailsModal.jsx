@@ -11,12 +11,13 @@ import {
   IoEllipsisHorizontal,
   IoClose,
   IoPersonCircle,
+  IoPersonOutline,
 } from "react-icons/io5";
 import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
-import { commentService, likeService, postService } from "../../services";
+import { commentService, likeService, postService, userService } from "../../services";
 import { usersSelector } from "../../redux/slices/usersSlice";
-import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux/slices/postsSlice";
+import { deletePostAsync, toggleSavePostAsync, updatePostAsync, postsSelector } from "../../redux/slices/postsSlice";
 import { formatTimeAgo, isVideoMedia } from "../../utils";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
@@ -43,15 +44,46 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(initialPost?.caption || "");
+  const [editedTags, setEditedTags] = useState(initialPost?.tags || []);
+  const [editTagQuery, setEditTagQuery] = useState("");
+  const [editSearchResults, setEditSearchResults] = useState([]);
+  const [isSearchingEditTags, setIsSearchingEditTags] = useState(false);
+  const [showEditTagInput, setShowEditTagInput] = useState(false);
   const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
   const [isSavingPost, setIsSavingPost] = useState(false);
 
   const dispatch = useDispatch();
-  const { userId: currentUserId } = useSelector(usersSelector);
+  const { userId: currentUserId, signedUser } = useSelector(usersSelector);
   const { savedPostIds = [] } = useSelector(postsSelector);
 
   const currentPostId = post?._id || initialPost?._id;
   const isSaved = savedPostIds.includes(currentPostId);
+
+  useEffect(() => {
+    if (!editTagQuery.trim()) {
+      setEditSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingEditTags(true);
+      try {
+        const res = await userService.searchUsers(editTagQuery);
+        if (res.data?.users) {
+          const filtered = res.data.users.filter(
+            (u) =>
+              u._id !== signedUser?._id &&
+              !editedTags.some((tagged) => (tagged._id || tagged) === u._id)
+          );
+          setEditSearchResults(filtered);
+        }
+      } catch (err) {
+        console.error("Failed to search users:", err);
+      } finally {
+        setIsSearchingEditTags(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [editTagQuery, signedUser?._id, editedTags]);
 
   useEffect(() => {
     if (isEditing) {
@@ -165,6 +197,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     }, 50);
   };
 
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+    setCommentText("");
+  };
+
   const handleCommentDeleted = (deletedCommentId, parentCommentId) => {
     setComments((prevComments) => {
       if (parentCommentId) {
@@ -192,13 +229,16 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     if (!commentText.trim()) return;
     const textToAdd = commentText;
     const parentId = replyingTo?.commentId || null;
+    const targetPostId = post?._id || initialPost?._id;
+
+    if (!targetPostId) return;
 
     setCommentText("");
     setReplyingTo(null);
 
     try {
       const response = await commentService.addComment(
-        post._id,
+        targetPostId,
         textToAdd,
         parentId
       );
@@ -229,23 +269,49 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
   const handleEditPost = () => {
     setEditedCaption(currentPostData?.caption || "");
+    setEditedTags(currentPostData?.tags || []);
+    setEditTagQuery("");
+    setEditSearchResults([]);
+    setShowEditTagInput(false);
     setIsEditing(true);
     setShowOptions(false);
+  };
+
+  const handleEditAddTag = (user) => {
+    if (!editedTags.some((u) => (u._id || u) === user._id)) {
+      setEditedTags((prev) => [...prev, user]);
+    }
+    setEditTagQuery("");
+    setEditSearchResults([]);
+  };
+
+  const handleEditRemoveTag = (userId) => {
+    setEditedTags((prev) => prev.filter((u) => (u._id || u) !== userId));
   };
 
   const handleUpdatePost = async () => {
     setIsSavingPost(true);
     try {
-      await dispatch(
+      const res = await dispatch(
         updatePostAsync({
           postId: post._id,
-          postData: { ...post, caption: editedCaption },
+          postData: {
+            ...post,
+            caption: editedCaption,
+            tags: editedTags.map((u) => u._id || u),
+          },
         })
       ).unwrap();
-      setPost((prev) => ({ ...prev, caption: editedCaption }));
+      const updated = res?.updatedPost || res;
+      setPost((prev) => ({
+        ...prev,
+        caption: editedCaption,
+        tags: updated?.tags || editedTags,
+      }));
       toast.success("Post updated");
       setIsEditing(false);
       setShowEditEmojiPicker(false);
+      setShowEditTagInput(false);
     } catch (error) {
       console.error("Failed to update post:", error);
       toast.error("Failed to update post");
@@ -454,9 +520,9 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                         isOpen={showEditEmojiPicker}
                         onClose={() => setShowEditEmojiPicker(false)}
                         onEmojiSelect={(emoji) => setEditedCaption((prev) => prev + emoji)}
-                        position="top-left"
-                        width={300}
-                        height={320}
+                        position="bottom-left"
+                        width={280}
+                        height={290}
                       />
                     </div>
 
@@ -465,8 +531,10 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                         type="button"
                         onClick={() => {
                           setEditedCaption(currentPostData?.caption || "");
+                          setEditedTags(currentPostData?.tags || []);
                           setIsEditing(false);
                           setShowEditEmojiPicker(false);
+                          setShowEditTagInput(false);
                         }}
                         className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100 transition cursor-pointer"
                       >
@@ -482,6 +550,115 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                       </button>
                     </div>
                   </div>
+                </div>
+
+                {/* Tag / Untag People in Edit */}
+                <div className="pt-2 border-t border-gray-200/80">
+                  <div
+                    className="flex items-center justify-between cursor-pointer select-none py-1"
+                    onClick={() => setShowEditTagInput((prev) => !prev)}
+                  >
+                    <span className="text-xs font-semibold text-gray-700 flex items-center space-x-1">
+                      <span>Tagged People</span>
+                      {editedTags.length > 0 && (
+                        <span className="text-[11px] text-[#0095F6] font-bold">
+                          ({editedTags.length})
+                        </span>
+                      )}
+                    </span>
+                    <IoPersonOutline className="text-gray-500 text-sm" />
+                  </div>
+
+                  {/* Tagged users chips */}
+                  {editedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 my-1.5">
+                      {editedTags.map((tagUser) => {
+                        const tagId = tagUser?._id || tagUser;
+                        const tagUsername =
+                          tagUser?.username || tagUser?.name || "user";
+                        return (
+                          <span
+                            key={tagId}
+                            className="inline-flex items-center space-x-1 bg-white text-gray-800 text-[11px] px-2 py-0.5 rounded-full border border-gray-200 shadow-2xs"
+                          >
+                            <Avatar
+                              src={tagUser?.profilePic}
+                              alt={tagUsername}
+                              gender={tagUser?.gender}
+                              username={tagUsername}
+                              className="w-3.5 h-3.5 rounded-full object-cover"
+                            />
+                            <span className="font-medium">@{tagUsername}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleEditRemoveTag(tagId)}
+                              className="text-gray-400 hover:text-red-500 ml-0.5 cursor-pointer"
+                              aria-label={`Untag ${tagUsername}`}
+                            >
+                              <IoClose className="text-xs" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Search user to tag input & dropdown */}
+                  {showEditTagInput && (
+                    <div className="mt-1.5 relative">
+                      <input
+                        type="text"
+                        value={editTagQuery}
+                        onChange={(e) => setEditTagQuery(e.target.value)}
+                        placeholder="Search user to tag..."
+                        className="w-full bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0095F6]"
+                      />
+
+                      {isSearchingEditTags && (
+                        <div className="py-1.5 text-center text-[11px] text-gray-400">
+                          Searching...
+                        </div>
+                      )}
+
+                      {editSearchResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 z-30 mt-1 bg-white rounded-lg shadow-xl border border-gray-100 max-h-36 overflow-y-auto divide-y divide-gray-50">
+                          {editSearchResults.map((user) => (
+                            <div
+                              key={user._id}
+                              onClick={() => handleEditAddTag(user)}
+                              className="flex items-center space-x-2 p-1.5 hover:bg-gray-50 cursor-pointer transition"
+                            >
+                              <Avatar
+                                src={user.profilePic}
+                                alt={user.username}
+                                gender={user.gender}
+                                username={user.username}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-semibold text-gray-900 truncate">
+                                  {user.username}
+                                </span>
+                                {user.name && (
+                                  <span className="text-[10px] text-gray-400 truncate">
+                                    {user.name}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {editTagQuery.trim() &&
+                        !isSearchingEditTags &&
+                        editSearchResults.length === 0 && (
+                          <div className="py-1 text-center text-[11px] text-gray-400">
+                            No users found
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

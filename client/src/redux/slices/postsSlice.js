@@ -193,8 +193,20 @@ const postsSlice = createSlice({
         state.postsLoading = false;
       })
 
-      .addCase(updatePostAsync.fulfilled, () => {
-        toast.success("Post updated successfully!");
+      .addCase(updatePostAsync.fulfilled, (state, action) => {
+        const updated = action.payload?.updatedPost || action.payload;
+        if (updated && (updated._id || updated.id)) {
+          const updateId = (updated._id || updated.id).toString();
+          state.posts = state.posts.map((p) =>
+            (p._id || p.id).toString() === updateId ? { ...p, ...updated } : p
+          );
+          state.userPosts = state.userPosts.map((p) =>
+            (p._id || p.id).toString() === updateId ? { ...p, ...updated } : p
+          );
+          state.savedPosts = state.savedPosts.map((p) =>
+            (p._id || p.id).toString() === updateId ? { ...p, ...updated } : p
+          );
+        }
       })
 
       .addCase(deletePostAsync.fulfilled, (state, action) => {

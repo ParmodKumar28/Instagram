@@ -53,7 +53,26 @@ export const updatePostDb = async (postId, user, postData) => {
     return await PostModel.findByIdAndUpdate(postId, postData, {
       runValidators: true,
       new: true,
-    });
+    })
+      .populate("user", "name username profilePic gender")
+      .populate({
+        path: "tags",
+        select: "name username profilePic gender",
+        model: "User",
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes replies",
+        populate: {
+          path: "user",
+          select: "name username profilePic gender",
+          model: "User",
+        },
+      });
   } catch (error) {
     throw error;
   }
