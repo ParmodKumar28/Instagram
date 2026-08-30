@@ -722,7 +722,10 @@ export function QuickChatDrawer() {
                     const uname =
                       convPart?.username || convPart?.name || "User";
                     const lastMsg = conv.lastMessage?.text || "Started a chat";
-                    const hasUnread = (conv.unreadCount || 0) > 0;
+                    const isLastMsgMine =
+                      (conv.lastMessage?.sender?._id || conv.lastMessage?.sender)?.toString() ===
+                      currentUserId?.toString();
+                    const hasUnread = !isLastMsgMine && (conv.unreadCount || 0) > 0;
                     const isConvOnline = isOnline(convPart?._id || convPart?.id);
                     const isConvTyping =
                       typingUsers[conv._id]?.senderId?.toString() ===

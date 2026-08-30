@@ -6,7 +6,7 @@ import UserModel from "../../user/model/user.schema.js";
 // Helper to safely format ID
 const toId = (id) => (id?._id ? id._id.toString() : id?.toString());
 
-// Get all conversations for a user
+// Get all conversations for a user with accurate unread counts
 export const getUserConversationsDb = async (userId) => {
   try {
     const uid = toId(userId);
@@ -18,11 +18,39 @@ export const getUserConversationsDb = async (userId) => {
       .populate("participants", "name username profilePic gender accountType")
       .populate("lastMessage.sender", "name username profilePic");
 
+    // Compute actual unread count directly from Message collection
+    const unreadAgg = await MessageModel.aggregate([
+      {
+        $match: {
+          recipient: new mongoose.Types.ObjectId(uid),
+          seen: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$conversation",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const unreadMap = new Map();
+    unreadAgg.forEach((item) => {
+      if (item._id) {
+        unreadMap.set(item._id.toString(), item.count);
+      }
+    });
+
     return conversations.map((conv) => {
       const otherParticipant = conv.participants.find(
         (p) => toId(p) !== uid
       );
-      const unreadCount = conv.unreadCounts?.get?.(uid) || 0;
+      const isLastMsgMine =
+        conv.lastMessage?.sender &&
+        toId(conv.lastMessage.sender) === uid;
+      const unreadCount = isLastMsgMine
+        ? 0
+        : unreadMap.get(conv._id.toString()) || 0;
 
       return {
         _id: conv._id,

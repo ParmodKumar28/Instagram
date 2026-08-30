@@ -110,6 +110,14 @@ const chatSlice = createSlice({
   reducers: {
     setActiveConversation: (state, action) => {
       state.activeConversation = action.payload;
+      if (action.payload?._id) {
+        const conv = state.conversations.find(
+          (c) => c._id === action.payload._id
+        );
+        if (conv) {
+          conv.unreadCount = 0;
+        }
+      }
     },
     clearActiveConversation: (state) => {
       state.activeConversation = null;
@@ -138,8 +146,8 @@ const chatSlice = createSlice({
           createdAt: newMessage.createdAt,
         };
         conv.updatedAt = newMessage.createdAt;
-        if (state.activeConversation?._id !== conv._id) {
-          conv.unreadCount = (conv.unreadCount || 0) + 1;
+        if (state.activeConversation?._id === conv._id) {
+          conv.unreadCount = 0;
         }
       }
     },
@@ -175,6 +183,10 @@ const chatSlice = createSlice({
         state.messages.forEach((m) => {
           m.seen = true;
         });
+      }
+      const conv = state.conversations.find((c) => c._id === conversationId);
+      if (conv) {
+        conv.unreadCount = 0;
       }
     },
   },

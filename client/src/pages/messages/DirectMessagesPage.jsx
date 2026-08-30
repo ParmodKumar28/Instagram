@@ -461,9 +461,10 @@ export function DirectMessagesPage() {
             filteredConversations.map((conv) => {
               const participant = conv.participant;
               const isSelected = activeConversation?._id === conv._id;
-              const uname = participant?.username || participant?.name || "User";
-              const lastMsgText = conv.lastMessage?.text || "Started a chat";
-              const hasUnread = (conv.unreadCount || 0) > 0;
+              const isLastMsgMine =
+                (conv.lastMessage?.sender?._id || conv.lastMessage?.sender)?.toString() ===
+                currentUserId?.toString();
+              const hasUnread = !isLastMsgMine && (conv.unreadCount || 0) > 0;
               const isPartnerOnline = isOnline(participant?._id || participant?.id);
               const isConvTyping =
                 typingUsers[conv._id]?.senderId?.toString() ===
