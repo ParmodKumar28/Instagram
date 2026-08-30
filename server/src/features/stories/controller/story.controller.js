@@ -9,6 +9,8 @@ import {
   replyStoryDb,
   deleteStoryDb,
 } from "../model/story.repository.js";
+import StoryModel from "../model/story.schema.js";
+import { emitToUser } from "../../../socket/index.js";
 
 // Create a new story
 export const createStory = async (req, res, next) => {
@@ -107,6 +109,28 @@ export const toggleLikeStory = async (req, res, next) => {
 
     const result = await toggleLikeStoryDb(storyId, userId);
 
+    if (result.isLiked) {
+      try {
+        const story = await StoryModel.findById(storyId);
+        if (story && story.user && story.user.toString() !== userId.toString()) {
+          emitToUser(story.user, "new_notification", {
+            type: "story_like",
+            sender: {
+              _id: req.user._id,
+              username: req.user.username,
+              name: req.user.name,
+              profilePic: req.user.profilePic,
+            },
+            message: `${req.user.username} liked your story.`,
+            storyId,
+            createdAt: new Date(),
+          });
+        }
+      } catch (e) {
+        console.error("Failed to emit story like notification:", e);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       msg: result.isLiked ? "Story liked!" : "Story unliked",
@@ -133,6 +157,26 @@ export const replyStory = async (req, res, next) => {
     }
 
     const result = await replyStoryDb(storyId, userId, text);
+
+    try {
+      const story = await StoryModel.findById(storyId);
+      if (story && story.user && story.user.toString() !== userId.toString()) {
+        emitToUser(story.user, "new_notification", {
+          type: "story_reply",
+          sender: {
+            _id: req.user._id,
+            username: req.user.username,
+            name: req.user.name,
+            profilePic: req.user.profilePic,
+          },
+          message: `${req.user.username} replied to your story: "${text.slice(0, 30)}${text.length > 30 ? "..." : ""}"`,
+          storyId,
+          createdAt: new Date(),
+        });
+      }
+    } catch (e) {
+      console.error("Failed to emit story reply notification:", e);
+    }
 
     return res.status(200).json({
       success: true,

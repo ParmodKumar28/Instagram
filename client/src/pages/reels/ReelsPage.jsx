@@ -360,6 +360,10 @@ function SingleReelCard({
   }, [reel._id]);
 
   useEffect(() => {
+    fetchLikes();
+  }, [fetchLikes]);
+
+  useEffect(() => {
     if (showComments) {
       fetchComments();
     }
@@ -403,29 +407,55 @@ function SingleReelCard({
     }
   };
 
-  const handleVideoClick = () => {
-    if (clickTimeoutRef.current) {
-      clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = null;
-      // Double tap detected
+  const lastTapRef = useRef(0);
+
+  const handleVideoClick = (e) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 350;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
       handleDoubleTap();
+      lastTapRef.current = 0;
     } else {
+      lastTapRef.current = now;
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
       clickTimeoutRef.current = setTimeout(() => {
         clickTimeoutRef.current = null;
         handleTogglePlay();
-      }, 250);
+      }, 280);
     }
   };
 
+  const handleDoubleClick = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+    }
+    handleDoubleTap();
+  };
+
   const handleLikeToggle = async () => {
+    const prevLiked = isLiked;
+    const nextLiked = !prevLiked;
+    setIsLiked(nextLiked);
+    setLikesCount((prev) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
+
     try {
       const res = await likeService.toggleLike(reel._id, "Post");
       if (res.status === 200) {
-        setIsLiked((prev) => !prev);
         fetchLikes();
+      } else {
+        setIsLiked(prevLiked);
+        setLikesCount((prev) => (prevLiked ? prev + 1 : Math.max(0, prev - 1)));
       }
     } catch (err) {
       console.error("Failed to toggle like on reel:", err);
+      setIsLiked(prevLiked);
+      setLikesCount((prev) => (prevLiked ? prev + 1 : Math.max(0, prev - 1)));
     }
   };
 
@@ -550,7 +580,10 @@ function SingleReelCard({
   return (
     <div className="flex items-end justify-center space-x-3 sm:space-x-4 max-w-full">
       {/* Video Player Card */}
-      <div className="relative w-[340px] sm:w-[380px] md:w-[410px] h-[580px] sm:h-[660px] md:h-[720px] max-h-[86vh] rounded-3xl overflow-hidden shadow-2xl bg-black border border-white/10 flex items-center justify-center">
+      <div
+        className="relative w-[340px] sm:w-[380px] md:w-[410px] h-[580px] sm:h-[660px] md:h-[720px] max-h-[86vh] rounded-3xl overflow-hidden shadow-2xl bg-black border border-white/10 flex items-center justify-center select-none"
+        onDoubleClick={handleDoubleClick}
+      >
         {/* Video Stream Element */}
         <video
           ref={videoRef}
@@ -561,12 +594,14 @@ function SingleReelCard({
           muted={isMuted}
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoClick}
+          onDoubleClick={handleDoubleClick}
         />
 
         {/* Play / Pause Center Icon Indicator */}
         {!isPlaying && (
           <div
-            onClick={handleTogglePlay}
+            onClick={handleVideoClick}
+            onDoubleClick={handleDoubleClick}
             className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-auto cursor-pointer"
           >
             <div className="w-16 h-16 rounded-full bg-black/65 backdrop-blur-md flex items-center justify-center text-white text-3xl shadow-lg border border-white/20">
@@ -602,9 +637,9 @@ function SingleReelCard({
         </div>
 
         {/* Bottom Left Info Overlay */}
-        <div className="absolute inset-x-0 bottom-0 pt-20 pb-4 px-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent z-10 text-white flex flex-col space-y-2.5 pointer-events-auto">
+        <div className="absolute inset-x-0 bottom-0 pt-20 pb-4 px-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent z-10 text-white flex flex-col space-y-2.5 pointer-events-none">
           {/* Author Header */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 pointer-events-auto">
             {authorHasStories ? (
               <div
                 onClick={(e) => {
@@ -661,7 +696,7 @@ function SingleReelCard({
 
           {/* Caption */}
           {reel.caption && (
-            <div className="text-xs text-white/95 drop-shadow-md pr-2">
+            <div className="text-xs text-white/95 drop-shadow-md pr-2 pointer-events-auto">
               <p className={!isExpandedCaption ? "line-clamp-2 leading-relaxed" : "leading-relaxed"}>
                 {reel.caption}
               </p>
@@ -678,7 +713,7 @@ function SingleReelCard({
           )}
 
           {/* Audio Track Bar */}
-          <div className="flex items-center space-x-2 text-[11px] text-white/80 drop-shadow-md max-w-[85%]">
+          <div className="flex items-center space-x-2 text-[11px] text-white/80 drop-shadow-md max-w-[85%] pointer-events-auto">
             <IoMusicalNotes className="text-xs flex-shrink-0 animate-pulse text-[#FD1D1D]" />
             <span className="truncate">Original audio • {username}</span>
           </div>

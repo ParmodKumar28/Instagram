@@ -22,6 +22,7 @@ import Avatar from "../../components/common/Avatar";
 import EmojiDrawer from "../../components/common/EmojiDrawer";
 import StoryViewerModal from "../../components/story/StoryViewerModal";
 import { usersSelector } from "../../redux/slices/usersSlice";
+import { useSocket } from "../../context/SocketContext";
 import {
   fetchConversationsAsync,
   getOrCreateConversationAsync,
@@ -71,7 +72,27 @@ export function DirectMessagesPage() {
   const prevMessagesLengthRef = useRef(0);
   const fileInputRef = useRef(null);
   const messageInputRef = useRef(null);
-  const pollingRef = useRef(null);
+  const {
+    isOnline,
+    typingUsers,
+    sendTyping,
+    sendStopTyping,
+    sendMarkSeen,
+    joinConversation,
+    leaveConversation,
+  } = useSocket();
+
+  const typingTimeoutRef = useRef(null);
+
+  const activeParticipant =
+    activeConversation?.participant ||
+    activeConversation?.participants?.find(
+      (p) => (p?._id || p)?.toString() !== currentUserId?.toString()
+    ) ||
+    activeConversation?.participants?.[0] ||
+    null;
+  const activeUsername =
+    activeParticipant?.username || activeParticipant?.name || "User";
 
   // Load user conversations on mount
   useEffect(() => {
@@ -121,28 +142,23 @@ export function DirectMessagesPage() {
     }
   }, [chatId, conversations, activeConversation, dispatch]);
 
-  // Load messages when active conversation changes
+  // Join room and load messages when active conversation changes (Real-time Socket stream)
   useEffect(() => {
     if (activeConversation?._id) {
+      joinConversation(activeConversation._id);
       dispatch(fetchMessagesAsync(activeConversation._id));
       dispatch(markSeenAsync(activeConversation._id));
-    }
-  }, [dispatch, activeConversation?._id]);
 
-  // Periodic polling for fresh messages in active conversation
-  useEffect(() => {
-    if (activeConversation?._id) {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-      pollingRef.current = setInterval(() => {
-        dispatch(fetchMessagesAsync(activeConversation._id));
-        dispatch(fetchConversationsAsync());
-      }, 4000);
-    }
+      const recipientId = activeParticipant?._id || activeParticipant?.id;
+      if (recipientId) {
+        sendMarkSeen({ conversationId: activeConversation._id, recipientId });
+      }
 
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [dispatch, activeConversation?._id]);
+      return () => {
+        leaveConversation(activeConversation._id);
+      };
+    }
+  }, [dispatch, activeConversation?._id, activeParticipant?._id, joinConversation, leaveConversation, sendMarkSeen]);
 
   // Handle scroll position to prevent jumping when user scrolls up
   const handleScroll = useCallback(() => {
@@ -197,6 +213,30 @@ export function DirectMessagesPage() {
     setFilePreview(null);
   };
 
+  // Handle text input with live typing indicator
+  const handleInputChange = (e) => {
+    const text = e.target.value;
+    setMessageText(text);
+
+    const recipient = activeConversation?.participant;
+    const recipientId = recipient?._id || recipient?.id;
+    if (activeConversation?._id && recipientId) {
+      sendTyping({
+        conversationId: activeConversation._id,
+        recipientId,
+        username: signedUser?.username,
+      });
+
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        sendStopTyping({
+          conversationId: activeConversation._id,
+          recipientId,
+        });
+      }, 2000);
+    }
+  };
+
   // Send message
   const handleSendMessage = async (textToSend = null) => {
     const textContent = textToSend !== null ? textToSend : messageText.trim();
@@ -205,6 +245,14 @@ export function DirectMessagesPage() {
     const recipient = activeConversation?.participant;
     const recipientId = recipient?._id || recipient?.id;
     if (!recipientId) return;
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    if (activeConversation?._id) {
+      sendStopTyping({
+        conversationId: activeConversation._id,
+        recipientId,
+      });
+    }
 
     const formData = new FormData();
     formData.append("recipientId", recipientId);
@@ -226,7 +274,6 @@ export function DirectMessagesPage() {
 
     try {
       await dispatch(sendMessageAsync(formData)).unwrap();
-      dispatch(fetchConversationsAsync());
       setTimeout(() => scrollToBottom("smooth"), 50);
     } catch (err) {
       setMessageText(currentText);
@@ -258,16 +305,6 @@ export function DirectMessagesPage() {
       uname.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
-  const activeParticipant =
-    activeConversation?.participant ||
-    activeConversation?.participants?.find(
-      (p) => (p?._id || p)?.toString() !== currentUserId?.toString()
-    ) ||
-    activeConversation?.participants?.[0] ||
-    null;
-  const activeUsername =
-    activeParticipant?.username || activeParticipant?.name || "User";
 
   // Check if active participant has active stories
   const activeStoryGroupItem = feedStories.find(
@@ -590,8 +627,17 @@ export function DirectMessagesPage() {
                   <span className="font-bold text-sm text-gray-900 hover:underline truncate">
                     {activeUsername}
                   </span>
-                  <span className="text-[11px] text-gray-400 truncate">
-                    {activeParticipant?.name || "Active now"}
+                  <span className="text-[11px] flex items-center space-x-1.5 truncate">
+                    {isOnline(activeParticipant?._id || activeParticipant?.id) ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shadow-2xs" />
+                        <span className="text-emerald-600 font-semibold">Active now</span>
+                      </>
+                    ) : (
+                      <span className="text-gray-400 truncate">
+                        {activeParticipant?.name || "Offline"}
+                      </span>
+                    )}
                   </span>
                 </Link>
               </div>
@@ -747,6 +793,18 @@ export function DirectMessagesPage() {
                   No messages yet. Send a message to start chatting!
                 </div>
               )}
+              {/* Live Typing Indicator */}
+              {typingUsers[activeConversation?._id]?.senderId?.toString() ===
+                (activeParticipant?._id || activeParticipant?.id)?.toString() && (
+                <div className="flex items-center space-x-2 py-1 animate-in fade-in duration-150">
+                  <div className="bg-[#EFEFEF] px-3.5 py-2 rounded-full flex items-center space-x-1">
+                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" />
+                  </div>
+                  <span className="text-[11px] text-gray-400 italic">typing...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
@@ -800,7 +858,7 @@ export function DirectMessagesPage() {
                   ref={messageInputRef}
                   type="text"
                   value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder="Message..."
                   className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder-gray-500"
                 />

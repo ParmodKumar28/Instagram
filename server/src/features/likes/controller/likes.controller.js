@@ -1,7 +1,8 @@
-// Like's controller is here for routes and database/model communication function's
 // Imports
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { getLikesDb, toggleLikeDb } from "../model/likes.repository.js";
+import PostModel from "../../posts/model/posts.schema.js";
+import { emitToUser } from "../../../socket/index.js";
 
 // Get likes on post or comment here
 export const getLikes = async (req, res, next) => {
@@ -69,6 +70,30 @@ export const toggleLike = async (req, res, next) => {
         new ErrorHandler(400, "Like not toggled something went wrong!")
       );
     }
+
+    // If like was added on a Post, emit live notification to post owner
+    if (response.message === "Like added" && type === "Post") {
+      try {
+        const post = await PostModel.findById(id);
+        if (post && post.user && post.user.toString() !== userId.toString()) {
+          emitToUser(post.user, "new_notification", {
+            type: "like",
+            sender: {
+              _id: user._id,
+              username: user.username,
+              name: user.name,
+              profilePic: user.profilePic,
+            },
+            message: `${user.username} liked your post.`,
+            postId: id,
+            createdAt: new Date(),
+          });
+        }
+      } catch (e) {
+        console.error("Failed to emit like notification:", e);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       msg: response.message,

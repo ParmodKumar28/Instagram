@@ -8,6 +8,8 @@ import {
   markMessagesSeenDb,
   deleteMessageDb,
 } from "../model/chat.repository.js";
+import { ConversationModel } from "../model/chat.schema.js";
+import { emitToUser } from "../../../socket/index.js";
 
 // Get user's conversation list
 export const getConversations = async (req, res, next) => {
@@ -103,6 +105,16 @@ export const sendMessage = async (req, res, next) => {
       mediaType
     );
 
+    // Emit real-time message event to recipient & sender (across all their open tabs)
+    emitToUser(recipientId, "receive_message", {
+      message: result.message,
+      conversationId: result.conversationId,
+    });
+    emitToUser(senderId, "message_sent", {
+      message: result.message,
+      conversationId: result.conversationId,
+    });
+
     return res.status(201).json({
       success: true,
       msg: "Message sent",
@@ -118,13 +130,27 @@ export const sendMessage = async (req, res, next) => {
 export const markSeen = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { conversationId } = req.params;
+    const { conversationId } = req.pa1rams;
 
     if (!conversationId) {
       return next(new ErrorHandler(400, "Conversation ID is required"));
     }
 
     await markMessagesSeenDb(conversationId, userId);
+
+    // Notify conversation partner in real-time that their messages were seen
+    const conversation = await ConversationModel.findById(conversationId);
+    if (conversation) {
+      const otherParticipant = conversation.participants.find(
+        (p) => p.toString() !== userId.toString()
+      );
+      if (otherParticipant) {
+        emitToUser(otherParticipant, "messages_seen", {
+          conversationId,
+          seenBy: userId,
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -146,6 +172,14 @@ export const deleteMessage = async (req, res, next) => {
     }
 
     const result = await deleteMessageDb(messageId, userId);
+
+    // Emit real-time message deletion event
+    if (result?.conversationId) {
+      emitToUser(userId, "message_deleted", {
+        messageId,
+        conversationId: result.conversationId,
+      });
+    }
 
     return res.status(200).json({
       success: true,

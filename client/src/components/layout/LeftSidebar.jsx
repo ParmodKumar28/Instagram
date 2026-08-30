@@ -10,6 +10,7 @@ import {
 import {
   followersSelector,
   getFollowRequestsAsync,
+  clearUnreadNotifications,
 } from "../../redux/slices/followersSlice";
 import {
   GoHome,
@@ -45,16 +46,13 @@ export function LeftSidebar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { signedUser, userId } = useSelector(usersSelector);
-  const { requests } = useSelector(followersSelector);
+  const { requests = [], hasUnreadNotifications } = useSelector(followersSelector);
   const currentUser = signedUser;
   const currentPath = location.pathname;
+  const showNotificationDot = hasUnreadNotifications || requests.length > 0;
 
   useEffect(() => {
     dispatch(getFollowRequestsAsync());
-    const interval = setInterval(() => {
-      dispatch(getFollowRequestsAsync());
-    }, 8000);
-    return () => clearInterval(interval);
   }, [dispatch]);
 
   // Close popup menus when clicking outside
@@ -111,21 +109,24 @@ export function LeftSidebar() {
     },
     {
       label: "Notifications",
-      onClick: () => setShowNotifications(true),
+      onClick: () => {
+        dispatch(clearUnreadNotifications());
+        setShowNotifications(true);
+      },
       active: showNotifications,
       outlineIcon: (
         <div className="relative">
           <IoHeartOutline className="text-[28px] text-black" />
-          {requests.length > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3040] rounded-full ring-2 ring-white" />
+          {showNotificationDot && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3040] rounded-full ring-2 ring-white animate-pulse" />
           )}
         </div>
       ),
       filledIcon: (
         <div className="relative">
           <IoHeartSharp className="text-[28px] text-black" />
-          {requests.length > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3040] rounded-full ring-2 ring-white" />
+          {showNotificationDot && (
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3040] rounded-full ring-2 ring-white animate-pulse" />
           )}
         </div>
       ),

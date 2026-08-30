@@ -252,21 +252,30 @@ export function PostCard({ post, onPostDeleted }) {
     }
   };
 
-  const handleDoubleTap = () => {
+  const handleDoubleTap = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    setShowHeart(true);
+    setTimeout(() => setShowHeart(false), 900);
+
     if (!isLiked) {
       handleToggleLike();
     }
-    setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 900);
   };
 
-  const handleImageTap = () => {
+  const handleImageTap = (e) => {
     const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
+    const DOUBLE_TAP_DELAY = 350;
     if (now - lastTap < DOUBLE_TAP_DELAY) {
-      handleDoubleTap();
+      handleDoubleTap(e);
+      setLastTap(0);
+    } else {
+      setLastTap(now);
     }
-    setLastTap(now);
+  };
+
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    handleDoubleTap(e);
   };
 
   const handleDeletePost = async () => {
@@ -420,8 +429,9 @@ export function PostCard({ post, onPostDeleted }) {
 
       {/* Media (Video or Image) */}
       <div
-        className="relative aspect-square w-full bg-black overflow-hidden flex items-center justify-center cursor-pointer"
+        className="relative aspect-square w-full bg-black overflow-hidden flex items-center justify-center cursor-pointer select-none"
         onClick={handleImageTap}
+        onDoubleClick={handleDoubleClick}
       >
         {isVideoMedia(currentPost?.media, currentPost?.mediaType) ? (
           <InstagramVideoPlayer
@@ -435,6 +445,8 @@ export function PostCard({ post, onPostDeleted }) {
             className="w-full h-full object-cover"
             src={currentPost?.media}
             alt="Post media"
+            onClick={handleImageTap}
+            onDoubleClick={handleDoubleClick}
           />
         )}
 

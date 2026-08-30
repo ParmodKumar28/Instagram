@@ -6,3 +6,4 @@ export { default as likeService } from "./likeService";
 export { default as followerService } from "./followerService";
 export { default as storyService } from "./storyService";
 export { default as chatService } from "./chatService";
+export { default as socketService } from "./socketService";

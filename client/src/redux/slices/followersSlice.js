@@ -164,6 +164,8 @@ const initialState = {
   following: [],
   requests: [],
   activity: [],
+  hasUnreadNotifications: false,
+  unreadCount: 0,
   loading: false,
   error: null,
   followStatus: "",
@@ -172,7 +174,34 @@ const initialState = {
 const followersSlice = createSlice({
   name: "followers",
   initialState,
-  reducers: {},
+  reducers: {
+    addIncomingNotification: (state, action) => {
+      const notification = action.payload;
+      state.hasUnreadNotifications = true;
+      state.unreadCount = (state.unreadCount || 0) + 1;
+
+      if (notification?.type === "follow") {
+        if (
+          notification.sender &&
+          !state.requests.some(
+            (r) =>
+              (r.follower?._id || r.follower) ===
+              (notification.sender?._id || notification.sender)
+          )
+        ) {
+          state.requests.unshift({
+            _id: `req_${Date.now()}`,
+            follower: notification.sender,
+            createdAt: notification.createdAt || new Date(),
+          });
+        }
+      }
+    },
+    clearUnreadNotifications: (state) => {
+      state.hasUnreadNotifications = false;
+      state.unreadCount = 0;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(toggleFollowAsync.pending, (state) => {
@@ -255,6 +284,9 @@ const followersSlice = createSlice({
       });
   },
 });
+
+export const { addIncomingNotification, clearUnreadNotifications } =
+  followersSlice.actions;
 
 export const followersReducer = followersSlice.reducer;
 export const followersSelector = (state) => state.followersReducer;

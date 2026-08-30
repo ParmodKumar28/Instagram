@@ -2,22 +2,29 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { InstagramLogo } from "../common/InstagramLogo";
-import { followersSelector, getFollowRequestsAsync } from "../../redux/slices/followersSlice";
+import {
+  followersSelector,
+  getFollowRequestsAsync,
+  clearUnreadNotifications,
+} from "../../redux/slices/followersSlice";
 import { IoHeartOutline, IoPaperPlaneOutline } from "react-icons/io5";
 import NotificationsDrawer from "../notifications/NotificationsDrawer";
 
 export function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const dispatch = useDispatch();
-  const { requests = [] } = useSelector(followersSelector);
+  const { requests = [], hasUnreadNotifications } = useSelector(followersSelector);
 
   useEffect(() => {
     dispatch(getFollowRequestsAsync());
-    const interval = setInterval(() => {
-      dispatch(getFollowRequestsAsync());
-    }, 8000);
-    return () => clearInterval(interval);
   }, [dispatch]);
+
+  const handleOpenNotifications = () => {
+    dispatch(clearUnreadNotifications());
+    setShowNotifications(true);
+  };
+
+  const showNotificationDot = hasUnreadNotifications || requests.length > 0;
 
   return (
     <>
@@ -30,13 +37,13 @@ export function Header() {
         {/* Right Action Icons (Notifications & Direct Messages) */}
         <div className="flex items-center space-x-4 text-black">
           <button
-            onClick={() => setShowNotifications(true)}
+            onClick={handleOpenNotifications}
             aria-label="Notifications"
-            className="relative focus:outline-none p-1"
+            className="relative focus:outline-none p-1 cursor-pointer"
           >
             <IoHeartOutline className="text-[25px] text-black" />
-            {requests.length > 0 && (
-              <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#FF3040] rounded-full ring-2 ring-white" />
+            {showNotificationDot && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#FF3040] rounded-full ring-2 ring-white animate-pulse" />
             )}
           </button>
 

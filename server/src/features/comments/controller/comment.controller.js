@@ -1,4 +1,3 @@
-// Comment's controller is here for routes and database/model communication function's
 // Imports
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
@@ -7,6 +6,8 @@ import {
   removeCommentDb,
   updateCommentDb,
 } from "../model/comment.repository.js";
+import PostModel from "../../posts/model/posts.schema.js";
+import { emitToUser } from "../../../socket/index.js";
 
 // Adding new comment on the post
 export const addComment = async (req, res, next) => {
@@ -38,6 +39,29 @@ export const addComment = async (req, res, next) => {
         new ErrorHandler(400, "Comment not added something went wrong!")
       );
     }
+
+    // Emit live notification to post author
+    try {
+      const post = await PostModel.findById(postId);
+      if (post && post.user && post.user.toString() !== userId.toString()) {
+        emitToUser(post.user, "new_notification", {
+          type: "comment",
+          sender: {
+            _id: req.user._id,
+            username: req.user.username,
+            name: req.user.name,
+            profilePic: req.user.profilePic,
+          },
+          message: `${req.user.username} commented on your post: "${comment.slice(0, 30)}${comment.length > 30 ? "..." : ""}"`,
+          postId,
+          commentId: newComment._id,
+          createdAt: new Date(),
+        });
+      }
+    } catch (e) {
+      console.error("Failed to emit comment notification:", e);
+    }
+
     // Sending response
     return res.status(201).json({
       success: true,

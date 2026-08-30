@@ -4,13 +4,16 @@ import { Toaster } from "react-hot-toast";
 
 import store from "./redux/store";
 import router from "./routes/appRouter";
+import { SocketProvider } from "./context/SocketContext";
 import "./App.css";
 
 const App = () => {
   return (
     <Provider store={store}>
-      <RouterProvider router={router} />
-      <Toaster position="top-center" reverseOrder={false} />
+      <SocketProvider>
+        <RouterProvider router={router} />
+        <Toaster position="top-center" reverseOrder={false} />
+      </SocketProvider>
     </Provider>
   );
 };

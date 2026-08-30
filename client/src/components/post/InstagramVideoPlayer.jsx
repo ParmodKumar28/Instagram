@@ -56,9 +56,18 @@ export function InstagramVideoPlayer({
       const timeout = setTimeout(() => {
         togglePlay();
         setClickTimeout(null);
-      }, 250);
+      }, 280);
       setClickTimeout(timeout);
     }
+  };
+
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      setClickTimeout(null);
+    }
+    if (onDoubleTap) onDoubleTap();
   };
 
   const toggleMute = (e) => {
@@ -74,6 +83,7 @@ export function InstagramVideoPlayer({
     <div
       className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer select-none overflow-hidden"
       onClick={handleVideoClick}
+      onDoubleClick={handleDoubleClick}
     >
       <video
         ref={videoRef}
@@ -83,6 +93,7 @@ export function InstagramVideoPlayer({
         playsInline
         muted={isMuted}
         autoPlay
+        onDoubleClick={handleDoubleClick}
         preload="metadata"
       />
 

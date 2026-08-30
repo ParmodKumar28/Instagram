@@ -38,11 +38,6 @@ export function NotificationsDrawer({ isOpen, onClose }) {
       }
       dispatch(getFollowRequestsAsync());
       dispatch(getActivityAsync());
-      const interval = setInterval(() => {
-        dispatch(getFollowRequestsAsync());
-        dispatch(getActivityAsync());
-      }, 6000);
-      return () => clearInterval(interval);
     } else {
       setViewingAllRequests(false);
     }

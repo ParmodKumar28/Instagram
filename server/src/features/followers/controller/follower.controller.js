@@ -1,4 +1,3 @@
-// Creating here follower's controller to handle communication between routes and the model/database
 // Imports
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import {
@@ -13,6 +12,7 @@ import {
   unfollowDb,
   getActivityDb,
 } from "../model/follower.repository.js";
+import { emitToUser } from "../../../socket/index.js";
 
 // Toggle follower
 export const toggleFollow = async (req, res, next) => {
@@ -29,6 +29,20 @@ export const toggleFollow = async (req, res, next) => {
         new ErrorHandler(400, "Follow action failed, please try again!")
       );
     }
+
+    // Emit live notification to target user
+    emitToUser(following, "new_notification", {
+      type: "follow",
+      sender: {
+        _id: req.user._id,
+        username: req.user.username,
+        name: req.user.name,
+        profilePic: req.user.profilePic,
+      },
+      message: typeof response === "object" ? response.msg : response,
+      createdAt: new Date(),
+    });
+
     return res.status(200).json({
       success: true,
       ...(typeof response === "object" ? response : { msg: response }),
@@ -53,6 +67,20 @@ export const acceptRequest = async (req, res, next) => {
         new ErrorHandler(400, "Request not accepted somtehing went wrong!")
       );
     }
+
+    // Notify the user who requested that their request was accepted
+    emitToUser(follower, "new_notification", {
+      type: "accept_request",
+      sender: {
+        _id: req.user._id,
+        username: req.user.username,
+        name: req.user.name,
+        profilePic: req.user.profilePic,
+      },
+      message: `${req.user.username} accepted your follow request.`,
+      createdAt: new Date(),
+    });
+
     return res.status(200).json({
       success: true,
       msg: response,

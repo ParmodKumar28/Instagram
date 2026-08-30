@@ -6,6 +6,8 @@ const initialState = {
   conversations: [],
   activeConversation: null,
   messages: [],
+  onlineUsers: [],
+  typingUsers: {},
   loadingConversations: false,
   loadingMessages: false,
   sendingMessage: false,
@@ -136,6 +138,43 @@ const chatSlice = createSlice({
           createdAt: newMessage.createdAt,
         };
         conv.updatedAt = newMessage.createdAt;
+        if (state.activeConversation?._id !== conv._id) {
+          conv.unreadCount = (conv.unreadCount || 0) + 1;
+        }
+      }
+    },
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload || [];
+    },
+    updateUserOnlineStatus: (state, action) => {
+      const { userId, status, onlineUsers } = action.payload;
+      if (onlineUsers) {
+        state.onlineUsers = onlineUsers;
+      } else if (status === "online" && !state.onlineUsers.includes(userId)) {
+        state.onlineUsers.push(userId);
+      } else if (status === "offline") {
+        state.onlineUsers = state.onlineUsers.filter((id) => id !== userId);
+      }
+    },
+    setTypingStatus: (state, action) => {
+      const { conversationId, senderId, username, isTyping } = action.payload;
+      if (!conversationId) return;
+      if (isTyping) {
+        state.typingUsers[conversationId] = { senderId, username };
+      } else {
+        delete state.typingUsers[conversationId];
+      }
+    },
+    handleIncomingMessageDeleted: (state, action) => {
+      const { messageId } = action.payload;
+      state.messages = state.messages.filter((m) => m._id !== messageId);
+    },
+    handleIncomingMessagesSeen: (state, action) => {
+      const { conversationId } = action.payload;
+      if (state.activeConversation?._id === conversationId) {
+        state.messages.forEach((m) => {
+          m.seen = true;
+        });
       }
     },
   },
@@ -228,6 +267,11 @@ export const {
   setActiveConversation,
   clearActiveConversation,
   addIncomingMessage,
+  setOnlineUsers,
+  updateUserOnlineStatus,
+  setTypingStatus,
+  handleIncomingMessageDeleted,
+  handleIncomingMessagesSeen,
 } = chatSlice.actions;
 
 export const chatReducer = chatSlice.reducer;

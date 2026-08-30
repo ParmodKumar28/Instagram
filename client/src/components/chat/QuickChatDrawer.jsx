@@ -29,6 +29,7 @@ import {
   chatSelector,
 } from "../../redux/slices/chatSlice";
 import { storiesSelector } from "../../redux/slices/storiesSlice";
+import { useSocket } from "../../context/SocketContext";
 import { userService } from "../../services";
 import { formatTimeAgo } from "../../utils";
 import toast from "react-hot-toast";
@@ -67,13 +68,33 @@ export function QuickChatDrawer() {
   const prevMessagesLengthRef = useRef(0);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
-  const pollingRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  const {
+    isOnline,
+    typingUsers,
+    sendTyping,
+    sendStopTyping,
+    sendMarkSeen,
+    joinConversation,
+    leaveConversation,
+  } = useSocket();
 
   // Total unread count across conversations
   const totalUnreadCount = conversations.reduce(
     (acc, conv) => acc + (conv.unreadCount || 0),
     0
   );
+
+  const participant =
+    selectedChat?.participant ||
+    selectedChat?.participants?.find(
+      (p) => (p?._id || p)?.toString() !== currentUserId?.toString()
+    ) ||
+    selectedChat?.participants?.[0] ||
+    null;
+  const participantName =
+    participant?.username || participant?.name || "User";
 
   // Fetch conversations on mount & when expanded
   useEffect(() => {
@@ -86,29 +107,23 @@ export function QuickChatDrawer() {
     }
   }, [isExpanded, dispatch]);
 
-  // Load messages when selectedChat changes
+  // Load messages and join room when selectedChat changes
   useEffect(() => {
     if (selectedChat?._id && isExpanded) {
+      joinConversation(selectedChat._id);
       dispatch(fetchMessagesAsync(selectedChat._id));
       dispatch(markSeenAsync(selectedChat._id));
-    }
-  }, [selectedChat?._id, isExpanded, dispatch]);
 
-  // Polling while expanded
-  useEffect(() => {
-    if (isExpanded) {
-      pollingRef.current = setInterval(() => {
-        dispatch(fetchConversationsAsync());
-        if (selectedChat?._id) {
-          dispatch(fetchMessagesAsync(selectedChat._id));
-        }
-      }, 4000);
-    }
+      const recipientId = participant?._id || participant?.id;
+      if (recipientId) {
+        sendMarkSeen({ conversationId: selectedChat._id, recipientId });
+      }
 
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [isExpanded, selectedChat?._id, dispatch]);
+      return () => {
+        leaveConversation(selectedChat._id);
+      };
+    }
+  }, [selectedChat?._id, isExpanded, participant?._id, dispatch, joinConversation, leaveConversation, sendMarkSeen]);
 
   // Handle scroll position to avoid jumping when user has scrolled up
   const handleScroll = useCallback(() => {
@@ -200,6 +215,30 @@ export function QuickChatDrawer() {
     setFilePreview(null);
   };
 
+  // Handle message text typing
+  const handleInputChange = (e) => {
+    const text = e.target.value;
+    setMessageText(text);
+
+    const recipient = selectedChat?.participant;
+    const recipientId = recipient?._id || recipient?.id;
+    if (selectedChat?._id && recipientId) {
+      sendTyping({
+        conversationId: selectedChat._id,
+        recipientId,
+        username: signedUser?.username,
+      });
+
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        sendStopTyping({
+          conversationId: selectedChat._id,
+          recipientId,
+        });
+      }, 2000);
+    }
+  };
+
   // Send message
   const handleSendMessage = async (textToSend = null) => {
     const textContent = textToSend !== null ? textToSend : messageText.trim();
@@ -209,6 +248,14 @@ export function QuickChatDrawer() {
     const recipient = selectedChat.participant;
     const recipientId = recipient?._id || recipient?.id;
     if (!recipientId) return;
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    if (selectedChat?._id) {
+      sendStopTyping({
+        conversationId: selectedChat._id,
+        recipientId,
+      });
+    }
 
     const formData = new FormData();
     formData.append("recipientId", recipientId);
@@ -230,7 +277,6 @@ export function QuickChatDrawer() {
 
     try {
       await dispatch(sendMessageAsync(formData)).unwrap();
-      dispatch(fetchConversationsAsync());
       setTimeout(() => scrollToBottom("smooth"), 50);
     } catch (err) {
       setMessageText(text);
@@ -266,16 +312,6 @@ export function QuickChatDrawer() {
       name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
-  const participant =
-    selectedChat?.participant ||
-    selectedChat?.participants?.find(
-      (p) => (p?._id || p)?.toString() !== currentUserId?.toString()
-    ) ||
-    selectedChat?.participants?.[0] ||
-    null;
-  const participantName =
-    participant?.username || participant?.name || "User";
 
   return (
     <>
@@ -357,7 +393,16 @@ export function QuickChatDrawer() {
                     >
                       {participantName}
                     </Link>
-                    <span className="text-[10px] text-gray-400">Active</span>
+                    <span className="text-[10px] flex items-center space-x-1">
+                      {isOnline(participant?._id || participant?.id) ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                          <span className="text-emerald-600 font-medium">Active</span>
+                        </>
+                      ) : (
+                        <span className="text-gray-400">Offline</span>
+                      )}
+                    </span>
                   </div>
                 </div>
 
@@ -463,6 +508,18 @@ export function QuickChatDrawer() {
                     No messages yet. Say hello!
                   </div>
                 )}
+                {/* Live Typing Indicator */}
+                {typingUsers[selectedChat?._id]?.senderId?.toString() ===
+                  (participant?._id || participant?.id)?.toString() && (
+                  <div className="flex items-center space-x-1.5 py-1 animate-in fade-in duration-150">
+                    <div className="bg-[#EFEFEF] px-3 py-1.5 rounded-full flex items-center space-x-1">
+                      <span className="w-1 h-1 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1 h-1 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1 h-1 bg-gray-500 rounded-full animate-bounce" />
+                    </div>
+                    <span className="text-[10px] text-gray-400 italic">typing...</span>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -514,7 +571,7 @@ export function QuickChatDrawer() {
                     ref={inputRef}
                     type="text"
                     value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="Message..."
                     className="flex-1 bg-transparent text-xs text-gray-900 outline-none placeholder-gray-500"
                   />
