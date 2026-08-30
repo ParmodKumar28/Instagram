@@ -30,18 +30,34 @@ export const toggleFollow = async (req, res, next) => {
       );
     }
 
-    // Emit live notification to target user
-    emitToUser(following, "new_notification", {
-      type: "follow",
-      sender: {
-        _id: req.user._id,
-        username: req.user.username,
-        name: req.user.name,
-        profilePic: req.user.profilePic,
-      },
-      message: typeof response === "object" ? response.msg : response,
-      createdAt: new Date(),
-    });
+    // Emit live notification to target user according to account privacy
+    if (typeof response === "object" && response.status === "pending") {
+      emitToUser(following, "new_notification", {
+        type: "follow_request",
+        sender: {
+          _id: req.user._id,
+          username: req.user.username,
+          name: req.user.name,
+          profilePic: req.user.profilePic,
+          gender: req.user.gender,
+        },
+        message: `${req.user.username} sent you a follow request.`,
+        createdAt: new Date(),
+      });
+    } else if (typeof response === "object" && response.status === "accepted") {
+      emitToUser(following, "new_notification", {
+        type: "follow",
+        sender: {
+          _id: req.user._id,
+          username: req.user.username,
+          name: req.user.name,
+          profilePic: req.user.profilePic,
+          gender: req.user.gender,
+        },
+        message: `${req.user.username} started following you.`,
+        createdAt: new Date(),
+      });
+    }
 
     return res.status(200).json({
       success: true,

@@ -197,8 +197,12 @@ export function SocketProvider({ children }) {
           actionText = "replied to your story.";
         } else if (notification.type === "accept_request") {
           actionText = "accepted your follow request.";
+        } else if (notification.type === "follow_request") {
+          actionText = "sent you a follow request.";
         } else if (notification.type === "follow") {
           actionText = "started following you.";
+        } else if (notification.type === "tag") {
+          actionText = "tagged you in a post.";
         }
 
         toast.custom(
@@ -230,6 +234,8 @@ export function SocketProvider({ children }) {
                     ? "❤️"
                     : notification.type?.includes("comment") || notification.type?.includes("reply")
                     ? "💬"
+                    : notification.type === "tag"
+                    ? "🏷️"
                     : "👤"}
                 </span>
               </div>

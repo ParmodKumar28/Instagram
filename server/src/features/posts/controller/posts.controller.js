@@ -1,7 +1,6 @@
-// Creating here user controller to handle communication between routes and the model/database
-// Imports
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import { uploadMedia } from "../../../utils/cloudinary.js";
+import { emitToUser } from "../../../socket/index.js";
 import {
   createPostDb,
   deletePostDb,
@@ -19,7 +18,6 @@ import {
 export const createPost = async (req, res, next) => {
   try {
     const postData = req.body;
-    console.log("postData", postData);
 
     // Ensure that at least one field is provided
     if (!postData.caption && !postData.location && !req.file) {
@@ -59,6 +57,28 @@ export const createPost = async (req, res, next) => {
       return next(
         new ErrorHandler(400, "Post not created, something went wrong!")
       );
+    }
+
+    // Live Socket Notification: Alert all tagged users
+    if (newPost.tags && Array.isArray(newPost.tags) && newPost.tags.length > 0) {
+      newPost.tags.forEach((taggedUser) => {
+        const taggedId = (taggedUser?._id || taggedUser)?.toString();
+        if (taggedId && taggedId !== req.user._id.toString()) {
+          emitToUser(taggedId, "new_notification", {
+            type: "tag",
+            sender: {
+              _id: req.user._id,
+              username: req.user.username,
+              name: req.user.name,
+              profilePic: req.user.profilePic,
+              gender: req.user.gender,
+            },
+            postId: newPost._id,
+            message: `${req.user.username} tagged you in a post.`,
+            createdAt: new Date(),
+          });
+        }
+      });
     }
 
     // Respond with the created post
@@ -127,6 +147,29 @@ export const updatePost = async (req, res, next) => {
         new ErrorHandler(400, "Post not updated something went wrong!")
       );
     }
+
+    // Live Socket Notification: Alert newly tagged users
+    if (updatedPost.tags && Array.isArray(updatedPost.tags) && updatedPost.tags.length > 0) {
+      updatedPost.tags.forEach((taggedUser) => {
+        const taggedId = (taggedUser?._id || taggedUser)?.toString();
+        if (taggedId && taggedId !== req.user._id.toString()) {
+          emitToUser(taggedId, "new_notification", {
+            type: "tag",
+            sender: {
+              _id: req.user._id,
+              username: req.user.username,
+              name: req.user.name,
+              profilePic: req.user.profilePic,
+              gender: req.user.gender,
+            },
+            postId: updatedPost._id,
+            message: `${req.user.username} tagged you in a post.`,
+            createdAt: new Date(),
+          });
+        }
+      });
+    }
+
     return res.status(200).json({
       succes: true,
       msg: "Post updated!",

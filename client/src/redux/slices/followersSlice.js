@@ -180,7 +180,7 @@ const followersSlice = createSlice({
       state.hasUnreadNotifications = true;
       state.unreadCount = (state.unreadCount || 0) + 1;
 
-      if (notification?.type === "follow") {
+      if (notification?.type === "follow_request" || notification?.type === "follow") {
         if (
           notification.sender &&
           !state.requests.some(
