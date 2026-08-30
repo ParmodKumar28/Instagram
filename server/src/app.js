@@ -19,6 +19,7 @@ import postsRouter from "./features/posts/routes/posts.routes.js";
 import likesRouter from "./features/likes/routes/likes.routes.js";
 import commentsRouter from "./features/comments/routes/comment.routes.js";
 import followersRouter from "./features/followers/routes/follower.routes.js";
+import storyRouter from "./features/stories/routes/story.routes.js";
 
 // Server
 const app = express();
@@ -67,6 +68,9 @@ app.use("/api/like", likesRouter);
 app.use("/api/comment", commentsRouter);
 // Follower's routes
 app.use("/api/follower", followersRouter);
+// Story routes
+app.use("/api/story", storyRouter);
+app.use("/api/stories", storyRouter);
 
 // Not existing route
 app.use((req, res, next) => {

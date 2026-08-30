@@ -30,6 +30,7 @@ import {
 import { RiAddBoxLine, RiAddBoxFill } from "react-icons/ri";
 import NotificationsDrawer from "../notifications/NotificationsDrawer";
 import CreatePostModal from "../post/CreatePostModal";
+import CreateStoryModal from "../story/CreateStoryModal";
 import toast from "react-hot-toast";
 
 export function LeftSidebar() {
@@ -38,6 +39,7 @@ export function LeftSidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateStoryModal, setShowCreateStoryModal] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -251,9 +253,9 @@ export function LeftSidebar() {
                       <button
                         onClick={() => {
                           setShowCreateMenu(false);
-                          toast.success("To add a story, tap your avatar in the story tray on the feed!");
+                          setShowCreateStoryModal(true);
                         }}
-                        className="w-full flex items-center space-x-3 px-3.5 py-3 text-sm text-gray-900 font-semibold hover:bg-[#F2F2F2] rounded-xl transition text-left"
+                        className="w-full flex items-center space-x-3 px-3.5 py-3 text-sm text-gray-900 font-semibold hover:bg-[#F2F2F2] rounded-xl transition text-left cursor-pointer"
                       >
                         <div className="w-5 h-5 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center flex-shrink-0">
                           <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
@@ -356,6 +358,12 @@ export function LeftSidebar() {
       <CreatePostModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      {/* Create Story Modal */}
+      <CreateStoryModal
+        isOpen={showCreateStoryModal}
+        onClose={() => setShowCreateStoryModal(false)}
       />
     </>
   );

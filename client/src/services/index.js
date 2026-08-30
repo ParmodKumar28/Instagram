@@ -4,3 +4,4 @@ export { default as postService } from "./postService";
 export { default as commentService } from "./commentService";
 export { default as likeService } from "./likeService";
 export { default as followerService } from "./followerService";
+export { default as storyService } from "./storyService";

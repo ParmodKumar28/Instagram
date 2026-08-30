@@ -25,7 +25,8 @@ import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
 import { Loader2 } from "lucide-react";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 import Avatar from "../../components/common/Avatar";
-import { postService } from "../../services";
+import StoryViewerModal from "../../components/story/StoryViewerModal";
+import { postService, storyService } from "../../services";
 
 export function ProfilePage() {
   const dispatch = useDispatch();
@@ -37,6 +38,8 @@ export function ProfilePage() {
   const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
   const [taggedPosts, setTaggedPosts] = useState([]);
   const [taggedLoading, setTaggedLoading] = useState(false);
+  const [activeStories, setActiveStories] = useState([]);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
 
   const isOwnProfile = !userId || userId === currentUserId;
   const user = isOwnProfile ? signedUser : profileUser;
@@ -75,6 +78,20 @@ export function ProfilePage() {
         });
     }
   }, [activeTab, userId, currentUserId]);
+
+  useEffect(() => {
+    const targetId = userId || currentUserId;
+    if (targetId) {
+      storyService
+        .getUserStories(targetId)
+        .then((res) => {
+          setActiveStories(res.data?.stories || []);
+        })
+        .catch(() => {
+          setActiveStories([]);
+        });
+    }
+  }, [userId, currentUserId]);
   
   const isFollowed =
     followStatus === "accepted" ||
@@ -135,15 +152,27 @@ export function ProfilePage() {
         {/* Profile Picture */}
         <div className="flex-shrink-0 sm:w-[290px] flex justify-center mb-4 sm:mb-0">
           <div
-            onClick={() => setIsProfilePicZoomed(true)}
-            className="w-24 h-24 sm:w-36 sm:h-36 md:w-38 md:h-38 rounded-full border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 transition"
+            onClick={() => {
+              if (activeStories.length > 0) {
+                setIsStoryViewerOpen(true);
+              } else {
+                setIsProfilePicZoomed(true);
+              }
+            }}
+            className={`w-24 h-24 sm:w-36 sm:h-36 md:w-38 md:h-38 rounded-full overflow-hidden cursor-pointer transition ${
+              activeStories.length > 0
+                ? "p-[3.5px] ig-story-ring hover:scale-105"
+                : "border border-gray-200 hover:opacity-90"
+            }`}
           >
             <Avatar
               src={user?.profilePic}
               alt={user?.username || "Profile"}
               gender={user?.gender}
               username={user?.username}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover rounded-full ${
+                activeStories.length > 0 ? "border-2 border-white bg-white" : ""
+              }`}
             />
           </div>
         </div>
@@ -408,6 +437,22 @@ export function ProfilePage() {
             username={user?.username}
           />
         </div>
+      )}
+
+      {/* Story Viewer Modal */}
+      {isStoryViewerOpen && activeStories.length > 0 && (
+        <StoryViewerModal
+          storyGroups={[
+            {
+              user: user,
+              stories: activeStories,
+              isSelf: isOwnProfile,
+            },
+          ]}
+          initialUserIndex={0}
+          isOpen={true}
+          onClose={() => setIsStoryViewerOpen(false)}
+        />
       )}
     </div>
   );

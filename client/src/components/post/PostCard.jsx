@@ -24,6 +24,7 @@ import {
   postsSelector,
 } from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
+import { storiesSelector } from "../../redux/slices/storiesSlice";
 import { commentService, likeService, userService } from "../../services";
 import { formatTimeAgo, isVideoMedia } from "../../utils";
 import CommentList from "./CommentList";
@@ -31,6 +32,7 @@ import LikeList from "./LikeList";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import EmojiDrawer from "../common/EmojiDrawer";
+import StoryViewerModal from "../story/StoryViewerModal";
 
 export function PostCard({ post, onPostDeleted }) {
   const commentInputRef = useRef(null);
@@ -38,6 +40,7 @@ export function PostCard({ post, onPostDeleted }) {
   const [currentPost, setCurrentPost] = useState(post);
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // { commentId, username }
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -62,6 +65,7 @@ export function PostCard({ post, onPostDeleted }) {
   const dispatch = useDispatch();
   const { userId: currentUserId, signedUser } = useSelector(usersSelector);
   const { savedPostIds = [] } = useSelector(postsSelector);
+  const { feedStories = [] } = useSelector(storiesSelector);
   const isSaved = savedPostIds.includes(currentPost?._id);
 
   useEffect(() => {
@@ -336,23 +340,48 @@ export function PostCard({ post, onPostDeleted }) {
     0
   );
 
+  const authorStoryGroup = feedStories.find(
+    (g) =>
+      (g.user?._id || g.user?.id)?.toString() ===
+      (currentPost?.user?._id || currentPost?.user)?.toString()
+  );
+  const authorHasStories = Boolean(
+    authorStoryGroup && authorStoryGroup.stories && authorStoryGroup.stories.length > 0
+  );
+
   return (
     <article className="w-full max-w-[480px] mx-auto bg-white border border-gray-200 rounded-2xl mb-8 select-none shadow-sm overflow-hidden">
       {/* Header with comfortable side padding */}
       <div className="flex items-center justify-between px-4 py-3 sm:px-4 sm:py-3.5 border-b border-gray-50">
         <div className="flex items-center space-x-3">
-          <Link
-            to={`/profile/${currentPost?.user?._id || ""}`}
-            className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
-          >
-            <Avatar
-              src={currentPost?.user?.profilePic}
-              alt={username}
-              gender={currentPost?.user?.gender}
-              username={username}
-              className="w-full h-full rounded-full object-cover"
-            />
-          </Link>
+          {authorHasStories ? (
+            <div
+              onClick={() => setShowStoryViewer(true)}
+              className="w-10 h-10 rounded-full p-[2px] ig-story-ring flex-shrink-0 overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              title={`View ${username}'s story`}
+            >
+              <Avatar
+                src={currentPost?.user?.profilePic}
+                alt={username}
+                gender={currentPost?.user?.gender}
+                username={username}
+                className="w-full h-full rounded-full object-cover border-2 border-white bg-white"
+              />
+            </div>
+          ) : (
+            <Link
+              to={`/profile/${currentPost?.user?._id || ""}`}
+              className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
+            >
+              <Avatar
+                src={currentPost?.user?.profilePic}
+                alt={username}
+                gender={currentPost?.user?.gender}
+                username={username}
+                className="w-full h-full rounded-full object-cover"
+              />
+            </Link>
+          )}
 
           <div className="flex items-center space-x-2">
             <Link
@@ -810,6 +839,16 @@ export function PostCard({ post, onPostDeleted }) {
 
       {showLikes && (
         <LikeList likes={likeList} onClose={() => setShowLikes(false)} />
+      )}
+
+      {/* Story Viewer Modal */}
+      {showStoryViewer && authorHasStories && (
+        <StoryViewerModal
+          storyGroups={[authorStoryGroup]}
+          initialUserIndex={0}
+          isOpen={true}
+          onClose={() => setShowStoryViewer(false)}
+        />
       )}
     </article>
   );

@@ -5,6 +5,7 @@ import FollowerModel from "./follower.schema.js";
 import PostModel from "../../posts/model/posts.schema.js";
 import LikeModel from "../../likes/model/likes.schema.js";
 import CommentModel from "../../comments/model/comment.schema.js";
+import StoryModel from "../../stories/model/story.schema.js";
 
 // Function to handle toggling of sending follow requests (follow / unfollow / cancel request)
 export const toggleSendRequestDb = async (user, following) => {
@@ -407,8 +408,59 @@ export const getActivityDb = async (userId) => {
       .sort({ createdAt: -1 })
       .limit(15);
 
+    // 7. Story likes & replies on user's active stories
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const myStories = await StoryModel.find({
+      user: userObjectId,
+      createdAt: { $gte: cutoff },
+    })
+      .select("_id media mediaType likes replies createdAt")
+      .populate("likes.user", "name username profilePic gender")
+      .populate("replies.user", "name username profilePic gender");
+
+    const storyLikes = [];
+    const storyReplies = [];
+
+    myStories.forEach((story) => {
+      (story.likes || []).forEach((like) => {
+        if (
+          like.user &&
+          (like.user._id || like.user).toString() !== userObjectId.toString()
+        ) {
+          storyLikes.push({
+            _id: `story_like_${story._id}_${like.user._id || like.user}`,
+            user: like.user,
+            type: "liked_story",
+            text: "liked your story.",
+            story: { _id: story._id, media: story.media, mediaType: story.mediaType },
+            createdAt: like.createdAt || story.createdAt,
+          });
+        }
+      });
+
+      (story.replies || []).forEach((reply) => {
+        if (
+          reply.user &&
+          (reply.user._id || reply.user).toString() !== userObjectId.toString()
+        ) {
+          storyReplies.push({
+            _id: `story_reply_${story._id}_${reply._id || reply.createdAt}`,
+            user: reply.user,
+            type: "replied_story",
+            text: `replied to your story: "${reply.text?.slice(0, 35)}${
+              (reply.text?.length || 0) > 35 ? "..." : ""
+            }"`,
+            story: { _id: story._id, media: story.media, mediaType: story.mediaType },
+            createdAt: reply.createdAt || story.createdAt,
+          });
+        }
+      });
+    });
+
     // Combine all notification activities
     const activities = [
+      ...storyLikes,
+      ...storyReplies,
       ...taggedPosts.map((item) => ({
         _id: `tag_${item._id}`,
         user: item.user,
