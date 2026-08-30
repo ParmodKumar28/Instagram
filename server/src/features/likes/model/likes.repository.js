@@ -6,11 +6,11 @@ import LikeModel from "./likes.schema.js";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import CommentModel from "../../comments/model/comment.schema.js";
 
-// Getting like's on comment or post from database
+// Getting likes on comment or post from database
 export const getLikesDb = async (id, type) => {
   try {
     let likeable;
-    if (type == "Post") {
+    if (type === "Post") {
       likeable = await PostModel.findById(id);
     } else if (type === "Comment") {
       likeable = await CommentModel.findById(id);
@@ -23,21 +23,14 @@ export const getLikesDb = async (id, type) => {
       );
     }
 
-    const likes = LikeModel.find({
+    const likes = await LikeModel.find({
       likeable: new ObjectId(id),
       on_model: type,
     })
-      .populate({ path: "user", select: "name profilePic _id" })
+      .populate({ path: "user", select: "name username profilePic gender _id" })
       .populate("likeable");
 
-    if (likes.length === 0) {
-      throw new ErrorHandler(
-        400,
-        `There are no like's on this ${type.toLowerCase()}.`
-      );
-    }
-
-    return likes;
+    return likes || [];
   } catch (error) {
     throw error;
   }

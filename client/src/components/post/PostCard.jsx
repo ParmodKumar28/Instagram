@@ -325,22 +325,29 @@ export function PostCard({ post, onPostDeleted }) {
       {/* Actions Bar with left/right padding */}
       <div className="flex justify-between items-center px-4 pt-3 pb-1">
         <div className="flex items-center space-x-4">
-          <button
-            onClick={handleToggleLike}
-            className="flex items-center space-x-1.5 focus:outline-none transition active:scale-125"
-            aria-label={isLiked ? "Unlike post" : "Like post"}
-          >
-            {isLiked ? (
-              <IoHeartSharp className="text-[27px] text-[#FF3040] transition-colors" />
-            ) : (
-              <IoHeartOutline className="text-[27px] text-gray-900 hover:text-gray-500 transition-colors" />
-            )}
+          <div className="flex items-center space-x-1.5">
+            <button
+              onClick={handleToggleLike}
+              className="focus:outline-none transition active:scale-125"
+              aria-label={isLiked ? "Unlike post" : "Like post"}
+            >
+              {isLiked ? (
+                <IoHeartSharp className="text-[27px] text-[#FF3040] transition-colors" />
+              ) : (
+                <IoHeartOutline className="text-[27px] text-gray-900 hover:text-gray-500 transition-colors" />
+              )}
+            </button>
             {likeList.length > 0 && (
-              <span className="text-[13px] font-semibold text-gray-900">
+              <button
+                type="button"
+                onClick={() => setShowLikes(true)}
+                className="text-[13px] font-semibold text-gray-900 hover:text-gray-600 focus:outline-none cursor-pointer"
+                aria-label="View likes"
+              >
                 {likeList.length}
-              </span>
+              </button>
             )}
-          </button>
+          </div>
 
           <button
             onClick={() => setShowComments(!showComments)}

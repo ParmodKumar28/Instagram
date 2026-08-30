@@ -21,6 +21,7 @@ import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import Avatar from "../common/Avatar";
 import CommentList from "./CommentList";
+import LikeList from "./LikeList";
 import EmojiDrawer from "../common/EmojiDrawer";
 import toast from "react-hot-toast";
 
@@ -29,6 +30,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState([]);
   const [likeList, setLikeList] = useState([]);
+  const [showLikes, setShowLikes] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState(null); // { commentId, username }
@@ -401,11 +403,19 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
             {/* Likes Tally & Timestamp */}
             <div className="px-4 pb-2">
-              <p className="font-semibold text-sm text-gray-900">
-                {likeList.length} {likeList.length === 1 ? "like" : "likes"}
-              </p>
+              {likeList.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowLikes(true)}
+                  className="font-semibold text-sm text-gray-900 hover:underline cursor-pointer focus:outline-none"
+                >
+                  {likeList.length} {likeList.length === 1 ? "like" : "likes"}
+                </button>
+              ) : (
+                <p className="text-xs text-gray-400">Be the first to like this</p>
+              )}
               {timeAgo && (
-                <span className="text-gray-400 text-[10px] uppercase font-medium tracking-wider">
+                <span className="text-gray-400 text-[10px] uppercase font-medium tracking-wider block mt-0.5">
                   {timeAgo} AGO
                 </span>
               )}
@@ -475,6 +485,10 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
           </div>
         </div>
       </div>
+
+      {showLikes && (
+        <LikeList likeList={likeList} onClose={() => setShowLikes(false)} />
+      )}
     </div>
   );
 }
