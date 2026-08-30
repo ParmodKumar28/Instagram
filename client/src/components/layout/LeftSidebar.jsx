@@ -3,19 +3,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { InstagramLogo } from "../common/InstagramLogo";
 import Avatar from "../common/Avatar";
-import {
-  logoutAsync,
-  usersSelector,
-} from "../../redux/slices/usersSlice";
+import { logoutAsync, usersSelector } from "../../redux/slices/usersSlice";
 import {
   followersSelector,
   getFollowRequestsAsync,
   clearUnreadNotifications,
 } from "../../redux/slices/followersSlice";
-import {
-  GoHome,
-  GoHomeFill,
-} from "react-icons/go";
+import { GoHome, GoHomeFill } from "react-icons/go";
 import {
   IoSearchOutline,
   IoSearchSharp,
@@ -46,7 +40,8 @@ export function LeftSidebar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { signedUser, userId } = useSelector(usersSelector);
-  const { requests = [], hasUnreadNotifications } = useSelector(followersSelector);
+  const { requests = [], hasUnreadNotifications } =
+    useSelector(followersSelector);
   const currentUser = signedUser;
   const currentPath = location.pathname;
   const showNotificationDot = hasUnreadNotifications || requests.length > 0;
@@ -230,7 +225,9 @@ export function LeftSidebar() {
                     {isHovered && (
                       <span
                         className={`text-[15px] tracking-tight whitespace-nowrap transition-opacity duration-200 ${
-                          item.active ? "font-bold text-black" : "text-black font-normal"
+                          item.active
+                            ? "font-bold text-black"
+                            : "text-black font-normal"
                         }`}
                       >
                         {item.label}
@@ -264,7 +261,15 @@ export function LeftSidebar() {
                       >
                         <div className="w-5 h-5 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center flex-shrink-0">
                           <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#DD2A7B]">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="12"
+                              height="12"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              className="text-[#DD2A7B]"
+                            >
                               <line x1="12" y1="5" x2="12" y2="19" />
                               <line x1="5" y1="12" x2="19" y2="12" />
                             </svg>
@@ -294,7 +299,9 @@ export function LeftSidebar() {
                 {isHovered && (
                   <span
                     className={`text-[15px] tracking-tight whitespace-nowrap transition-opacity duration-200 ${
-                      item.active ? "font-bold text-black" : "text-black font-normal"
+                      item.active
+                        ? "font-bold text-black"
+                        : "text-black font-normal"
                     }`}
                   >
                     {item.label}

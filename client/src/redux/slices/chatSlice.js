@@ -69,9 +69,10 @@ export const sendMessageAsync = createAsyncThunk(
       const response = await chatService.sendMessage(formData);
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.msg || "Failed to send message");
       return rejectWithValue(
-        error.response?.data?.message || "Failed to send message"
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        "Failed to send message"
       );
     }
   }

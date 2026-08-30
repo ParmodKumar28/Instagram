@@ -9,10 +9,7 @@ export const chatService = {
   getMessages: (conversationId) =>
     apiClient.get(`/chat/messages/${conversationId}`),
 
-  sendMessage: (formData) =>
-    apiClient.post("/chat/send", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+  sendMessage: (data) => apiClient.post("/chat/send", data),
 
   markSeen: (conversationId) =>
     apiClient.post(`/chat/seen/${conversationId}`),

@@ -33,6 +33,7 @@ import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import EmojiDrawer from "../common/EmojiDrawer";
 import StoryViewerModal from "../story/StoryViewerModal";
+import SharePostModal from "./SharePostModal";
 
 export function PostCard({ post, onPostDeleted }) {
   const commentInputRef = useRef(null);
@@ -61,6 +62,7 @@ export function PostCard({ post, onPostDeleted }) {
   const [isSavingPost, setIsSavingPost] = useState(false);
   const lastTapRef = useRef(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId, signedUser } = useSelector(usersSelector);
@@ -548,7 +550,8 @@ export function PostCard({ post, onPostDeleted }) {
           </button>
 
           <button
-            className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition active:scale-110 cursor-pointer"
             aria-label="Share"
           >
             <IoPaperPlaneOutline className="text-[25px]" />
@@ -874,6 +877,13 @@ export function PostCard({ post, onPostDeleted }) {
           onClose={() => setShowStoryViewer(false)}
         />
       )}
+
+      {/* Share Post Modal */}
+      <SharePostModal
+        post={currentPost}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </article>
   );
 }

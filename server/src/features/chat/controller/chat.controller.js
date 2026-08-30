@@ -130,7 +130,7 @@ export const sendMessage = async (req, res, next) => {
 export const markSeen = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { conversationId } = req.pa1rams;
+    const { conversationId } = req.params;
 
     if (!conversationId) {
       return next(new ErrorHandler(400, "Conversation ID is required"));

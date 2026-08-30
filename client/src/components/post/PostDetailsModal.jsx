@@ -24,6 +24,8 @@ import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import Avatar from "../common/Avatar";
 import CommentList from "./CommentList";
 import LikeList from "./LikeList";
+import StoryViewerModal from "../story/StoryViewerModal";
+import SharePostModal from "./SharePostModal";
 import EmojiDrawer from "../common/EmojiDrawer";
 import toast from "react-hot-toast";
 
@@ -51,6 +53,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [showEditTagInput, setShowEditTagInput] = useState(false);
   const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
   const [isSavingPost, setIsSavingPost] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId, signedUser } = useSelector(usersSelector);
@@ -760,7 +763,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                   )}
                 </div>
 
-                <button className="text-gray-900 hover:text-gray-500 transition">
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="text-gray-900 hover:text-gray-500 transition active:scale-110 cursor-pointer"
+                  aria-label="Share post"
+                >
                   <IoPaperPlaneOutline className="text-[24px]" />
                 </button>
               </div>
@@ -865,6 +872,13 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
       {showLikes && (
         <LikeList likeList={likeList} onClose={() => setShowLikes(false)} />
       )}
+
+      {/* Share Post Modal */}
+      <SharePostModal
+        post={post || initialPost}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 }

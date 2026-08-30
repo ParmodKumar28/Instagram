@@ -103,7 +103,10 @@ export function Footer() {
 
           if (tab.onClick) {
             return (
-              <div key={tab.label} className="relative flex items-center justify-center">
+              <div
+                key={tab.label}
+                className="relative flex items-center justify-center"
+              >
                 <button
                   onClick={tab.onClick}
                   className="flex items-center justify-center p-1.5 focus:outline-none"
@@ -138,7 +141,15 @@ export function Footer() {
                     >
                       <div className="w-5 h-5 rounded-full p-[1.5px] bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center flex-shrink-0">
                         <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#DD2A7B]">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="10"
+                            height="10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            className="text-[#DD2A7B]"
+                          >
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>

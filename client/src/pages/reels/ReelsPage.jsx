@@ -23,6 +23,7 @@ import EmojiDrawer from "../../components/common/EmojiDrawer";
 import StoryViewerModal from "../../components/story/StoryViewerModal";
 import LikeList from "../../components/post/LikeList";
 import CommentList from "../../components/post/CommentList";
+import SharePostModal from "../../components/post/SharePostModal";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import {
   toggleSavePostAsync,
@@ -313,6 +314,7 @@ function SingleReelCard({
 
   const [isExpandedCaption, setIsExpandedCaption] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isFollowed, setIsFollowed] = useState(
     (following || []).some(
       (u) =>
@@ -890,7 +892,7 @@ function SingleReelCard({
         {/* Share */}
         <button
           type="button"
-          onClick={handleShareReel}
+          onClick={() => setShowShareModal(true)}
           className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition active:scale-90 hover:scale-105 cursor-pointer shadow-md"
           aria-label="Share reel"
         >
@@ -929,6 +931,13 @@ function SingleReelCard({
       {showLikes && (
         <LikeList likes={likeList} onClose={() => setShowLikes(false)} />
       )}
+
+      {/* Share Post Modal */}
+      <SharePostModal
+        post={reel}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 }
