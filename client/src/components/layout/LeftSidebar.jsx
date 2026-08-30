@@ -100,8 +100,12 @@ export function LeftSidebar() {
     },
     {
       label: "Messages",
-      to: "#messages",
-      active: currentPath === "/messages",
+      to: "/messages",
+      active:
+        currentPath === "/messages" ||
+        currentPath.startsWith("/messages") ||
+        currentPath.startsWith("/direct") ||
+        currentPath.startsWith("/chat"),
       outlineIcon: <IoPaperPlaneOutline className="text-[26px] text-black" />,
       filledIcon: <IoPaperPlaneSharp className="text-[26px] text-black" />,
     },

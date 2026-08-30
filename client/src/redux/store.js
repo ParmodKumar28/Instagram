@@ -3,6 +3,7 @@ import { usersReducer } from "./slices/usersSlice";
 import { postsReducer } from "./slices/postsSlice";
 import { followersReducer } from "./slices/followersSlice";
 import { storiesReducer } from "./slices/storiesSlice";
+import { chatReducer } from "./slices/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     postsReducer,
     followersReducer,
     storiesReducer,
+    chatReducer,
   },
 });
 

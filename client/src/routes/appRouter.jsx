@@ -14,6 +14,7 @@ const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const HomePage = lazy(() => import("../pages/feed/HomePage"));
 const ExplorePage = lazy(() => import("../pages/explore/ExplorePage"));
 const ReelsPage = lazy(() => import("../pages/reels/ReelsPage"));
+const DirectMessagesPage = lazy(() => import("../pages/messages/DirectMessagesPage"));
 const CreatePostPage = lazy(() => import("../pages/post/CreatePostPage"));
 const PostDetailsPage = lazy(() => import("../pages/post/PostDetailsPage"));
 
@@ -49,6 +50,14 @@ export const router = createBrowserRouter([
       { path: "explore", element: withSuspense(<ExplorePage />) },
       { path: "search", element: withSuspense(<ExplorePage />) },
       { path: "reels", element: withSuspense(<ReelsPage />) },
+      { path: "messages", element: withSuspense(<DirectMessagesPage />) },
+      { path: "messages/:chatId", element: withSuspense(<DirectMessagesPage />) },
+      { path: "messages/user/:userId", element: withSuspense(<DirectMessagesPage />) },
+      { path: "direct", element: withSuspense(<DirectMessagesPage />) },
+      { path: "direct/inbox", element: withSuspense(<DirectMessagesPage />) },
+      { path: "direct/t/:chatId", element: withSuspense(<DirectMessagesPage />) },
+      { path: "chat", element: withSuspense(<DirectMessagesPage />) },
+      { path: "chat/:chatId", element: withSuspense(<DirectMessagesPage />) },
       { path: "new-post", element: withSuspense(<CreatePostPage />) },
       { path: "post/:postId", element: withSuspense(<PostDetailsPage />) },
       { path: "profile/:userId", element: withSuspense(<ProfilePage />) },

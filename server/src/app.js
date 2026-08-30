@@ -20,6 +20,7 @@ import likesRouter from "./features/likes/routes/likes.routes.js";
 import commentsRouter from "./features/comments/routes/comment.routes.js";
 import followersRouter from "./features/followers/routes/follower.routes.js";
 import storyRouter from "./features/stories/routes/story.routes.js";
+import chatRouter from "./features/chat/routes/chat.routes.js";
 
 // Server
 const app = express();
@@ -71,6 +72,10 @@ app.use("/api/follower", followersRouter);
 // Story routes
 app.use("/api/story", storyRouter);
 app.use("/api/stories", storyRouter);
+// Chat routes
+app.use("/api/chat", chatRouter);
+app.use("/api/message", chatRouter);
+app.use("/api/messages", chatRouter);
 
 // Not existing route
 app.use((req, res, next) => {

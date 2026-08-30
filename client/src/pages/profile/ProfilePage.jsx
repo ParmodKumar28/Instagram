@@ -214,7 +214,7 @@ export function ProfilePage() {
                   {isPending ? "Requested" : isFollowed ? "Following" : "Follow"}
                 </button>
                 <Link
-                  to="#messages"
+                  to={`/messages?user=${userId || user?._id || user?.id || ""}`}
                   className="bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900 text-sm font-semibold px-4 py-1.5 rounded-lg transition"
                 >
                   Message

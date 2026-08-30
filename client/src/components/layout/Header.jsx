@@ -40,7 +40,7 @@ export function Header() {
             )}
           </button>
 
-          <Link to="#messages" aria-label="Messages" className="p-1 focus:outline-none">
+          <Link to="/messages" aria-label="Messages" className="p-1 focus:outline-none">
             <IoPaperPlaneOutline className="text-[24px] text-black" />
           </Link>
         </div>
