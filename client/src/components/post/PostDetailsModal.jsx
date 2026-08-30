@@ -19,6 +19,7 @@ import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import Avatar from "../common/Avatar";
+import EmojiDrawer from "../common/EmojiDrawer";
 import toast from "react-hot-toast";
 
 function formatTimeAgo(dateString) {
@@ -47,6 +48,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [showHeart, setShowHeart] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
@@ -412,7 +414,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
             </div>
 
             {/* Inline Add Comment Input */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
+            <div className="relative flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
               <input
                 type="text"
                 className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1 mr-2"
@@ -423,16 +425,36 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                   if (e.key === "Enter") handleAddComment();
                 }}
               />
-              {commentText.trim() ? (
+              <div className="flex items-center space-x-2.5">
                 <button
-                  onClick={handleAddComment}
-                  className="text-[#0095F6] hover:text-[#1877F2] text-sm font-semibold"
+                  type="button"
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  className={`text-gray-400 hover:text-gray-600 text-lg cursor-pointer p-0.5 transition ${
+                    showEmojiPicker ? "text-[#0095F6]" : ""
+                  }`}
+                  aria-label="Add emoji"
                 >
-                  Post
+                  <BsEmojiSmile />
                 </button>
-              ) : (
-                <BsEmojiSmile className="text-gray-400 hover:text-gray-600 text-lg cursor-pointer" />
-              )}
+
+                {commentText.trim() && (
+                  <button
+                    onClick={handleAddComment}
+                    className="text-[#0095F6] hover:text-[#1877F2] text-sm font-semibold"
+                  >
+                    Post
+                  </button>
+                )}
+              </div>
+
+              <EmojiDrawer
+                isOpen={showEmojiPicker}
+                onClose={() => setShowEmojiPicker(false)}
+                onEmojiSelect={(emoji) => setCommentText((prev) => prev + emoji)}
+                position="top-right"
+                width={320}
+                height={350}
+              />
             </div>
           </div>
         </div>

@@ -26,6 +26,7 @@ import CommentList from "./CommentList";
 import LikeList from "./LikeList";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
+import EmojiDrawer from "../common/EmojiDrawer";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "";
@@ -44,7 +45,7 @@ function formatTimeAgo(dateString) {
   return `${weeks}w`;
 }
 
-export function PostCard({ post }) {
+export function PostCard({ post, onPostDeleted }) {
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
@@ -57,6 +58,7 @@ export function PostCard({ post }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(post?.caption || "");
   const [lastTap, setLastTap] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
@@ -371,7 +373,7 @@ export function PostCard({ post }) {
         )}
 
         {/* Add comment input */}
-        <div className="pt-2 flex items-center border-t border-gray-100">
+        <div className="relative pt-2 flex items-center justify-between border-t border-gray-100">
           <input
             type="text"
             placeholder="Add a comment..."
@@ -382,16 +384,36 @@ export function PostCard({ post }) {
             }}
             className="flex-1 text-xs text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none py-1 mr-2"
           />
-          {commentText.trim() ? (
+          <div className="flex items-center space-x-2">
             <button
-              onClick={handleAddComment}
-              className="text-[#0095F6] hover:text-[#1877F2] text-xs font-semibold"
+              type="button"
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              className={`text-gray-400 hover:text-gray-600 text-sm cursor-pointer p-0.5 transition ${
+                showEmojiPicker ? "text-[#0095F6]" : ""
+              }`}
+              aria-label="Add emoji"
             >
-              Post
+              <BsEmojiSmile />
             </button>
-          ) : (
-            <BsEmojiSmile className="text-gray-400 hover:text-gray-600 text-sm cursor-pointer" />
-          )}
+
+            {commentText.trim() && (
+              <button
+                onClick={handleAddComment}
+                className="text-[#0095F6] hover:text-[#1877F2] text-xs font-semibold"
+              >
+                Post
+              </button>
+            )}
+          </div>
+
+          <EmojiDrawer
+            isOpen={showEmojiPicker}
+            onClose={() => setShowEmojiPicker(false)}
+            onEmojiSelect={(emoji) => setCommentText((prev) => prev + emoji)}
+            position="top-right"
+            width={300}
+            height={340}
+          />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { createPostAsync, fetchPostsAsync, fetchUserPostsAsync, postsSelector } from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import Avatar from "../common/Avatar";
+import EmojiDrawer from "../common/EmojiDrawer";
 
 export function CreatePostModal({ isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ export function CreatePostModal({ isOpen, onClose }) {
   const [location, setLocation] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   if (!isOpen) return null;
 
@@ -235,14 +237,27 @@ export function CreatePostModal({ isOpen, onClose }) {
                     maxLength={2200}
                     className="w-full text-sm text-gray-900 placeholder-gray-400 resize-none focus:outline-none"
                   />
-                  <div className="flex justify-between items-center text-gray-400 text-xs py-2 border-b border-gray-100">
+                  <div className="relative flex justify-between items-center text-gray-400 text-xs py-2 border-b border-gray-100">
                     <button
                       type="button"
-                      className="hover:text-gray-600 p-0.5 text-lg"
+                      onClick={() => setShowEmojiPicker((prev) => !prev)}
+                      className={`hover:text-gray-700 p-0.5 text-lg transition ${
+                        showEmojiPicker ? "text-[#0095F6]" : ""
+                      }`}
                       aria-label="Add emoji"
                     >
                       <BsEmojiSmile />
                     </button>
+
+                    <EmojiDrawer
+                      isOpen={showEmojiPicker}
+                      onClose={() => setShowEmojiPicker(false)}
+                      onEmojiSelect={(emoji) => setCaption((prev) => prev + emoji)}
+                      position="bottom-left"
+                      width={310}
+                      height={350}
+                    />
+
                     <span>{caption.length}/2,200</span>
                   </div>
                 </div>
