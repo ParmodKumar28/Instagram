@@ -61,7 +61,7 @@ export function Footer() {
     },
     {
       label: "Reels",
-      to: "#reels",
+      to: "/reels",
       active: currentPath === "/reels",
       outlineIcon: <IoFilmOutline className="text-[25px] text-black" />,
       filledIcon: <IoFilmSharp className="text-[25px] text-black" />,

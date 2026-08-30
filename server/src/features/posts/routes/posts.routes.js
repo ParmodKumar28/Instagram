@@ -13,12 +13,16 @@ import {
   updatePost,
   toggleSavePost,
   getSavedPosts,
+  getReels,
 } from "../controller/posts.controller.js";
 
 // Router
 const postsRouter = express.Router();
 
 // Routes
+
+// Get reels
+postsRouter.get("/reels", auth, getReels);
 
 // Create post
 postsRouter.post("/create-post", auth, upload.single("media"), createPost);

@@ -14,6 +14,7 @@ function SingleCommentItem({
   onReply,
   onCommentDeleted,
   isReply = false,
+  isDark = false,
 }) {
   const user = comment.user || {};
   const username = user.username || user.name || "user";
@@ -85,28 +86,34 @@ function SingleCommentItem({
             alt={username}
             gender={user.gender}
             username={username}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${isDark ? "border border-white/20" : ""}`}
           />
         </Link>
 
         <div className="flex-1 leading-snug">
-          <p className="text-gray-900">
+          <p className={isDark ? "text-white" : "text-gray-900"}>
             <Link
               to={`/profile/${user._id || ""}`}
-              className="font-semibold mr-1.5 text-gray-900 hover:underline inline-block"
+              className={`font-semibold mr-1.5 inline-block ${
+                isDark ? "text-white hover:text-white/80" : "text-gray-900 hover:underline"
+              }`}
             >
               {username}
             </Link>
-            <span className="text-gray-800 break-words">
+            <span className={`break-words ${isDark ? "text-white/90 font-normal" : "text-gray-800"}`}>
               {comment.content || comment.comment}
             </span>
           </p>
 
-          <div className="flex items-center space-x-3 text-[11px] text-gray-500 mt-1 font-medium">
+          <div
+            className={`flex items-center space-x-3 text-[11px] mt-1 font-medium ${
+              isDark ? "text-white/60" : "text-gray-500"
+            }`}
+          >
             <span>{formatTimeAgo(comment.createdAt || comment.timestamp)}</span>
 
             {likesCount > 0 && (
-              <span className="font-semibold text-gray-600">
+              <span className={`font-semibold ${isDark ? "text-white/80" : "text-gray-600"}`}>
                 {likesCount} {likesCount === 1 ? "like" : "likes"}
               </span>
             )}
@@ -114,7 +121,9 @@ function SingleCommentItem({
             <button
               type="button"
               onClick={() => onReply && onReply({ commentId: comment.parentComment || comment._id, username })}
-              className="font-semibold text-gray-500 hover:text-gray-900 transition"
+              className={`font-semibold transition cursor-pointer ${
+                isDark ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-gray-900"
+              }`}
             >
               Reply
             </button>
@@ -123,7 +132,7 @@ function SingleCommentItem({
               <button
                 type="button"
                 onClick={handleDelete}
-                className="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                className="text-red-400 hover:text-red-300 transition opacity-0 group-hover:opacity-100 cursor-pointer"
               >
                 Delete
               </button>
@@ -135,13 +144,15 @@ function SingleCommentItem({
         <button
           type="button"
           onClick={handleToggleLike}
-          className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none transition flex-shrink-0 mt-0.5"
+          className={`p-1 focus:outline-none transition flex-shrink-0 mt-0.5 cursor-pointer ${
+            isDark ? "text-white/50 hover:text-white" : "text-gray-400 hover:text-gray-600"
+          }`}
           aria-label="Like comment"
         >
           {isLiked ? (
-            <IoHeartSharp className="text-red-500 text-sm animate-in zoom-in-50 duration-150" />
+            <IoHeartSharp className="text-[#FF3040] text-sm animate-in zoom-in-50 duration-150" />
           ) : (
-            <IoHeartOutline className="text-sm hover:text-gray-600" />
+            <IoHeartOutline className="text-sm" />
           )}
         </button>
       </div>
@@ -152,9 +163,11 @@ function SingleCommentItem({
           <button
             type="button"
             onClick={() => setShowReplies(!showReplies)}
-            className="flex items-center space-x-2 text-[11px] font-semibold text-gray-500 hover:text-gray-800 transition py-0.5"
+            className={`flex items-center space-x-2 text-[11px] font-semibold transition py-0.5 cursor-pointer ${
+              isDark ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-gray-800"
+            }`}
           >
-            <span className="w-5 h-[1px] bg-gray-300 inline-block" />
+            <span className={`w-5 h-[1px] inline-block ${isDark ? "bg-white/30" : "bg-gray-300"}`} />
             <span>
               {showReplies
                 ? "Hide replies"
@@ -163,7 +176,7 @@ function SingleCommentItem({
           </button>
 
           {showReplies && (
-            <div className="space-y-1 mt-1 border-l border-gray-100 pl-2.5">
+            <div className={`space-y-1 mt-1 pl-2.5 border-l ${isDark ? "border-white/15" : "border-gray-100"}`}>
               {replies.map((reply, replyIndex) => (
                 <SingleCommentItem
                   key={reply._id || replyIndex}
@@ -172,6 +185,7 @@ function SingleCommentItem({
                   onReply={onReply}
                   onCommentDeleted={onCommentDeleted}
                   isReply={true}
+                  isDark={isDark}
                 />
               ))}
             </div>
@@ -187,27 +201,28 @@ export function CommentList({
   commentsLoading = false,
   onReply,
   onCommentDeleted,
+  isDark = false,
 }) {
   const { userId: currentUserId } = useSelector(usersSelector);
 
   if (commentsLoading && (!comments || comments.length === 0)) {
     return (
       <div className="flex justify-center items-center py-4">
-        <p className="text-gray-400 text-xs">Loading comments...</p>
+        <p className={`text-xs ${isDark ? "text-white/60" : "text-gray-400"}`}>Loading comments...</p>
       </div>
     );
   }
 
   if (!comments || comments.length === 0) {
     return (
-      <div className="py-4 text-center text-xs text-gray-400">
+      <div className={`py-6 text-center text-xs ${isDark ? "text-white/60" : "text-gray-400"}`}>
         No comments yet. Be the first to comment!
       </div>
     );
   }
 
   return (
-    <div className="space-y-1 overflow-y-auto pr-1 divide-y divide-gray-50">
+    <div className={`space-y-1 overflow-y-auto pr-1 divide-y ${isDark ? "divide-white/10" : "divide-gray-50"}`}>
       {comments.map((comment, index) => (
         <SingleCommentItem
           key={comment._id || index}
@@ -216,6 +231,7 @@ export function CommentList({
           onReply={onReply}
           onCommentDeleted={onCommentDeleted}
           isReply={false}
+          isDark={isDark}
         />
       ))}
     </div>

@@ -6,6 +6,7 @@ export const postService = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getAllPosts: () => apiClient.get("/post/all-posts"),
+  getReels: () => apiClient.get("/post/reels"),
   getPostById: (postId) => apiClient.get(`/post/${postId}`),
   getUserPosts: (userId) => apiClient.get(`/post/user-posts/${userId}`),
   getTaggedPosts: (userId) => apiClient.get(`/post/tagged-posts/${userId}`),

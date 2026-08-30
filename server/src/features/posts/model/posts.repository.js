@@ -337,3 +337,49 @@ export const getSavedPostsDb = async (userId) => {
     throw error;
   }
 };
+
+// Getting all reel videos from db with privacy filter
+export const getReelsDb = async (viewerId = null) => {
+  try {
+    const blockedPrivateUserIds = await getBlockedPrivateUserIds(viewerId);
+    const query = {
+      $or: [
+        { mediaType: "video" },
+        { media: { $regex: /\.(mp4|webm|mov|ogg|m4v)(\?.*)?$/i } },
+      ],
+    };
+    if (blockedPrivateUserIds.length > 0) {
+      query.user = { $nin: blockedPrivateUserIds };
+    }
+
+    return await PostModel.find(query)
+      .sort({ createdAt: -1 })
+      .populate("user", "name username profilePic gender accountType")
+      .populate({
+        path: "tags",
+        select: "name username profilePic gender",
+        model: "User",
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+        populate: {
+          path: "user",
+          select: "name username profilePic gender",
+          model: "User",
+        },
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes replies createdAt",
+        populate: {
+          path: "user",
+          select: "name username profilePic gender",
+          model: "User",
+        },
+      });
+  } catch (error) {
+    throw error;
+  }
+};
+

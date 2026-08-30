@@ -93,7 +93,7 @@ export function LeftSidebar() {
     },
     {
       label: "Reels",
-      to: "#reels",
+      to: "/reels",
       active: currentPath === "/reels",
       outlineIcon: <IoFilmOutline className="text-[27px] text-black" />,
       filledIcon: <IoFilmSharp className="text-[27px] text-black" />,

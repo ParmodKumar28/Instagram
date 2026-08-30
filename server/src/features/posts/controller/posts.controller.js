@@ -12,6 +12,7 @@ import {
   updatePostDb,
   toggleSavePostDb,
   getSavedPostsDb,
+  getReelsDb,
 } from "../model/posts.repository.js";
 
 // Create new post
@@ -239,6 +240,20 @@ export const getSavedPosts = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       savedPosts: savedPosts || [],
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Get Reel Videos
+export const getReels = async (req, res, next) => {
+  try {
+    const viewerId = req.user?._id;
+    const reels = await getReelsDb(viewerId);
+    return res.status(200).json({
+      success: true,
+      reels: reels || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

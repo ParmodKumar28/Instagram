@@ -13,6 +13,7 @@ export function EmojiDrawer({
   width = 320,
   height = 380,
   className = "",
+  theme = Theme.LIGHT,
 }) {
   const containerRef = useRef(null);
 
@@ -67,7 +68,7 @@ export function EmojiDrawer({
           }
         }}
         autoFocusSearch={false}
-        theme={Theme.LIGHT}
+        theme={theme}
         emojiStyle={EmojiStyle.APPLE}
         skinTonesDisabled={true}
         suggestedFailedMode={SuggestionMode.HIDE}

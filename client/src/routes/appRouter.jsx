@@ -13,6 +13,7 @@ const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 
 const HomePage = lazy(() => import("../pages/feed/HomePage"));
 const ExplorePage = lazy(() => import("../pages/explore/ExplorePage"));
+const ReelsPage = lazy(() => import("../pages/reels/ReelsPage"));
 const CreatePostPage = lazy(() => import("../pages/post/CreatePostPage"));
 const PostDetailsPage = lazy(() => import("../pages/post/PostDetailsPage"));
 
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
       { index: true, element: withSuspense(<HomePage />) },
       { path: "explore", element: withSuspense(<ExplorePage />) },
       { path: "search", element: withSuspense(<ExplorePage />) },
+      { path: "reels", element: withSuspense(<ReelsPage />) },
       { path: "new-post", element: withSuspense(<CreatePostPage />) },
       { path: "post/:postId", element: withSuspense(<PostDetailsPage />) },
       { path: "profile/:userId", element: withSuspense(<ProfilePage />) },
