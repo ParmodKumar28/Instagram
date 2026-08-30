@@ -42,8 +42,8 @@ export function Footer() {
     },
     {
       label: "Search",
-      to: "#search",
-      active: currentPath === "/search",
+      to: "/explore",
+      active: currentPath === "/explore" || currentPath === "/search",
       outlineIcon: <IoSearchOutline className="text-[25px] text-black" />,
       filledIcon: <IoSearchSharp className="text-[25px] text-black" />,
     },

@@ -140,10 +140,11 @@ export const updatePost = async (req, res, next) => {
 export const getPost = async (req, res, next) => {
   try {
     const postId = req.params.postId;
+    const viewerId = req.user?._id;
     if (!postId) {
       return next(new ErrorHandler(400, "Enter postId in the params!"));
     }
-    const post = await getPostDb(postId);
+    const post = await getPostDb(postId, viewerId);
     if (!post) {
       return next(new ErrorHandler(400, "No post found by this id!"));
     }
@@ -161,10 +162,11 @@ export const getPost = async (req, res, next) => {
 export const getUserPosts = async (req, res, next) => {
   try {
     const userId = req.params.userId;
+    const viewerId = req.user?._id;
     if (!userId) {
       return next(new ErrorHandler(400, "Enter userId in the params!"));
     }
-    const posts = await getUserPostsDb(userId);
+    const posts = await getUserPostsDb(userId, viewerId);
     return res.status(200).json({
       success: true,
       msg: "Posts found successfully!",
@@ -179,10 +181,11 @@ export const getUserPosts = async (req, res, next) => {
 export const getTaggedPosts = async (req, res, next) => {
   try {
     const userId = req.params.userId;
+    const viewerId = req.user?._id;
     if (!userId) {
       return next(new ErrorHandler(400, "Enter userId in the params!"));
     }
-    const posts = await getTaggedPostsDb(userId);
+    const posts = await getTaggedPostsDb(userId, viewerId);
     return res.status(200).json({
       success: true,
       msg: "Tagged posts found successfully!",
@@ -196,7 +199,8 @@ export const getTaggedPosts = async (req, res, next) => {
 // Getting all posts from the db
 export const getAllPosts = async (req, res, next) => {
   try {
-    const posts = await getAllPostsDb();
+    const viewerId = req.user?._id;
+    const posts = await getAllPostsDb(viewerId);
     return res.status(200).json({
       success: true,
       msg: "Posts found successfully!",

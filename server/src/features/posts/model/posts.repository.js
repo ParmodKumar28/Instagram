@@ -3,6 +3,31 @@ import { ObjectId } from "mongodb";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import PostModel from "./posts.schema.js";
 import UserModel from "../../user/model/user.schema.js";
+import FollowerModel from "../../followers/model/follower.schema.js";
+
+// Helper to determine private account user IDs that the viewer cannot view
+export const getBlockedPrivateUserIds = async (viewerId) => {
+  const privateUsers = await UserModel.find({ accountType: "private" }).select("_id");
+  const privateUserIds = privateUsers.map((u) => u._id.toString());
+
+  if (privateUserIds.length === 0) return [];
+
+  const allowedUserIds = new Set();
+  if (viewerId) {
+    allowedUserIds.add(viewerId.toString());
+    const acceptedFollows = await FollowerModel.find({
+      follower: new ObjectId(viewerId),
+      status: "accepted",
+    }).select("following");
+    acceptedFollows.forEach((f) => {
+      if (f.following) allowedUserIds.add(f.following.toString());
+    });
+  }
+
+  return privateUserIds
+    .filter((id) => !allowedUserIds.has(id))
+    .map((id) => new ObjectId(id));
+};
 
 // Create new post in the db
 export const createPostDb = async (post, user) => {
@@ -54,7 +79,7 @@ export const updatePostDb = async (postId, user, postData) => {
       runValidators: true,
       new: true,
     })
-      .populate("user", "name username profilePic gender")
+      .populate("user", "name username profilePic gender accountType")
       .populate({
         path: "tags",
         select: "name username profilePic gender",
@@ -78,11 +103,11 @@ export const updatePostDb = async (postId, user, postData) => {
   }
 };
 
-// Getting post by id from the database
-export const getPostDb = async (postId) => {
+// Getting post by id from the database (enforcing privacy check)
+export const getPostDb = async (postId, viewerId = null) => {
   try {
-    return await PostModel.findById(postId)
-      .populate("user", "name username profilePic gender")
+    const post = await PostModel.findById(postId)
+      .populate("user", "name username profilePic gender accountType")
       .populate({
         path: "tags",
         select: "name username profilePic gender",
@@ -91,6 +116,11 @@ export const getPostDb = async (postId) => {
       .populate({
         path: "likes",
         select: "user",
+        populate: {
+          path: "user",
+          select: "name username profilePic gender",
+          model: "User",
+        },
       })
       .populate({
         path: "comments",
@@ -101,17 +131,59 @@ export const getPostDb = async (postId) => {
           model: "User",
         },
       });
+
+    if (!post) {
+      throw new ErrorHandler(404, "No post found by this id!");
+    }
+
+    if (post.user && post.user.accountType === "private") {
+      const authorId = (post.user._id || post.user).toString();
+      const isSelf = viewerId && authorId === viewerId.toString();
+      if (!isSelf) {
+        const isFollowing = viewerId
+          ? await FollowerModel.findOne({
+              follower: new ObjectId(viewerId),
+              following: new ObjectId(authorId),
+              status: "accepted",
+            })
+          : null;
+        if (!isFollowing) {
+          throw new ErrorHandler(403, "This account is private.");
+        }
+      }
+    }
+
+    return post;
   } catch (error) {
     throw error;
   }
 };
 
-// Getting user posts from the database
-export const getUserPostsDb = async (user) => {
+// Getting user posts from the database (enforcing privacy check)
+export const getUserPostsDb = async (targetUserId, viewerId = null) => {
   try {
-    return await PostModel.find({ user: user })
+    const targetUser = await UserModel.findById(targetUserId).select("accountType");
+    if (!targetUser) throw new ErrorHandler(404, "User not found");
+
+    if (targetUser.accountType === "private") {
+      const isSelf = viewerId && targetUserId.toString() === viewerId.toString();
+      if (!isSelf) {
+        const isFollowing = viewerId
+          ? await FollowerModel.findOne({
+              follower: new ObjectId(viewerId),
+              following: new ObjectId(targetUserId),
+              status: "accepted",
+            })
+          : null;
+        if (!isFollowing) {
+          return []; // Hide posts of private account from non-followers
+        }
+      }
+    }
+
+    return await PostModel.find({ user: targetUserId })
       .sort({ createdAt: -1 })
-      .populate("user", "name username profilePic gender")
+      .populate("user", "name username profilePic gender accountType")
       .populate({
         path: "tags",
         select: "name username profilePic gender",
@@ -135,12 +207,37 @@ export const getUserPostsDb = async (user) => {
   }
 };
 
-// Getting tagged posts for a user
-export const getTaggedPostsDb = async (userId) => {
+// Getting tagged posts for a user (enforcing privacy check)
+export const getTaggedPostsDb = async (targetUserId, viewerId = null) => {
   try {
-    return await PostModel.find({ tags: userId })
+    const targetUser = await UserModel.findById(targetUserId).select("accountType");
+    if (!targetUser) throw new ErrorHandler(404, "User not found");
+
+    if (targetUser.accountType === "private") {
+      const isSelf = viewerId && targetUserId.toString() === viewerId.toString();
+      if (!isSelf) {
+        const isFollowing = viewerId
+          ? await FollowerModel.findOne({
+              follower: new ObjectId(viewerId),
+              following: new ObjectId(targetUserId),
+              status: "accepted",
+            })
+          : null;
+        if (!isFollowing) {
+          return []; // Hide tagged posts on private profile from non-followers
+        }
+      }
+    }
+
+    const blockedPrivateUserIds = await getBlockedPrivateUserIds(viewerId);
+    const query = { tags: targetUserId };
+    if (blockedPrivateUserIds.length > 0) {
+      query.user = { $nin: blockedPrivateUserIds };
+    }
+
+    return await PostModel.find(query)
       .sort({ createdAt: -1 })
-      .populate("user", "name username profilePic gender")
+      .populate("user", "name username profilePic gender accountType")
       .populate({
         path: "tags",
         select: "name username profilePic gender",
@@ -164,12 +261,15 @@ export const getTaggedPostsDb = async (userId) => {
   }
 };
 
-// Getting all posts from the db in latest to older form
-export const getAllPostsDb = async () => {
+// Getting all posts from the db with privacy filter
+export const getAllPostsDb = async (viewerId = null) => {
   try {
-    return await PostModel.find({})
+    const blockedPrivateUserIds = await getBlockedPrivateUserIds(viewerId);
+    const query = blockedPrivateUserIds.length > 0 ? { user: { $nin: blockedPrivateUserIds } } : {};
+
+    return await PostModel.find(query)
       .sort({ createdAt: -1 })
-      .populate("user", "name username profilePic gender")
+      .populate("user", "name username profilePic gender accountType")
       .populate({
         path: "tags",
         select: "name username profilePic gender",

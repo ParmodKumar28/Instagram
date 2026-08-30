@@ -74,16 +74,17 @@ export function EditProfilePage() {
   }, [signedUser]);
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
+    const { id, name, value } = e.target;
+    const fieldKey = name || id;
     setFormData((prev) => ({
       ...prev,
-      [id]: value,
+      [fieldKey]: value,
     }));
 
-    if (formErrors[id]) {
+    if (formErrors[fieldKey]) {
       setFormErrors((prev) => ({
         ...prev,
-        [id]: null,
+        [fieldKey]: null,
       }));
     }
   };
@@ -532,8 +533,15 @@ export function EditProfilePage() {
                   <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
                     Account Privacy
                   </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+                  <div className="space-y-3">
+                    <label
+                      onClick={() => setFormData((prev) => ({ ...prev, accountType: "public" }))}
+                      className={`flex items-start space-x-3.5 p-3.5 border rounded-xl cursor-pointer transition ${
+                        formData.accountType === "public"
+                          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="accountType"
@@ -541,17 +549,24 @@ export function EditProfilePage() {
                         value="public"
                         checked={formData.accountType === "public"}
                         onChange={handleInputChange}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="mt-0.5 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
+                      <div className="flex-1">
                         <span className="block text-sm font-semibold text-gray-900">Public Account</span>
-                        <span className="block text-xs text-gray-500">
-                          Anyone can see your profile and posts.
+                        <span className="block text-xs text-gray-500 mt-0.5 leading-relaxed">
+                          Anyone on or off Instagram can see your profile, posts, and reels.
                         </span>
                       </div>
                     </label>
 
-                    <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+                    <label
+                      onClick={() => setFormData((prev) => ({ ...prev, accountType: "private" }))}
+                      className={`flex items-start space-x-3.5 p-3.5 border rounded-xl cursor-pointer transition ${
+                        formData.accountType === "private"
+                          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="accountType"
@@ -559,12 +574,12 @@ export function EditProfilePage() {
                         value="private"
                         checked={formData.accountType === "private"}
                         onChange={handleInputChange}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="mt-0.5 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
+                      <div className="flex-1">
                         <span className="block text-sm font-semibold text-gray-900">Private Account</span>
-                        <span className="block text-xs text-gray-500">
-                          Only approved followers can view your posts.
+                        <span className="block text-xs text-gray-500 mt-0.5 leading-relaxed">
+                          Only approved followers can view your posts, reels, and stories.
                         </span>
                       </div>
                     </label>

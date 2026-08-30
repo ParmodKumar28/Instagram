@@ -78,14 +78,14 @@ export function LeftSidebar() {
     {
       label: "Home",
       to: "/",
-      active: currentPath === "/",
+      active: currentPath === "/" && !showNotifications,
       outlineIcon: <GoHome className="text-[28px] text-black" />,
       filledIcon: <GoHomeFill className="text-[28px] text-black" />,
     },
     {
       label: "Search",
-      to: "#search",
-      active: currentPath === "/search",
+      to: "/explore",
+      active: currentPath === "/explore" || currentPath === "/search",
       outlineIcon: <IoSearchOutline className="text-[27px] text-black" />,
       filledIcon: <IoSearchSharp className="text-[27px] text-black" />,
     },
