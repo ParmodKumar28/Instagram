@@ -1,8 +1,10 @@
-// Import necessary modules and utilities
 import { ObjectId } from "mongodb";
 import { ErrorHandler } from "../../../utils/errorHandler.js";
 import UserModel from "../../user/model/user.schema.js";
 import FollowerModel from "./follower.schema.js";
+import PostModel from "../../posts/model/posts.schema.js";
+import LikeModel from "../../likes/model/likes.schema.js";
+import CommentModel from "../../comments/model/comment.schema.js";
 
 // Function to handle toggling of sending follow requests (follow / unfollow / cancel request)
 export const toggleSendRequestDb = async (user, following) => {
@@ -148,7 +150,7 @@ export const acceptRequestDb = async (user, follower) => {
         following: user._id,
         status: "pending",
       },
-      { $set: { status: "accepted" } },
+      { $set: { status: "accepted", isApprovedRequest: true } },
       { new: true }
     );
 
@@ -337,47 +339,137 @@ export const getFollowStatusDb = async (userId, followingId) => {
 // Get activity/notifications db
 export const getActivityDb = async (userId) => {
   try {
-    // 1. Users who accepted current user's request
-    const acceptedRequests = await FollowerModel.find({
-      follower: userId,
-      status: "accepted",
-    })
-      .select("following createdAt updatedAt")
-      .populate("following", "name username profilePic")
-      .sort({ updatedAt: -1 })
-      .limit(15);
+    const userObjectId = new ObjectId(userId);
 
-    // 2. Users who started following the current user
-    const newFollowers = await FollowerModel.find({
-      following: userId,
-      status: "accepted",
+    // 1. Tagged in posts (posts created by others where user is in tags)
+    const taggedPosts = await PostModel.find({
+      tags: userObjectId,
+      user: { $ne: userObjectId },
     })
-      .select("follower createdAt updatedAt")
-      .populate("follower", "name username profilePic")
+      .select("_id user media mediaType caption createdAt")
+      .populate("user", "name username profilePic gender")
       .sort({ createdAt: -1 })
       .limit(15);
 
+    // 2. Posts authored by this user
+    const myPosts = await PostModel.find({ user: userObjectId }).select(
+      "_id media mediaType"
+    );
+    const myPostIds = myPosts.map((p) => p._id);
+    const postMap = new Map();
+    myPosts.forEach((p) => postMap.set(p._id.toString(), p));
+
+    // 3. Likes on user's posts (by other users)
+    let postLikes = [];
+    if (myPostIds.length > 0) {
+      postLikes = await LikeModel.find({
+        likeable: { $in: myPostIds },
+        on_model: "Post",
+        user: { $ne: userObjectId },
+      })
+        .select("_id user likeable createdAt")
+        .populate("user", "name username profilePic gender")
+        .sort({ createdAt: -1 })
+        .limit(15);
+    }
+
+    // 4. Comments on user's posts (by other users)
+    let postComments = [];
+    if (myPostIds.length > 0) {
+      postComments = await CommentModel.find({
+        post: { $in: myPostIds },
+        user: { $ne: userObjectId },
+      })
+        .select("_id user post content createdAt")
+        .populate("user", "name username profilePic gender")
+        .sort({ createdAt: -1 })
+        .limit(15);
+    }
+
+    // 5. Users who accepted current user's request (only if it was an approved private request)
+    const acceptedRequests = await FollowerModel.find({
+      follower: userObjectId,
+      status: "accepted",
+      isApprovedRequest: true,
+    })
+      .select("following createdAt updatedAt")
+      .populate("following", "name username profilePic gender")
+      .sort({ updatedAt: -1 })
+      .limit(15);
+
+    // 6. Users who started following the current user
+    const newFollowers = await FollowerModel.find({
+      following: userObjectId,
+      status: "accepted",
+    })
+      .select("follower createdAt updatedAt")
+      .populate("follower", "name username profilePic gender")
+      .sort({ createdAt: -1 })
+      .limit(15);
+
+    // Combine all notification activities
     const activities = [
+      ...taggedPosts.map((item) => ({
+        _id: `tag_${item._id}`,
+        user: item.user,
+        type: "tagged_post",
+        text: "tagged you in a post.",
+        post: {
+          _id: item._id,
+          media: item.media,
+          mediaType: item.mediaType,
+          caption: item.caption,
+        },
+        createdAt: item.createdAt,
+      })),
+      ...postLikes.map((item) => {
+        const post = postMap.get(item.likeable?.toString());
+        return {
+          _id: `like_${item._id}`,
+          user: item.user,
+          type: "liked_post",
+          text: "liked your post.",
+          post: post
+            ? { _id: post._id, media: post.media, mediaType: post.mediaType }
+            : null,
+          createdAt: item.createdAt,
+        };
+      }),
+      ...postComments.map((item) => {
+        const post = postMap.get(item.post?.toString());
+        return {
+          _id: `comment_${item._id}`,
+          user: item.user,
+          type: "commented_post",
+          text: `commented: "${item.content?.slice(0, 35)}${
+            (item.content?.length || 0) > 35 ? "..." : ""
+          }"`,
+          post: post
+            ? { _id: post._id, media: post.media, mediaType: post.mediaType }
+            : null,
+          createdAt: item.createdAt,
+        };
+      }),
       ...acceptedRequests.map((item) => ({
-        _id: item._id,
+        _id: `accept_${item._id}`,
         user: item.following,
         type: "accepted_request",
         text: "accepted your follow request.",
         createdAt: item.updatedAt || item.createdAt,
       })),
       ...newFollowers.map((item) => ({
-        _id: item._id,
+        _id: `follow_${item._id}`,
         user: item.follower,
         type: "new_follower",
         text: "started following you.",
         createdAt: item.createdAt,
       })),
-    ].filter((item) => item.user && item.user._id);
+    ].filter((item) => item.user && (item.user._id || item.user.id));
 
     // Sort combined activities by latest first
     activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    return activities.slice(0, 20);
+    return activities.slice(0, 35);
   } catch (error) {
     throw error;
   }

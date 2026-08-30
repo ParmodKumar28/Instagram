@@ -19,6 +19,10 @@ const followersSchema = new mongoose.Schema(
       enum: ["pending", "accepted", "rejected"],
       default: "pending",
     },
+    isApprovedRequest: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
