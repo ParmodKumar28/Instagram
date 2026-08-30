@@ -464,6 +464,10 @@ export function DirectMessagesPage() {
               const uname = participant?.username || participant?.name || "User";
               const lastMsgText = conv.lastMessage?.text || "Started a chat";
               const hasUnread = (conv.unreadCount || 0) > 0;
+              const isPartnerOnline = isOnline(participant?._id || participant?.id);
+              const isConvTyping =
+                typingUsers[conv._id]?.senderId?.toString() ===
+                (participant?._id || participant?.id)?.toString();
 
               // Check if participant has active stories
               const partStoryGroup = feedStories.find(
@@ -490,36 +494,46 @@ export function DirectMessagesPage() {
                   }`}
                 >
                   <div className="flex items-center space-x-3.5 min-w-0 flex-1">
-                    {/* Participant Avatar */}
-                    {hasStory ? (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveStoryGroup(partStoryGroup);
-                        }}
-                        className="w-14 h-14 rounded-full p-[2px] ig-story-ring flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                      >
-                        <Avatar
-                          src={participant?.profilePic}
-                          alt={uname}
-                          gender={participant?.gender}
-                          username={uname}
-                          className="w-full h-full rounded-full object-cover border-2 border-white bg-white"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-                        <Avatar
-                          src={participant?.profilePic}
-                          alt={uname}
-                          gender={participant?.gender}
-                          username={uname}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      </div>
-                    )}
+                    {/* Participant Avatar with Online Green Dot */}
+                    <div className="relative flex-shrink-0">
+                      {hasStory ? (
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveStoryGroup(partStoryGroup);
+                          }}
+                          className="w-14 h-14 rounded-full p-[2px] ig-story-ring flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                        >
+                          <Avatar
+                            src={participant?.profilePic}
+                            alt={uname}
+                            gender={participant?.gender}
+                            username={uname}
+                            className="w-full h-full rounded-full object-cover border-2 border-white bg-white"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
+                          <Avatar
+                            src={participant?.profilePic}
+                            alt={uname}
+                            gender={participant?.gender}
+                            username={uname}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        </div>
+                      )}
 
-                    {/* Participant Info & Last Message */}
+                      {/* Online Status Green Dot */}
+                      {isPartnerOnline && (
+                        <span
+                          className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-[#10B981] border-2 border-white rounded-full shadow-xs ring-1 ring-black/5"
+                          title="Active now"
+                        />
+                      )}
+                    </div>
+
+                    {/* Participant Info & Last Message / Typing */}
                     <div className="flex flex-col min-w-0 flex-1 leading-snug">
                       <span
                         className={`text-sm truncate ${
@@ -531,18 +545,26 @@ export function DirectMessagesPage() {
                         {uname}
                       </span>
                       <div className="flex items-center space-x-1.5 mt-0.5">
-                        <span
-                          className={`text-xs truncate max-w-[170px] ${
-                            hasUnread
-                              ? "font-semibold text-black"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {lastMsgText}
-                        </span>
-                        <span className="text-[11px] text-gray-400 flex-shrink-0">
-                          • {formatTimeAgo(conv.updatedAt || conv.createdAt)}
-                        </span>
+                        {isConvTyping ? (
+                          <span className="text-xs text-[#0095F6] font-semibold flex items-center space-x-1 animate-pulse">
+                            <span>Typing...</span>
+                          </span>
+                        ) : (
+                          <>
+                            <span
+                              className={`text-xs truncate max-w-[170px] ${
+                                hasUnread
+                                  ? "font-semibold text-black"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {lastMsgText}
+                            </span>
+                            <span className="text-[11px] text-gray-400 flex-shrink-0">
+                              • {formatTimeAgo(conv.updatedAt || conv.createdAt)}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -619,7 +641,7 @@ export function DirectMessagesPage() {
                   </Link>
                 )}
 
-                {/* Recipient Name & Active Status */}
+                {/* Recipient Name & Active / Typing Status */}
                 <Link
                   to={`/profile/${activeParticipant?._id || ""}`}
                   className="flex flex-col min-w-0"
@@ -628,7 +650,12 @@ export function DirectMessagesPage() {
                     {activeUsername}
                   </span>
                   <span className="text-[11px] flex items-center space-x-1.5 truncate">
-                    {isOnline(activeParticipant?._id || activeParticipant?.id) ? (
+                    {typingUsers[activeConversation?._id]?.senderId?.toString() ===
+                    (activeParticipant?._id || activeParticipant?.id)?.toString() ? (
+                      <span className="text-[#0095F6] font-semibold flex items-center space-x-1 animate-pulse">
+                        <span>typing...</span>
+                      </span>
+                    ) : isOnline(activeParticipant?._id || activeParticipant?.id) ? (
                       <>
                         <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block shadow-2xs" />
                         <span className="text-emerald-600 font-semibold">Active now</span>
@@ -706,12 +733,16 @@ export function DirectMessagesPage() {
                   Loading conversation history...
                 </div>
               ) : messages.length > 0 ? (
-                messages.map((msg, index) => {
-                  const isMine =
-                    (msg.sender?._id || msg.sender)?.toString() ===
-                    currentUserId?.toString();
-                  const isLatestSent =
-                    isMine && index === messages.length - 1;
+                (() => {
+                  const lastSentMessageIndex = messages
+                    .map((m) => (m.sender?._id || m.sender)?.toString())
+                    .lastIndexOf(currentUserId?.toString());
+
+                  return messages.map((msg, index) => {
+                    const isMine =
+                      (msg.sender?._id || msg.sender)?.toString() ===
+                      currentUserId?.toString();
+                    const isLatestSent = isMine && index === lastSentMessageIndex;
 
                   return (
                     <div
@@ -787,7 +818,8 @@ export function DirectMessagesPage() {
                       </div>
                     </div>
                   );
-                })
+                });
+                })()
               ) : (
                 <div className="py-12 text-center text-xs text-gray-400">
                   No messages yet. Send a message to start chatting!

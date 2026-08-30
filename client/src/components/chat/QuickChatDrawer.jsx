@@ -394,7 +394,12 @@ export function QuickChatDrawer() {
                       {participantName}
                     </Link>
                     <span className="text-[10px] flex items-center space-x-1">
-                      {isOnline(participant?._id || participant?.id) ? (
+                      {typingUsers[selectedChat?._id]?.senderId?.toString() ===
+                      (participant?._id || participant?.id)?.toString() ? (
+                        <span className="text-[#0095F6] font-semibold flex items-center space-x-1 animate-pulse">
+                          <span>typing...</span>
+                        </span>
+                      ) : isOnline(participant?._id || participant?.id) ? (
                         <>
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                           <span className="text-emerald-600 font-medium">Active</span>
@@ -465,44 +470,56 @@ export function QuickChatDrawer() {
                     Loading messages...
                   </div>
                 ) : messages.length > 0 ? (
-                  messages.map((msg, index) => {
-                    const isMine =
-                      (msg.sender?._id || msg.sender)?.toString() ===
-                      currentUserId?.toString();
+                  (() => {
+                    const lastSentMessageIndex = messages
+                      .map((m) => (m.sender?._id || m.sender)?.toString())
+                      .lastIndexOf(currentUserId?.toString());
 
-                    return (
-                      <div
-                        key={msg._id || index}
-                        className={`flex flex-col ${
-                          isMine ? "items-end" : "items-start"
-                        }`}
-                      >
+                    return messages.map((msg, index) => {
+                      const isMine =
+                        (msg.sender?._id || msg.sender)?.toString() ===
+                        currentUserId?.toString();
+                      const isLatestSent = isMine && index === lastSentMessageIndex;
+
+                      return (
                         <div
-                          className={`px-3.5 py-2 text-xs leading-relaxed max-w-[80%] break-words shadow-2xs ${
-                            isMine
-                              ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[18px] rounded-br-[3px]"
-                              : "bg-[#EFEFEF] text-gray-900 rounded-[18px] rounded-bl-[3px]"
+                          key={msg._id || index}
+                          className={`flex flex-col ${
+                            isMine ? "items-end" : "items-start"
                           }`}
                         >
-                          {msg.media && (
-                            <img
-                              src={msg.media}
-                              alt="Attachment"
-                              className="mb-1 rounded-lg max-h-36 object-cover"
-                            />
-                          )}
-                          {msg.text && (
-                            <p className={msg.text === "❤️" ? "text-2xl" : ""}>
-                              {msg.text}
-                            </p>
-                          )}
+                          <div
+                            className={`px-3.5 py-2 text-xs leading-relaxed max-w-[80%] break-words shadow-2xs ${
+                              isMine
+                                ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[18px] rounded-br-[3px]"
+                                : "bg-[#EFEFEF] text-gray-900 rounded-[18px] rounded-bl-[3px]"
+                            }`}
+                          >
+                            {msg.media && (
+                              <img
+                                src={msg.media}
+                                alt="Attachment"
+                                className="mb-1 rounded-lg max-h-36 object-cover"
+                              />
+                            )}
+                            {msg.text && (
+                              <p className={msg.text === "❤️" ? "text-2xl" : ""}>
+                                {msg.text}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-[9px] text-gray-400 mt-0.5 px-1 flex items-center space-x-1">
+                            <span>{formatTimeAgo(msg.createdAt)}</span>
+                            {isLatestSent && msg.seen && (
+                              <span className="text-gray-500 font-medium ml-1">
+                                • Seen
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-[9px] text-gray-400 mt-0.5 px-1">
-                          {formatTimeAgo(msg.createdAt)}
-                        </span>
-                      </div>
-                    );
-                  })
+                      );
+                    });
+                  })()
                 ) : (
                   <div className="py-8 text-center text-xs text-gray-400">
                     No messages yet. Say hello!
@@ -706,6 +723,10 @@ export function QuickChatDrawer() {
                       convPart?.username || convPart?.name || "User";
                     const lastMsg = conv.lastMessage?.text || "Started a chat";
                     const hasUnread = (conv.unreadCount || 0) > 0;
+                    const isConvOnline = isOnline(convPart?._id || convPart?.id);
+                    const isConvTyping =
+                      typingUsers[conv._id]?.senderId?.toString() ===
+                      (convPart?._id || convPart?.id)?.toString();
 
                     return (
                       <div
@@ -714,14 +735,23 @@ export function QuickChatDrawer() {
                         className="flex items-center justify-between px-3.5 py-3 hover:bg-[#FAFAFA] transition cursor-pointer"
                       >
                         <div className="flex items-center space-x-3 min-w-0 flex-1">
-                          <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                            <Avatar
-                              src={convPart?.profilePic}
-                              alt={uname}
-                              gender={convPart?.gender}
-                              username={uname}
-                              className="w-full h-full rounded-full object-cover"
-                            />
+                          {/* Avatar with Online Green Dot */}
+                          <div className="relative w-12 h-12 flex-shrink-0">
+                            <div className="w-full h-full rounded-full overflow-hidden">
+                              <Avatar
+                                src={convPart?.profilePic}
+                                alt={uname}
+                                gender={convPart?.gender}
+                                username={uname}
+                                className="w-full h-full rounded-full object-cover"
+                              />
+                            </div>
+                            {isConvOnline && (
+                              <span
+                                className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-white rounded-full shadow-xs ring-1 ring-black/5"
+                                title="Active now"
+                              />
+                            )}
                           </div>
 
                           <div className="flex flex-col min-w-0 flex-1 leading-snug">
@@ -735,18 +765,26 @@ export function QuickChatDrawer() {
                               {uname}
                             </span>
                             <div className="flex items-center space-x-1 mt-0.5">
-                              <span
-                                className={`text-[11px] truncate max-w-[150px] ${
-                                  hasUnread
-                                    ? "font-bold text-black"
-                                    : "text-gray-500"
-                                }`}
-                              >
-                                {lastMsg}
-                              </span>
-                              <span className="text-[10px] text-gray-400 flex-shrink-0">
-                                • {formatTimeAgo(conv.updatedAt || conv.createdAt)}
-                              </span>
+                              {isConvTyping ? (
+                                <span className="text-[11px] text-[#0095F6] font-semibold flex items-center space-x-1 animate-pulse">
+                                  <span>Typing...</span>
+                                </span>
+                              ) : (
+                                <>
+                                  <span
+                                    className={`text-[11px] truncate max-w-[150px] ${
+                                      hasUnread
+                                        ? "font-bold text-black"
+                                        : "text-gray-500"
+                                    }`}
+                                  >
+                                    {lastMsg}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 flex-shrink-0">
+                                    • {formatTimeAgo(conv.updatedAt || conv.createdAt)}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
