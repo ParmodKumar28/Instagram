@@ -32,6 +32,7 @@ import EmojiDrawer from "../common/EmojiDrawer";
 
 export function PostCard({ post, onPostDeleted }) {
   const commentInputRef = useRef(null);
+  const editTextareaRef = useRef(null);
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null); // { commentId, username }
@@ -44,6 +45,8 @@ export function PostCard({ post, onPostDeleted }) {
   const [showOptions, setShowOptions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(post?.caption || "");
+  const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
+  const [isSavingPost, setIsSavingPost] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -51,6 +54,18 @@ export function PostCard({ post, onPostDeleted }) {
   const { userId: currentUserId } = useSelector(usersSelector);
   const { savedPostIds = [] } = useSelector(postsSelector);
   const isSaved = savedPostIds.includes(post?._id);
+
+  useEffect(() => {
+    if (isEditing) {
+      setTimeout(() => {
+        if (editTextareaRef.current) {
+          editTextareaRef.current.focus();
+          const len = editTextareaRef.current.value.length;
+          editTextareaRef.current.setSelectionRange(len, len);
+        }
+      }, 50);
+    }
+  }, [isEditing]);
 
   const handleToggleSave = () => {
     if (post?._id) {
@@ -69,7 +84,8 @@ export function PostCard({ post, onPostDeleted }) {
     }
   }, [post?._id]);
 
-  const getComments = useCallback(async () => {
+  const fetchComments = useCallback(async () => {
+    if (!post?._id) return;
     setCommentsLoading(true);
     try {
       const response = await commentService.getComments(post._id);
@@ -77,18 +93,16 @@ export function PostCard({ post, onPostDeleted }) {
         setComments(response.data?.comments || []);
       }
     } catch (error) {
-      console.error("Error getting comments:", error);
+      console.error("Error fetching comments:", error);
     } finally {
       setCommentsLoading(false);
     }
   }, [post?._id]);
 
   useEffect(() => {
-    if (post?._id) {
-      fetchLikes();
-      getComments();
-    }
-  }, [post?._id, fetchLikes, getComments]);
+    fetchLikes();
+    fetchComments();
+  }, [fetchLikes, fetchComments]);
 
   useEffect(() => {
     if (likeList && currentUserId) {
@@ -107,6 +121,8 @@ export function PostCard({ post, onPostDeleted }) {
     setTimeout(() => {
       if (commentInputRef.current) {
         commentInputRef.current.focus();
+        const len = commentInputRef.current.value.length;
+        commentInputRef.current.setSelectionRange(len, len);
       }
     }, 50);
   };
@@ -218,18 +234,29 @@ export function PostCard({ post, onPostDeleted }) {
   };
 
   const handleEditPost = () => {
+    setEditedCaption(post?.caption || "");
     setIsEditing(true);
     setShowOptions(false);
   };
 
   const handleUpdatePost = async () => {
-    await dispatch(
-      updatePostAsync({
-        postId: post._id,
-        postData: { ...post, caption: editedCaption },
-      })
-    );
-    setIsEditing(false);
+    setIsSavingPost(true);
+    try {
+      await dispatch(
+        updatePostAsync({
+          postId: post._id,
+          postData: { ...post, caption: editedCaption },
+        })
+      ).unwrap();
+      toast.success("Post updated");
+      setIsEditing(false);
+      setShowEditEmojiPicker(false);
+    } catch (error) {
+      console.error("Failed to update post:", error);
+      toast.error("Failed to update post");
+    } finally {
+      setIsSavingPost(false);
+    }
   };
 
   const isAuthor = currentUserId && post?.user?._id === currentUserId;
@@ -386,26 +413,79 @@ export function PostCard({ post, onPostDeleted }) {
       {/* Caption & Comments Section with proper left and right margins */}
       <div className="px-4 pt-1.5 pb-3.5 space-y-2 text-sm text-gray-900">
         {isEditing ? (
-          <div className="space-y-2 mt-2">
-            <textarea
-              value={editedCaption}
-              onChange={(e) => setEditedCaption(e.target.value)}
-              className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black"
-              rows={3}
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdatePost}
-                className="px-3 py-1 bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold rounded-lg"
-              >
-                Save
-              </button>
+          <div className="bg-gray-50/80 p-3 rounded-xl border border-gray-200/80 space-y-2 mt-1 relative">
+            <div className="flex items-center justify-between pb-0.5 text-xs font-semibold text-gray-700">
+              <span>Edit Caption</span>
+              <span className="text-[11px] text-gray-400 font-normal">{editedCaption.length}/2200</span>
+            </div>
+
+            <div className="relative">
+              <textarea
+                ref={editTextareaRef}
+                value={editedCaption}
+                onChange={(e) => setEditedCaption(e.target.value)}
+                onFocus={(e) => {
+                  const len = e.currentTarget.value.length;
+                  e.currentTarget.setSelectionRange(len, len);
+                }}
+                placeholder="Write a caption..."
+                className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0095F6] resize-none leading-relaxed"
+                rows={3}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    handleUpdatePost();
+                  } else if (e.key === "Escape") {
+                    setIsEditing(false);
+                    setShowEditEmojiPicker(false);
+                  }
+                }}
+              />
+
+              <div className="flex items-center justify-between pt-1.5">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditEmojiPicker((prev) => !prev)}
+                    className={`text-gray-400 hover:text-gray-600 text-base p-1.5 rounded-md transition hover:bg-gray-100 cursor-pointer ${
+                      showEditEmojiPicker ? "text-[#0095F6]" : ""
+                    }`}
+                    aria-label="Add emoji to caption"
+                  >
+                    <BsEmojiSmile />
+                  </button>
+
+                  <EmojiDrawer
+                    isOpen={showEditEmojiPicker}
+                    onClose={() => setShowEditEmojiPicker(false)}
+                    onEmojiSelect={(emoji) => setEditedCaption((prev) => prev + emoji)}
+                    position="top-left"
+                    width={300}
+                    height={320}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditedCaption(post?.caption || "");
+                      setIsEditing(false);
+                      setShowEditEmojiPicker(false);
+                    }}
+                    className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSavingPost}
+                    onClick={handleUpdatePost}
+                    className="px-3.5 py-1.5 bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold rounded-md shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSavingPost ? "Saving..." : "Done"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

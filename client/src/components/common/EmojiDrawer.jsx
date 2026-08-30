@@ -56,7 +56,7 @@ export function EmojiDrawer({
   return (
     <div
       ref={containerRef}
-      className={`absolute z-50 shadow-2xl rounded-2xl overflow-hidden border border-gray-200 bg-white ${currentPositionClass} ${className}`}
+      className={`absolute z-[100] shadow-2xl rounded-2xl overflow-hidden border border-gray-200 bg-white ${currentPositionClass} ${className}`}
       style={{ width, height }}
       onClick={(e) => e.stopPropagation()}
     >

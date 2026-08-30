@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 
 export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) {
   const commentInputRef = useRef(null);
+  const editTextareaRef = useRef(null);
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState([]);
   const [likeList, setLikeList] = useState([]);
@@ -38,6 +39,10 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCaption, setEditedCaption] = useState(initialPost?.caption || "");
+  const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
+  const [isSavingPost, setIsSavingPost] = useState(false);
 
   const dispatch = useDispatch();
   const { userId: currentUserId } = useSelector(usersSelector);
@@ -45,6 +50,18 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
   const currentPostId = post?._id || initialPost?._id;
   const isSaved = savedPostIds.includes(currentPostId);
+
+  useEffect(() => {
+    if (isEditing) {
+      setTimeout(() => {
+        if (editTextareaRef.current) {
+          editTextareaRef.current.focus();
+          const len = editTextareaRef.current.value.length;
+          editTextareaRef.current.setSelectionRange(len, len);
+        }
+      }, 50);
+    }
+  }, [isEditing]);
 
   const handleToggleSave = () => {
     if (currentPostId) {
@@ -54,6 +71,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
   useEffect(() => {
     setPost(initialPost);
+    setEditedCaption(initialPost?.caption || "");
   }, [initialPost]);
 
   // Fetch full fresh post data from backend
@@ -139,6 +157,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     setTimeout(() => {
       if (commentInputRef.current) {
         commentInputRef.current.focus();
+        const len = commentInputRef.current.value.length;
+        commentInputRef.current.setSelectionRange(len, len);
       }
     }, 50);
   };
@@ -202,6 +222,33 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     } catch (error) {
       console.error("Error adding comment:", error);
       toast.error("Failed to post comment");
+    }
+  };
+
+  const handleEditPost = () => {
+    setEditedCaption(currentPostData?.caption || "");
+    setIsEditing(true);
+    setShowOptions(false);
+  };
+
+  const handleUpdatePost = async () => {
+    setIsSavingPost(true);
+    try {
+      await dispatch(
+        updatePostAsync({
+          postId: post._id,
+          postData: { ...post, caption: editedCaption },
+        })
+      ).unwrap();
+      setPost((prev) => ({ ...prev, caption: editedCaption }));
+      toast.success("Post updated");
+      setIsEditing(false);
+      setShowEditEmojiPicker(false);
+    } catch (error) {
+      console.error("Failed to update post:", error);
+      toast.error("Failed to update post");
+    } finally {
+      setIsSavingPost(false);
     }
   };
 
@@ -309,6 +356,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                 isAuthor={isAuthor}
                 post={currentPostData}
                 onDelete={handleDeletePost}
+                onEdit={isAuthor ? handleEditPost : null}
                 onClose={() => setShowOptions(false)}
               />
             )}
@@ -317,36 +365,114 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
           {/* Scrollable Caption & Comments Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm text-gray-900 scrollbar-none">
-            {/* Caption Item */}
-            {currentPostData?.caption && (
-              <div className="flex items-start space-x-3 pb-3 border-b border-gray-50">
-                <Link
-                  to={`/profile/${author._id || ""}`}
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
-                >
-                  <Avatar
-                    src={author.profilePic}
-                    alt={username}
-                    gender={author.gender}
-                    username={username}
-                    className="w-full h-full object-cover"
+            {/* Caption Edit Form */}
+            {isEditing ? (
+              <div className="bg-gray-50/80 p-3 rounded-xl border border-gray-200/80 space-y-2 mb-3 relative">
+                <div className="flex items-center justify-between pb-0.5 text-xs font-semibold text-gray-700">
+                  <span>Edit Caption</span>
+                  <span className="text-[11px] text-gray-400 font-normal">{editedCaption.length}/2200</span>
+                </div>
+
+                <div className="relative">
+                  <textarea
+                    ref={editTextareaRef}
+                    value={editedCaption}
+                    onChange={(e) => setEditedCaption(e.target.value)}
+                    onFocus={(e) => {
+                      const len = e.currentTarget.value.length;
+                      e.currentTarget.setSelectionRange(len, len);
+                    }}
+                    placeholder="Write a caption..."
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0095F6] resize-none leading-relaxed"
+                    rows={3}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        handleUpdatePost();
+                      } else if (e.key === "Escape") {
+                        setIsEditing(false);
+                        setShowEditEmojiPicker(false);
+                      }
+                    }}
                   />
-                </Link>
-                <div className="leading-snug flex-1">
-                  <p>
-                    <Link
-                      to={`/profile/${author._id || ""}`}
-                      onClick={onClose}
-                      className="font-semibold mr-1.5 hover:underline"
-                    >
-                      {username}
-                    </Link>
-                    <span>{currentPostData.caption}</span>
-                  </p>
-                  <span className="text-gray-400 text-xs mt-1 block">{timeAgo}</span>
+
+                  <div className="flex items-center justify-between pt-1.5">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowEditEmojiPicker((prev) => !prev)}
+                        className={`text-gray-400 hover:text-gray-600 text-base p-1.5 rounded-md transition hover:bg-gray-100 cursor-pointer ${
+                          showEditEmojiPicker ? "text-[#0095F6]" : ""
+                        }`}
+                        aria-label="Add emoji to caption"
+                      >
+                        <BsEmojiSmile />
+                      </button>
+
+                      <EmojiDrawer
+                        isOpen={showEditEmojiPicker}
+                        onClose={() => setShowEditEmojiPicker(false)}
+                        onEmojiSelect={(emoji) => setEditedCaption((prev) => prev + emoji)}
+                        position="top-left"
+                        width={300}
+                        height={320}
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditedCaption(currentPostData?.caption || "");
+                          setIsEditing(false);
+                          setShowEditEmojiPicker(false);
+                        }}
+                        className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 rounded-md hover:bg-gray-100 transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSavingPost}
+                        onClick={handleUpdatePost}
+                        className="px-3.5 py-1.5 bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold rounded-md shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+                      >
+                        {isSavingPost ? "Saving..." : "Done"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
+            ) : (
+              currentPostData?.caption && (
+                <div className="flex items-start space-x-3 pb-3 border-b border-gray-50">
+                  <Link
+                    to={`/profile/${author._id || ""}`}
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
+                  >
+                    <Avatar
+                      src={author.profilePic}
+                      alt={username}
+                      gender={author.gender}
+                      username={username}
+                      className="w-full h-full object-cover"
+                    />
+                  </Link>
+                  <div className="leading-snug flex-1">
+                    <p>
+                      <Link
+                        to={`/profile/${author._id || ""}`}
+                        onClick={onClose}
+                        className="font-semibold mr-1.5 hover:underline"
+                      >
+                        {username}
+                      </Link>
+                      <span>{currentPostData.caption}</span>
+                    </p>
+                    <span className="text-gray-400 text-xs mt-1 block">{timeAgo}</span>
+                  </div>
+                </div>
+              )
             )}
 
             {/* Comments List */}
