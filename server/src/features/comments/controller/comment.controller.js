@@ -13,7 +13,7 @@ export const addComment = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { postId } = req.params;
-    const { comment } = req.body;
+    const { comment, parentCommentId } = req.body;
     if (!userId) {
       return next(
         new ErrorHandler(
@@ -32,7 +32,7 @@ export const addComment = async (req, res, next) => {
         new ErrorHandler(400, "Enter comment in req body comment not received!")
       );
     }
-    const newComment = await addCommentDb(postId, userId, comment);
+    const newComment = await addCommentDb(postId, userId, comment, parentCommentId);
     if (!newComment) {
       return next(
         new ErrorHandler(400, "Comment not added something went wrong!")

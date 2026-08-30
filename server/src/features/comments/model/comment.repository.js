@@ -6,11 +6,16 @@ import PostModel from "../../posts/model/posts.schema.js";
 import CommentModel from "./comment.schema.js";
 
 // Adding comment on a post in the database
-export const addCommentDb = async (postId, userId, comment) => {
+export const addCommentDb = async (postId, userId, comment, parentCommentId = null) => {
   try {
     const post = await PostModel.findById(postId);
     if (!post) {
       throw new ErrorHandler(400, "No post found by this id to add comment!");
+    }
+
+    let parentComment = null;
+    if (parentCommentId) {
+      parentComment = await CommentModel.findById(parentCommentId);
     }
 
     // Creating new comment
@@ -18,16 +23,26 @@ export const addCommentDb = async (postId, userId, comment) => {
       user: new ObjectId(userId),
       post: new ObjectId(postId),
       content: comment,
+      parentComment: parentComment ? new ObjectId(parentComment._id) : null,
     });
 
     // Saving new comment
     await newComment.save();
 
-    // Updating post's comments array
-    post.comments.push(new ObjectId(newComment._id));
-    await post.save();
+    if (parentComment) {
+      if (!parentComment.replies) parentComment.replies = [];
+      parentComment.replies.push(newComment._id);
+      await parentComment.save();
+    } else {
+      // Updating post's comments array for top-level comments
+      post.comments.push(new ObjectId(newComment._id));
+      await post.save();
+    }
 
-    await newComment.populate("user", "name username profilePic _id");
+    await newComment.populate([
+      { path: "user", select: "name username profilePic gender _id" },
+      { path: "likes" },
+    ]);
     return newComment;
   } catch (error) {
     throw error;
@@ -46,11 +61,27 @@ export const removeCommentDb = async (commentId, user) => {
     if (!comment.user.equals(user)) {
       throw new ErrorHandler(400, "You cannot delete other's comment!");
     }
+
+    // If it's a reply, remove from parentComment replies
+    if (comment.parentComment) {
+      await CommentModel.findByIdAndUpdate(comment.parentComment, {
+        $pull: { replies: comment._id },
+      });
+    } else {
+      // If it's a parent comment, delete its replies too and remove from post
+      if (comment.replies && comment.replies.length > 0) {
+        await CommentModel.deleteMany({ _id: { $in: comment.replies } });
+      }
+      if (post) {
+        const commentIndex = post.comments.indexOf(new ObjectId(commentId));
+        if (commentIndex !== -1) {
+          post.comments.splice(commentIndex, 1);
+          await post.save();
+        }
+      }
+    }
+
     const deletedComment = await CommentModel.findByIdAndDelete(commentId);
-    // Removing comment from post comment's array
-    const commentIndex = post.comments.indexOf(new ObjectId(commentId));
-    post.comments.splice(commentIndex, 1);
-    await post.save();
     return deletedComment;
   } catch (error) {
     throw error;
@@ -85,12 +116,21 @@ export const getCommentsDb = async (postId) => {
   try {
     const post = await PostModel.findById(postId);
     if (!post) {
-      throw new ErrorHandler(400, "No post found by this id to add comment!");
+      throw new ErrorHandler(400, "No post found by this id to get comments!");
     }
     const comments = await CommentModel.find({
       post: new ObjectId(postId),
+      parentComment: null, // Only fetch root comments; replies are nested
     })
-      .populate("user", "name username profilePic _id")
+      .populate("user", "name username profilePic gender _id")
+      .populate("likes")
+      .populate({
+        path: "replies",
+        populate: [
+          { path: "user", select: "name username profilePic gender _id" },
+          { path: "likes" },
+        ],
+      })
       .sort({ createdAt: 1 });
     return comments;
   } catch (error) {
