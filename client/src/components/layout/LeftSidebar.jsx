@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { InstagramLogo } from "../common/InstagramLogo";
+import Avatar from "../common/Avatar";
 import {
   logoutAsync,
   usersSelector,
@@ -139,18 +140,22 @@ export function LeftSidebar() {
       active: currentPath.startsWith("/profile"),
       outlineIcon: (
         <div className="w-7 h-7 rounded-full p-[1px] flex-shrink-0 overflow-hidden">
-          <img
-            src={currentUser?.profilePic || "https://placekitten.com/100/100"}
+          <Avatar
+            src={currentUser?.profilePic}
             alt="Profile"
+            gender={currentUser?.gender}
+            username={currentUser?.username}
             className="w-full h-full object-cover rounded-full"
           />
         </div>
       ),
       filledIcon: (
         <div className="w-7 h-7 rounded-full p-[1.5px] border-2 border-black flex-shrink-0 overflow-hidden">
-          <img
-            src={currentUser?.profilePic || "https://placekitten.com/100/100"}
+          <Avatar
+            src={currentUser?.profilePic}
             alt="Profile"
+            gender={currentUser?.gender}
+            username={currentUser?.username}
             className="w-full h-full object-cover rounded-full"
           />
         </div>

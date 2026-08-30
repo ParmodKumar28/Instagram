@@ -10,6 +10,7 @@ import {
   acceptFollowRequestAsync,
   rejectFollowRequestAsync,
 } from "../../redux/slices/followersSlice";
+import Avatar from "../common/Avatar";
 
 function formatTimeAgo(dateString) {
   if (!dateString) return "";
@@ -120,9 +121,11 @@ export function NotificationsDrawer({ isOpen, onClose }) {
                           onClick={onClose}
                           className="flex items-center space-x-3.5 flex-1 min-w-0 mr-2"
                         >
-                          <img
-                            src={follower.profilePic || "https://placekitten.com/100/100"}
+                          <Avatar
+                            src={follower.profilePic}
                             alt={username}
+                            gender={follower.gender}
+                            username={username}
                             className="w-11 h-11 rounded-full object-cover border border-gray-200 flex-shrink-0"
                           />
                           <div className="truncate leading-tight">
@@ -169,10 +172,12 @@ export function NotificationsDrawer({ isOpen, onClose }) {
                       {requests.slice(0, 2).map((item, idx) => {
                         const follower = item.follower || item;
                         return (
-                          <img
+                          <Avatar
                             key={item._id || idx}
-                            src={follower.profilePic || "https://placekitten.com/100/100"}
+                            src={follower.profilePic}
                             alt="Requester"
+                            gender={follower.gender}
+                            username={follower.username || follower.name}
                             className="w-10 h-10 rounded-full object-cover border-2 border-white"
                           />
                         );
@@ -217,9 +222,11 @@ export function NotificationsDrawer({ isOpen, onClose }) {
                             onClick={onClose}
                             className="flex items-center space-x-3.5 flex-1 min-w-0 mr-2"
                           >
-                            <img
-                              src={follower.profilePic || "https://placekitten.com/100/100"}
+                            <Avatar
+                              src={follower.profilePic}
                               alt={username}
+                              gender={follower.gender}
+                              username={username}
                               className="w-11 h-11 rounded-full object-cover border border-gray-200 flex-shrink-0"
                             />
                             <div className="truncate leading-snug">
@@ -283,9 +290,11 @@ export function NotificationsDrawer({ isOpen, onClose }) {
                           onClick={onClose}
                           className="flex items-center space-x-3.5 flex-1 min-w-0"
                         >
-                          <img
-                            src={actUser.profilePic || "https://placekitten.com/100/100"}
+                          <Avatar
+                            src={actUser.profilePic}
                             alt={actUsername}
+                            gender={actUser.gender}
+                            username={actUsername}
                             className="w-11 h-11 rounded-full object-cover border border-gray-200 flex-shrink-0"
                           />
                           <div className="truncate leading-snug">

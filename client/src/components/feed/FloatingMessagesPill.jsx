@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { PiPaperPlaneTiltFill } from "react-icons/pi";
+import Avatar from "../common/Avatar";
 
 export function FloatingMessagesPill() {
   const { signedUser } = useSelector(usersSelector);
@@ -18,9 +19,11 @@ export function FloatingMessagesPill() {
       <span className="font-semibold text-sm text-gray-900">Messages</span>
 
       {currentUser && (
-        <img
-          src={currentUser.profilePic || "https://placekitten.com/100/100"}
+        <Avatar
+          src={currentUser.profilePic}
           alt="Avatar"
+          gender={currentUser.gender}
+          username={currentUser.username}
           className="w-6 h-6 rounded-full object-cover border border-gray-200"
         />
       )}

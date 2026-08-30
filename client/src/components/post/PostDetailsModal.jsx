@@ -18,6 +18,7 @@ import { usersSelector } from "../../redux/slices/usersSlice";
 import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux/slices/postsSlice";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
+import Avatar from "../common/Avatar";
 import toast from "react-hot-toast";
 
 function formatTimeAgo(dateString) {
@@ -238,9 +239,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                 onClick={onClose}
                 className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
               >
-                <img
-                  src={author.profilePic || "https://placekitten.com/100/100"}
+                <Avatar
+                  src={author.profilePic}
                   alt={username}
+                  gender={author.gender}
+                  username={username}
                   className="w-full h-full object-cover"
                 />
               </Link>
@@ -276,9 +279,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                   onClick={onClose}
                   className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
                 >
-                  <img
-                    src={author.profilePic || "https://placekitten.com/100/100"}
+                  <Avatar
+                    src={author.profilePic}
                     alt={username}
+                    gender={author.gender}
+                    username={username}
                     className="w-full h-full object-cover"
                   />
                 </Link>
@@ -319,9 +324,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                       onClick={onClose}
                       className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
                     >
-                      <img
-                        src={commentUser.profilePic || "https://placekitten.com/100/100"}
+                      <Avatar
+                        src={commentUser.profilePic}
                         alt={commentUsername}
+                        gender={commentUser.gender}
+                        username={commentUsername}
                         className="w-full h-full object-cover"
                       />
                     </Link>

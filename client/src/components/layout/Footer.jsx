@@ -12,6 +12,7 @@ import {
 } from "react-icons/io5";
 import { RiAddBoxLine, RiAddBoxFill } from "react-icons/ri";
 import CreatePostModal from "../post/CreatePostModal";
+import Avatar from "../common/Avatar";
 import toast from "react-hot-toast";
 
 export function Footer() {
@@ -69,18 +70,22 @@ export function Footer() {
       active: currentPath.startsWith("/profile"),
       outlineIcon: (
         <div className="w-6 h-6 rounded-full overflow-hidden">
-          <img
-            src={currentUser?.profilePic || "https://placekitten.com/100/100"}
+          <Avatar
+            src={currentUser?.profilePic}
             alt="Profile"
+            gender={currentUser?.gender}
+            username={currentUser?.username}
             className="w-full h-full rounded-full object-cover"
           />
         </div>
       ),
       filledIcon: (
         <div className="w-6 h-6 rounded-full ring-2 ring-black ring-offset-1 overflow-hidden">
-          <img
-            src={currentUser?.profilePic || "https://placekitten.com/100/100"}
+          <Avatar
+            src={currentUser?.profilePic}
             alt="Profile"
+            gender={currentUser?.gender}
+            username={currentUser?.username}
             className="w-full h-full rounded-full object-cover"
           />
         </div>

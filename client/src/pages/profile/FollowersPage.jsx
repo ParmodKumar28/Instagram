@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Search, Users } from "lucide-react";
 
 import UserListSkeleton from "../../components/common/skeletons/UserListSkeleton";
+import Avatar from "../../components/common/Avatar";
 
 export function FollowersPage() {
   const dispatch = useDispatch();
@@ -138,9 +139,11 @@ export function FollowersPage() {
                     to={`/profile/${follower.follower?._id}`}
                     className="flex items-center space-x-3"
                   >
-                    <img
-                      src={follower.follower?.profilePic || "https://placekitten.com/100/100"}
+                    <Avatar
+                      src={follower.follower?.profilePic}
                       alt={follower.follower?.name || "User"}
+                      gender={follower.follower?.gender}
+                      username={follower.follower?.username || follower.follower?.name}
                       className="w-12 h-12 rounded-full object-cover border border-gray-200"
                     />
                     <div>

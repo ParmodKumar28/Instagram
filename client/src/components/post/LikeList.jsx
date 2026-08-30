@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaTimes } from "react-icons/fa";
+import Avatar from "../common/Avatar";
 
 export function LikeList({ likeList = [], onClose }) {
   return (
@@ -33,10 +34,12 @@ export function LikeList({ likeList = [], onClose }) {
                   onClick={onClose}
                   className="flex items-center space-x-3 w-full"
                 >
-                  <img
+                  <Avatar
                     className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                    src={like.user?.profilePic || "https://placekitten.com/100/100"}
+                    src={like.user?.profilePic}
                     alt={like.user?.name || "User"}
+                    gender={like.user?.gender}
+                    username={like.user?.username || like.user?.name}
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-900">

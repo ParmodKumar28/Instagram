@@ -23,6 +23,7 @@ import {
 import { IoSettingsOutline, IoLockClosedOutline, IoLinkOutline } from "react-icons/io5";
 import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
+import Avatar from "../../components/common/Avatar";
 
 export function ProfilePage() {
   const dispatch = useDispatch();
@@ -117,9 +118,11 @@ export function ProfilePage() {
             onClick={() => setIsProfilePicZoomed(true)}
             className="w-24 h-24 sm:w-36 sm:h-36 md:w-38 md:h-38 rounded-full border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 transition"
           >
-            <img
-              src={user?.profilePic || "https://placekitten.com/200/200"}
+            <Avatar
+              src={user?.profilePic}
               alt={user?.username || "Profile"}
+              gender={user?.gender}
+              username={user?.username}
               className="w-full h-full object-cover"
             />
           </div>
@@ -367,10 +370,12 @@ export function ProfilePage() {
           className="fixed inset-0 bg-black/85 flex justify-center items-center z-50 p-4"
           onClick={() => setIsProfilePicZoomed(false)}
         >
-          <img
+          <Avatar
             className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl animate-in zoom-in-95 duration-150"
-            src={user?.profilePic || "https://placekitten.com/200/200"}
+            src={user?.profilePic}
             alt={user?.username || "Profile"}
+            gender={user?.gender}
+            username={user?.username}
           />
         </div>
       )}

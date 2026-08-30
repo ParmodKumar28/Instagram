@@ -1,3 +1,5 @@
+import Avatar from "../common/Avatar";
+
 export function StoryItem({ story }) {
   const username = story?.user?.username || story?.user?.name || "user";
   const displayUsername =
@@ -6,9 +8,11 @@ export function StoryItem({ story }) {
   return (
     <div className="flex flex-col items-center space-y-2 cursor-pointer flex-shrink-0 group">
       <div className="w-[76px] h-[76px] rounded-full p-[2.5px] ig-story-ring group-hover:scale-105 transition-transform duration-200">
-        <img
-          src={story?.user?.profilePic || "https://placekitten.com/100/100"}
+        <Avatar
+          src={story?.user?.profilePic}
           alt={username}
+          gender={story?.user?.gender}
+          username={username}
           className="w-full h-full rounded-full object-cover border-2 border-white bg-white"
         />
       </div>

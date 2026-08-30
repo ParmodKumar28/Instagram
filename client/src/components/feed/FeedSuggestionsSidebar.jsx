@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { userService, followerService } from "../../services";
+import Avatar from "../common/Avatar";
 
 export function FeedSuggestionsSidebar() {
   const [suggestions, setSuggestions] = useState([]);
@@ -56,9 +57,11 @@ export function FeedSuggestionsSidebar() {
             to={`/profile/${currentUser._id}`}
             className="flex items-center space-x-3.5 hover:opacity-85 transition group"
           >
-            <img
-              src={currentUser.profilePic || "https://placekitten.com/100/100"}
+            <Avatar
+              src={currentUser.profilePic}
               alt={currentUser.username}
+              gender={currentUser.gender}
+              username={currentUser.username}
               className="w-12 h-12 rounded-full object-cover border border-gray-200"
             />
             <div className="leading-tight">
@@ -102,9 +105,11 @@ export function FeedSuggestionsSidebar() {
                 to={`/profile/${item._id}`}
                 className="flex items-center space-x-3.5 group"
               >
-                <img
-                  src={item.profilePic || "https://placekitten.com/100/100"}
+                <Avatar
+                  src={item.profilePic}
                   alt={item.username}
+                  gender={item.gender}
+                  username={item.username}
                   className="w-10 h-10 rounded-full object-cover border border-gray-200"
                 />
                 <div className="leading-tight">

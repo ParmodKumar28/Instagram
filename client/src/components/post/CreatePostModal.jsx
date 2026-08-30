@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { createPostAsync, fetchPostsAsync, fetchUserPostsAsync, postsSelector } from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
+import Avatar from "../common/Avatar";
 
 export function CreatePostModal({ isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -212,9 +213,11 @@ export function CreatePostModal({ isOpen, onClose }) {
               <div>
                 {/* Author row */}
                 <div className="flex items-center space-x-3 p-4">
-                  <img
-                    src={signedUser?.profilePic || "https://placekitten.com/100/100"}
+                  <Avatar
+                    src={signedUser?.profilePic}
                     alt={signedUser?.username || "User"}
+                    gender={signedUser?.gender}
+                    username={signedUser?.username}
                     className="w-7 h-7 rounded-full object-cover border border-gray-200"
                   />
                   <span className="font-semibold text-xs text-gray-900">

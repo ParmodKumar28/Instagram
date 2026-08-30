@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { commentService } from "../../services";
+import Avatar from "../common/Avatar";
 import toast from "react-hot-toast";
 
 function formatTimeAgo(dateString) {
@@ -67,9 +68,11 @@ export function CommentList({
               to={`/profile/${user._id || ""}`}
               className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
             >
-              <img
-                src={user.profilePic || "https://placekitten.com/100/100"}
+              <Avatar
+                src={user.profilePic}
                 alt={username}
+                gender={user.gender}
+                username={username}
                 className="w-full h-full object-cover"
               />
             </Link>

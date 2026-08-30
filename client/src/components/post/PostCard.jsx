@@ -13,6 +13,7 @@ import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Avatar from "../common/Avatar";
 import {
   deletePostAsync,
   updatePostAsync,
@@ -189,10 +190,12 @@ export function PostCard({ post }) {
             to={`/profile/${post?.user?._id || ""}`}
             className="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden"
           >
-            <img
-              className="w-full h-full rounded-full object-cover"
-              src={post?.user?.profilePic || "https://placekitten.com/100/100"}
+            <Avatar
+              src={post?.user?.profilePic}
               alt={username}
+              gender={post?.user?.gender}
+              username={username}
+              className="w-full h-full rounded-full object-cover"
             />
           </Link>
 
