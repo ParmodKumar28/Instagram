@@ -39,26 +39,53 @@ app.use(
   })
 );
 
-// Setting up cors with support for dev and production origins
-const allowedOrigins = [
-  process.env.CLIENT_URL,
+// Setting up cors with support for dev, production, and Vercel deployments
+const envOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((url) => url.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
+  ...envOrigins,
+  "https://socialgram-puce.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://localhost:8000",
   "http://127.0.0.1:5173",
-].filter(Boolean);
+  "http://127.0.0.1:3000",
+]);
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS policy violation"));
-      }
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = origin.replace(/\/$/, "");
+
+    if (
+      allowedOrigins.has(normalizedOrigin) ||
+      /\.vercel\.app$/.test(new URL(origin).hostname) ||
+      /\.onrender\.com$/.test(new URL(origin).hostname) ||
+      process.env.NODE_ENV !== "production"
+    ) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+  ],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 // General baseline rate limiting for all API routes
 app.use("/api/", generalApiLimiter);
