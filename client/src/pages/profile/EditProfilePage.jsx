@@ -9,6 +9,8 @@ import {
 import { motion } from "framer-motion";
 import { Camera, Check, ChevronLeft, Loader2, Upload, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import Avatar from "../../components/common/Avatar";
+import { ALL_AVATARS, MALE_AVATARS, FEMALE_AVATARS, NEUTRAL_AVATARS } from "../../constants";
 import toast from "react-hot-toast";
 
 export function EditProfilePage() {
@@ -31,7 +33,24 @@ export function EditProfilePage() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [activeSection, setActiveSection] = useState("basic");
   const [formErrors, setFormErrors] = useState({});
+  const [selectedAvatarCategory, setSelectedAvatarCategory] = useState("all");
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleSelectAvatar = async (avatarUrl) => {
+    setPreviewImage(avatarUrl);
+    setProfilePic(null);
+    setAvatarLoading(true);
+    try {
+      await dispatch(updateProfileAsync({ profilePic: avatarUrl })).unwrap();
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+    } catch (err) {
+      console.error("Error updating avatar:", err);
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (signedUser) {
@@ -193,15 +212,13 @@ export function EditProfilePage() {
           <div className="flex flex-col items-center">
             <div className="relative mb-4 group">
               <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center">
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Camera size={36} className="text-gray-400" />
-                )}
+                <Avatar
+                  src={previewImage || signedUser?.profilePic}
+                  alt="Profile Preview"
+                  gender={formData.gender || signedUser?.gender}
+                  username={formData.username || signedUser?.username}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               {profilePic && (
@@ -260,6 +277,84 @@ export function EditProfilePage() {
                 Profile picture updated!
               </div>
             )}
+
+            {/* Avatar Selector Gallery */}
+            <div className="w-full mt-6 pt-5 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center space-x-1.5">
+                  <span>Choose Preset Avatar</span>
+                  <span className="text-[10px] text-gray-400 font-normal">
+                    ({selectedAvatarCategory === "male"
+                      ? MALE_AVATARS.length
+                      : selectedAvatarCategory === "female"
+                      ? FEMALE_AVATARS.length
+                      : selectedAvatarCategory === "neutral"
+                      ? NEUTRAL_AVATARS.length
+                      : ALL_AVATARS.length})
+                  </span>
+                </span>
+                <div className="flex space-x-1 bg-gray-100 p-0.5 rounded-lg text-xs">
+                  {[
+                    { id: "all", label: "All" },
+                    { id: "male", label: "Male" },
+                    { id: "female", label: "Female" },
+                    { id: "neutral", label: "Neutral" },
+                  ].map(({ id, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setSelectedAvatarCategory(id)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                        selectedAvatarCategory === id
+                          ? "bg-white text-blue-600 shadow-xs"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3.5 overflow-x-auto pb-3 pt-1 scrollbar-thin scrollbar-thumb-gray-200">
+                {(selectedAvatarCategory === "female"
+                  ? FEMALE_AVATARS
+                  : selectedAvatarCategory === "male"
+                  ? MALE_AVATARS
+                  : selectedAvatarCategory === "neutral"
+                  ? NEUTRAL_AVATARS
+                  : ALL_AVATARS
+                ).map((avatarUrl, idx) => {
+                  const isSelected = (previewImage || signedUser?.profilePic) === avatarUrl;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={avatarLoading}
+                      onClick={() => handleSelectAvatar(avatarUrl)}
+                      title={`Select preset ${selectedAvatarCategory === "female" ? "female" : selectedAvatarCategory === "male" ? "male" : ""} avatar #${idx + 1}`}
+                      className={`relative flex-shrink-0 w-12 h-12 rounded-full overflow-hidden transition-all duration-200 transform hover:scale-110 focus:outline-none ${
+                        isSelected
+                          ? "ring-2 ring-blue-500 ring-offset-2 scale-105 shadow-md"
+                          : "opacity-85 hover:opacity-100 border border-gray-200 shadow-xs hover:shadow"
+                      }`}
+                    >
+                      <img
+                        src={avatarUrl}
+                        alt={`Avatar ${idx + 1}`}
+                        className="w-full h-full object-cover bg-gray-50"
+                        loading="lazy"
+                      />
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-blue-500/30 backdrop-blur-[0.5px] flex items-center justify-center">
+                          <Check size={16} className="text-white drop-shadow font-bold" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </motion.div>
 
