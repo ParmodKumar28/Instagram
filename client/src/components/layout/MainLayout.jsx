@@ -50,8 +50,12 @@ export function MainLayout() {
         </div>
       )}
 
-      {/* Quick Access Chat Drawer / Floating Messenger (hidden on full messages page) */}
-      {!isMessagesPage && <QuickChatDrawer />}
+      {/* Quick Access Chat Drawer / Floating Messenger (Desktop Only, hidden on full messages page) */}
+      {!isMessagesPage && (
+        <div className="hidden md:block">
+          <QuickChatDrawer />
+        </div>
+      )}
     </div>
   );
 }

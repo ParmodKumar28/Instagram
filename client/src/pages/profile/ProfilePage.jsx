@@ -9,8 +9,9 @@ import {
   userDataAsync,
   usersSelector,
   clearProfileUser,
+  logoutAsync,
 } from "../../redux/slices/usersSlice";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import UserPostList from "../../components/profile/UserPostList";
 import {
@@ -20,7 +21,13 @@ import {
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../redux/slices/followersSlice";
-import { IoSettingsOutline, IoLockClosedOutline, IoLinkOutline, IoPersonCircleOutline } from "react-icons/io5";
+import {
+  IoSettingsOutline,
+  IoLockClosedOutline,
+  IoLinkOutline,
+  IoPersonCircleOutline,
+  IoLogOutOutline,
+} from "react-icons/io5";
 import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
 import { Loader2 } from "lucide-react";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
@@ -30,6 +37,7 @@ import { postService, storyService } from "../../services";
 
 export function ProfilePage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { profileUser, signedUser, userLoading, userId: currentUserId } = useSelector(usersSelector);
   const { userPosts, userPostsLoading, savedPosts = [], savedPostsLoading } = useSelector(postsSelector);
   const { userId } = useParams();
@@ -43,6 +51,15 @@ export function ProfilePage() {
 
   const isOwnProfile = !userId || userId === currentUserId;
   const user = isOwnProfile ? signedUser : profileUser;
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutAsync());
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   useEffect(() => {
     if (userId) {
@@ -186,7 +203,7 @@ export function ProfilePage() {
             </h1>
 
             {isOwnProfile ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                 <Link
                   to="/edit-profile"
                   className="bg-[#EFEFEF] hover:bg-[#DBDBDB] text-gray-900 text-sm font-semibold px-4 py-1.5 rounded-lg transition"
@@ -195,11 +212,20 @@ export function ProfilePage() {
                 </Link>
                 <Link
                   to="/edit-profile"
-                  className="p-2 text-gray-900 hover:text-gray-600 transition"
+                  className="p-1.5 text-gray-900 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
                   aria-label="Settings"
+                  title="Settings"
                 >
-                  <IoSettingsOutline className="text-2xl" />
+                  <IoSettingsOutline className="text-xl" />
                 </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold px-3.5 py-1.5 rounded-lg transition border border-red-200 cursor-pointer active:scale-95"
+                  title="Log out"
+                >
+                  <IoLogOutOutline className="text-lg" />
+                  <span>Log out</span>
+                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">

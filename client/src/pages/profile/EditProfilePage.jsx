@@ -4,10 +4,11 @@ import {
   deleteAccountAsync,
   updateProfileAsync,
   uploadProfilePicAsync,
+  logoutAsync,
   usersSelector,
 } from "../../redux/slices/usersSlice";
 import { motion } from "framer-motion";
-import { Camera, Check, ChevronLeft, Loader2, Upload, X } from "lucide-react";
+import { Camera, Check, ChevronLeft, Loader2, Upload, X, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Avatar from "../../components/common/Avatar";
 import { ALL_AVATARS, MALE_AVATARS, FEMALE_AVATARS, NEUTRAL_AVATARS } from "../../constants";
@@ -165,6 +166,15 @@ export function EditProfilePage() {
   const removeSelectedImage = () => {
     setProfilePic(null);
     setPreviewImage(signedUser?.profilePic || null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutAsync());
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   const handleDeleteProfile = async () => {
@@ -606,8 +616,17 @@ export function EditProfilePage() {
 
               <button
                 type="button"
+                onClick={handleLogout}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-lg text-sm transition flex justify-center items-center space-x-2 cursor-pointer"
+              >
+                <LogOut size={16} />
+                <span>Log Out</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleDeleteProfile}
-                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 px-4 rounded-lg text-sm transition border border-red-200"
+                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 px-4 rounded-lg text-sm transition border border-red-200 cursor-pointer"
               >
                 Delete Account
               </button>

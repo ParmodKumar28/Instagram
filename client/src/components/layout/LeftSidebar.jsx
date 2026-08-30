@@ -69,11 +69,23 @@ export function LeftSidebar() {
     }
   };
 
+  const handleLogoClick = (e) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const navItems = [
     {
       label: "Home",
       to: "/",
       active: currentPath === "/" && !showNotifications,
+      onLinkClick: () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
       outlineIcon: <GoHome className="text-[28px] text-black" />,
       filledIcon: <GoHomeFill className="text-[28px] text-black" />,
     },
@@ -176,7 +188,7 @@ export function LeftSidebar() {
       >
         {/* Top Logo */}
         <div className="h-16 flex items-center px-2 flex-shrink-0">
-          <Link to="/" className="flex items-center">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center">
             {isHovered ? (
               <div className="px-2 transition-opacity duration-300">
                 <InstagramLogo size="text-3xl" className="pb-0 pt-0" />
@@ -287,6 +299,7 @@ export function LeftSidebar() {
               <Link
                 key={item.label}
                 to={item.to}
+                onClick={item.onLinkClick}
                 className={`group flex items-center p-3.5 rounded-xl transition-all duration-150 text-black hover:bg-[#F2F2F2] ${
                   isHovered ? "justify-start space-x-4" : "justify-center"
                 } ${item.active ? "font-bold" : "font-normal"}`}

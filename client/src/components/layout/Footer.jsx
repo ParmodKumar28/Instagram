@@ -39,6 +39,9 @@ export function Footer() {
       label: "Home",
       to: "/",
       active: currentPath === "/",
+      onLinkClick: () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      },
       outlineIcon: <GoHome className="text-[26px] text-black" />,
       filledIcon: <GoHomeFill className="text-[26px] text-black" />,
     },
@@ -167,6 +170,7 @@ export function Footer() {
             <Link
               key={tab.label}
               to={tab.to}
+              onClick={tab.onLinkClick}
               className="flex items-center justify-center p-1.5 focus:outline-none"
               aria-label={tab.label}
             >

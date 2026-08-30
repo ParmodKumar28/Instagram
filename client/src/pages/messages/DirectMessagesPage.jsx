@@ -329,18 +329,31 @@ export function DirectMessagesPage() {
         }`}
       >
         {/* Left Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <div className="flex items-center space-x-1.5 cursor-pointer">
-            <h1 className="font-bold text-xl text-gray-900 truncate">
-              {signedUser?.username || "messages"}
-            </h1>
-            <IoChevronDown className="text-sm text-gray-600" />
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <div className="flex items-center space-x-2 min-w-0">
+            {/* Mobile Back Button to Home */}
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="md:hidden p-1 -ml-1 text-gray-900 hover:text-black cursor-pointer rounded-full hover:bg-gray-100 transition flex items-center justify-center flex-shrink-0"
+              aria-label="Back to Home"
+              title="Back to Home"
+            >
+              <IoChevronBack className="text-2xl" />
+            </button>
+
+            <div className="flex items-center space-x-1.5 cursor-pointer min-w-0">
+              <h1 className="font-bold text-xl text-gray-900 truncate">
+                {signedUser?.username || "messages"}
+              </h1>
+              <IoChevronDown className="text-sm text-gray-600 flex-shrink-0" />
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() => setShowNewChatModal(true)}
-            className="p-1.5 text-gray-900 hover:text-gray-600 rounded-full transition cursor-pointer"
+            className="p-1.5 text-gray-900 hover:text-gray-600 rounded-full transition cursor-pointer flex-shrink-0"
             title="New message"
             aria-label="New message"
           >

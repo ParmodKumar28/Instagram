@@ -316,12 +316,12 @@ export function QuickChatDrawer() {
   return (
     <>
       {/* ========================================================
-          COLLAPSED STATE: Sleek Floating Chip / Pill Widget
+          COLLAPSED STATE: Sleek Floating Chip / Pill Widget (Desktop Only)
          ======================================================== */}
       {!isExpanded && (
         <div
           onClick={() => setIsExpanded(true)}
-          className="fixed bottom-5 right-6 sm:right-8 z-40 bg-white/95 backdrop-blur-md border border-gray-200/90 hover:border-gray-400 shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)] rounded-full px-4 py-2.5 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none group active:scale-95"
+          className="hidden md:flex fixed bottom-5 right-6 sm:right-8 z-40 bg-white/95 backdrop-blur-md border border-gray-200/90 hover:border-gray-400 shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)] rounded-full px-4 py-2.5 items-center space-x-3 cursor-pointer transition-all duration-200 select-none group active:scale-95"
           title="Open Messages"
         >
           {/* Direct Paper Airplane Icon with optional red notification dot */}
@@ -357,10 +357,10 @@ export function QuickChatDrawer() {
       )}
 
       {/* ========================================================
-          EXPANDED STATE: Official Instagram Floating Messenger Dock
+          EXPANDED STATE: Official Instagram Floating Messenger Dock (Desktop Only)
          ======================================================== */}
       {isExpanded && (
-        <div className="fixed bottom-0 right-4 sm:right-10 z-40 w-[350px] sm:w-[380px] h-[520px] max-h-[82vh] bg-white rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.18)] border border-gray-300 flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 select-none">
+        <div className="hidden md:flex fixed bottom-0 right-4 sm:right-10 z-40 w-[350px] sm:w-[380px] h-[520px] max-h-[82vh] bg-white rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.18)] border border-gray-300 flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 select-none">
           {/* VIEW 1: Active Chat Inside Dock */}
           {selectedChat ? (
             <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
