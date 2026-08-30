@@ -26,12 +26,12 @@ export const toggleFollow = async (req, res, next) => {
     const response = await toggleSendRequestDb(req.user, following);
     if (!response) {
       return next(
-        new ErrorHandler(400, "Follow not added somtehing went wrong!")
+        new ErrorHandler(400, "Follow action failed, please try again!")
       );
     }
     return res.status(200).json({
       success: true,
-      msg: response,
+      ...(typeof response === "object" ? response : { msg: response }),
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

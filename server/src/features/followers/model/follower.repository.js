@@ -4,28 +4,103 @@ import { ErrorHandler } from "../../../utils/errorHandler.js";
 import UserModel from "../../user/model/user.schema.js";
 import FollowerModel from "./follower.schema.js";
 
-// Function to handle toggling of sending follow requests
+// Function to handle toggling of sending follow requests (follow / unfollow / cancel request)
 export const toggleSendRequestDb = async (user, following) => {
   try {
     if (following.toString() === user._id.toString()) {
       throw new ErrorHandler(400, "User cannot follow itself!");
     }
 
-    const followerUser = await UserModel.findById(following);
-    if (!followerUser) {
-      throw new ErrorHandler(400, "No user found by this id!");
+    const targetUser = await UserModel.findById(following);
+    if (!targetUser) {
+      throw new ErrorHandler(404, "No user found by this id!");
     }
 
-    // Check if the user is already followed
-    const isAlreadyFollowed = followerUser.followers.some(
+    const currentUser = await UserModel.findById(user._id);
+
+    // 1. Check existing relation in FollowerModel or arrays
+    const existingFollow = await FollowerModel.findOne({
+      follower: user._id,
+      following: following,
+    });
+
+    const isAcceptedInModel = existingFollow && existingFollow.status === "accepted";
+    const isPendingInModel = existingFollow && existingFollow.status === "pending";
+    const isInFollowersArray = targetUser.followers && targetUser.followers.some(
       (f) => f.toString() === user._id.toString()
     );
-    if (isAlreadyFollowed) {
-      throw new ErrorHandler(400, "You are already following this user!");
+
+    // If ALREADY FOLLOWING (accepted) -> UNFOLLOW
+    if (isAcceptedInModel || isInFollowersArray) {
+      await FollowerModel.deleteMany({
+        follower: user._id,
+        following: following,
+      });
+
+      targetUser.followers = (targetUser.followers || []).filter(
+        (f) => f.toString() !== user._id.toString()
+      );
+      if (currentUser) {
+        currentUser.following = (currentUser.following || []).filter(
+          (f) => f.toString() !== following.toString()
+        );
+        await currentUser.save();
+      }
+      targetUser.requests = (targetUser.requests || []).filter(
+        (r) => r.toString() !== user._id.toString()
+      );
+      await targetUser.save();
+
+      return {
+        status: "not-following",
+        isFollowing: false,
+        isPending: false,
+        msg: "Unfollowed successfully!",
+      };
     }
 
-    // If the user's account type is public, immediately follow
-    if (followerUser.accountType === "public") {
+    // If PENDING request exists -> CANCEL REQUEST
+    if (isPendingInModel || (targetUser.requests && targetUser.requests.some((r) => r.toString() === user._id.toString()))) {
+      await FollowerModel.deleteMany({
+        follower: user._id,
+        following: following,
+      });
+
+      targetUser.requests = (targetUser.requests || []).filter(
+        (r) => r.toString() !== user._id.toString()
+      );
+      await targetUser.save();
+
+      return {
+        status: "not-following",
+        isFollowing: false,
+        isPending: false,
+        msg: "Follow request cancelled!",
+      };
+    }
+
+    // Otherwise -> FOLLOW (or SEND REQUEST if private)
+    if (targetUser.accountType === "private") {
+      const sendRequest = new FollowerModel({
+        follower: user._id,
+        following: following,
+        status: "pending",
+      });
+      await sendRequest.save();
+
+      if (!targetUser.requests) targetUser.requests = [];
+      if (!targetUser.requests.some((r) => r.toString() === user._id.toString())) {
+        targetUser.requests.push(user._id);
+        await targetUser.save();
+      }
+
+      return {
+        status: "pending",
+        isFollowing: false,
+        isPending: true,
+        msg: "Follow request sent!",
+      };
+    } else {
       const sendRequest = new FollowerModel({
         follower: user._id,
         following: following,
@@ -33,52 +108,26 @@ export const toggleSendRequestDb = async (user, following) => {
       });
       await sendRequest.save();
 
-      if (!followerUser.followers.some((f) => f.toString() === user._id.toString())) {
-        followerUser.followers.push(user._id);
-        await followerUser.save();
+      if (!targetUser.followers) targetUser.followers = [];
+      if (!targetUser.followers.some((f) => f.toString() === user._id.toString())) {
+        targetUser.followers.push(user._id);
+        await targetUser.save();
       }
 
-      if (!user.following.some((f) => f.toString() === following.toString())) {
-        user.following.push(following);
-        await user.save();
-      }
-
-      return "Followed successfully!";
-    } else {
-      // If the user's account type is private, handle follow requests
-      const isPending = await FollowerModel.findOne({
-        follower: user._id,
-        following: following,
-        status: "pending",
-      });
-
-      if (isPending) {
-        // If a pending request already exists, cancel it
-        await FollowerModel.findOneAndDelete({
-          follower: user._id,
-          following: following,
-          status: "pending",
-        });
-        followerUser.requests = followerUser.requests.filter(
-          (reqId) => reqId.toString() !== user._id.toString()
-        );
-        await followerUser.save();
-        return "Request cancelled!";
-      } else {
-        // If no pending request exists, send a new request
-        const sendRequest = new FollowerModel({
-          follower: user._id,
-          following: following,
-          status: "pending",
-        });
-        await sendRequest.save();
-
-        if (!followerUser.requests.some((r) => r.toString() === user._id.toString())) {
-          followerUser.requests.push(user._id);
-          await followerUser.save();
+      if (currentUser) {
+        if (!currentUser.following) currentUser.following = [];
+        if (!currentUser.following.some((f) => f.toString() === following.toString())) {
+          currentUser.following.push(following);
+          await currentUser.save();
         }
-        return "Request sent!";
       }
+
+      return {
+        status: "accepted",
+        isFollowing: true,
+        isPending: false,
+        msg: "Followed successfully!",
+      };
     }
   } catch (error) {
     throw error;

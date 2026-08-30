@@ -8,7 +8,13 @@ export const toggleFollowAsync = createAsyncThunk(
     try {
       const response = await followerService.toggleFollow(followingId);
       if (response.status === 200) {
-        return { followingId, msg: response.data?.msg };
+        return {
+          followingId,
+          status: response.data?.status,
+          isFollowing: response.data?.isFollowing,
+          isPending: response.data?.isPending,
+          msg: response.data?.msg,
+        };
       }
     } catch (error) {
       toast.error(error.customMessage || "Failed to toggle follow status");
@@ -174,19 +180,34 @@ const followersSlice = createSlice({
       })
       .addCase(toggleFollowAsync.fulfilled, (state, action) => {
         state.loading = false;
-        const msg = action.payload?.msg || "";
-        if (msg.includes("Followed") || msg.includes("accepted")) {
-          state.followStatus = "accepted";
-          toast.success(msg);
-        } else if (msg.includes("Request sent")) {
-          state.followStatus = "pending";
-          toast.success("Follow request sent");
-        } else if (msg.includes("cancelled")) {
+        const { followingId, status, isFollowing, msg } = action.payload || {};
+        if (status) {
+          state.followStatus = status;
+        } else if (msg?.includes("Unfollowed") || msg?.includes("cancelled")) {
           state.followStatus = "not-following";
-          toast.success("Request cancelled");
-        } else {
-          toast.success(msg || "Updated");
+        } else if (msg?.includes("Followed") || msg?.includes("accepted")) {
+          state.followStatus = "accepted";
+        } else if (msg?.includes("sent") || msg?.includes("pending")) {
+          state.followStatus = "pending";
         }
+
+        // Keep local following array in sync
+        if (status === "accepted" || isFollowing === true) {
+          if (
+            followingId &&
+            !state.following.some(
+              (u) => (u.following?._id || u.following || u._id || "").toString() === followingId.toString()
+            )
+          ) {
+            state.following.push({ following: followingId, _id: followingId });
+          }
+        } else if (status === "not-following" || isFollowing === false) {
+          state.following = state.following.filter(
+            (u) => (u.following?._id || u.following || u._id || "").toString() !== followingId?.toString()
+          );
+        }
+
+        if (msg) toast.success(msg);
       })
       .addCase(toggleFollowAsync.rejected, (state, action) => {
         state.loading = false;

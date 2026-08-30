@@ -303,6 +303,7 @@ export function PostCard({ post, onPostDeleted }) {
       {showOptions && (
         <OptionsList
           isAuthor={isAuthor}
+          post={post}
           onDelete={handleDeletePost}
           onEdit={handleEditPost}
           onClose={() => setShowOptions(false)}

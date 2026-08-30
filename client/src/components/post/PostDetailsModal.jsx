@@ -313,16 +313,22 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
             </div>
 
             <div className="relative">
-              <button
-                onClick={() => setShowOptions(!showOptions)}
-                className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
-              >
-                <IoEllipsisHorizontal className="text-lg" />
-              </button>
-              {showOptions && isAuthor && (
-                <OptionsList onDelete={handleDeletePost} onEdit={() => {}} />
-              )}
-            </div>
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
+              aria-label="Post options"
+            >
+              <IoEllipsisHorizontal className="text-lg" />
+            </button>
+            {showOptions && (
+              <OptionsList
+                isAuthor={isAuthor}
+                post={currentPostData}
+                onDelete={handleDeletePost}
+                onClose={() => setShowOptions(false)}
+              />
+            )}
+          </div>
           </div>
 
           {/* Scrollable Caption & Comments Area */}
