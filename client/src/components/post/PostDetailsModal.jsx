@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -19,6 +19,7 @@ import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import Avatar from "../common/Avatar";
+import CommentList from "./CommentList";
 import EmojiDrawer from "../common/EmojiDrawer";
 import toast from "react-hot-toast";
 
@@ -40,11 +41,13 @@ function formatTimeAgo(dateString) {
 }
 
 export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) {
+  const commentInputRef = useRef(null);
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState([]);
   const [likeList, setLikeList] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [replyingTo, setReplyingTo] = useState(null); // { commentId, username }
   const [showHeart, setShowHeart] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -144,27 +147,75 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     setTimeout(() => setShowHeart(false), 900);
   };
 
+  const handleReply = ({ commentId, username }) => {
+    setReplyingTo({ commentId, username });
+    setCommentText(`@${username} `);
+    setTimeout(() => {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+    }, 50);
+  };
+
+  const handleCommentDeleted = (deletedCommentId, parentCommentId) => {
+    setComments((prevComments) => {
+      if (parentCommentId) {
+        return prevComments.map((c) => {
+          if (c._id === parentCommentId) {
+            return {
+              ...c,
+              replies: (c.replies || []).filter((r) => r._id !== deletedCommentId),
+            };
+          }
+          return c;
+        });
+      } else {
+        return prevComments
+          .filter((c) => c._id !== deletedCommentId)
+          .map((c) => ({
+            ...c,
+            replies: (c.replies || []).filter((r) => r._id !== deletedCommentId),
+          }));
+      }
+    });
+  };
+
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
+    const textToAdd = commentText;
+    const parentId = replyingTo?.commentId || null;
+
+    setCommentText("");
+    setReplyingTo(null);
+
     try {
-      const response = await commentService.addComment(post._id, commentText);
-      if (response.status === 201) {
-        fetchComments();
-        setCommentText("");
+      const response = await commentService.addComment(
+        post._id,
+        textToAdd,
+        parentId
+      );
+      if (response.status === 201 && response.data?.comment) {
+        const newComment = response.data.comment;
+        setComments((prevComments) => {
+          if (parentId) {
+            return prevComments.map((c) => {
+              if (c._id === parentId) {
+                const existingReplies = Array.isArray(c.replies) ? c.replies : [];
+                return {
+                  ...c,
+                  replies: [...existingReplies, newComment],
+                };
+              }
+              return c;
+            });
+          } else {
+            return [...prevComments, newComment];
+          }
+        });
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    try {
-      await commentService.deleteComment(commentId);
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
-      toast.success("Comment deleted");
-    } catch (error) {
-      console.error("Error deleting comment:", error);
-      toast.error("Failed to delete comment");
+      toast.error("Failed to post comment");
     }
   };
 
@@ -183,57 +234,60 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   const username = author.username || author.name || "user";
   const timeAgo = formatTimeAgo(currentPostData.createdAt);
 
+  const totalCommentsCount = comments.reduce(
+    (acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0),
+    0
+  );
+
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      {/* Top Right Close Button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 sm:p-6 backdrop-blur-xs animate-in fade-in duration-200" onClick={onClose}>
+      {/* Close button at top-right outside modal */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl z-50 focus:outline-none p-1"
+        className="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl z-50 p-2 focus:outline-none transition"
         aria-label="Close modal"
       >
         <IoClose />
       </button>
 
-      {/* Main Two-Column Modal Container */}
+      {/* Modal Container */}
       <div
-        className="bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row max-w-[1000px] w-full max-h-[90vh] md:h-[620px] shadow-2xl relative select-none"
+        className="bg-white rounded-xl overflow-hidden max-w-5xl w-full max-h-[90vh] flex flex-col md:flex-row shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Column: Media (Video or Image) */}
+        {/* Left Side: Media */}
         <div
-          className="flex-1 bg-black flex items-center justify-center relative overflow-hidden md:h-full cursor-pointer select-none min-h-[300px]"
+          className="md:w-3/5 bg-black flex items-center justify-center relative min-h-[300px] md:min-h-[500px] select-none cursor-pointer"
           onDoubleClick={handleDoubleTap}
         >
-          {currentPostData?.mediaType === "video" ||
-          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(currentPostData?.media || "") ||
-          (typeof currentPostData?.media === "string" && currentPostData.media.includes("/video/upload/")) ? (
+          {currentPostData.mediaType === "video" ||
+          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(currentPostData.media) ||
+          (typeof currentPostData.media === "string" && currentPostData.media.includes("/video/upload/")) ? (
             <InstagramVideoPlayer
               src={currentPostData.media}
+              className="w-full h-full max-h-[85vh] object-contain"
+              autoPlay={true}
               onDoubleTap={handleDoubleTap}
-              className="w-full h-full object-contain max-h-[620px] bg-black"
             />
           ) : (
             <img
-              src={currentPostData?.media}
-              alt={currentPostData?.caption || "Post media"}
-              className="w-full h-full object-contain max-h-[620px]"
+              src={currentPostData.media}
+              alt="Post"
+              className="w-full h-full max-h-[85vh] object-contain"
             />
           )}
 
-          {/* Double tap Heart popup */}
+          {/* Double tap heart animation overlay */}
           {showHeart && (
-            <div className="absolute top-1/2 left-1/2 pointer-events-none z-30">
-              <FaHeart className="text-white fill-white w-28 h-28 animate-heart-beat drop-shadow-[0_0_25px_rgba(0,0,0,0.6)]" />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <FaHeart className="text-white text-9xl drop-shadow-2xl animate-ping opacity-90 duration-300" />
             </div>
           )}
         </div>
 
-        {/* Right Column: Author, Comments & Actions */}
-        <div className="w-full md:w-[420px] flex flex-col justify-between bg-white border-l border-gray-100 h-full max-h-[620px]">
-          {/* Header */}
+        {/* Right Side: Header, Comments, Actions, Input */}
+        <div className="md:w-2/5 flex flex-col justify-between bg-white h-[450px] md:h-auto max-h-[85vh]">
+          {/* Post Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <div className="flex items-center space-x-3">
               <Link
@@ -275,7 +329,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
           <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm text-gray-900 scrollbar-none">
             {/* Caption Item */}
             {currentPostData?.caption && (
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-3 pb-3 border-b border-gray-50">
                 <Link
                   to={`/profile/${author._id || ""}`}
                   onClick={onClose}
@@ -306,61 +360,12 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
             )}
 
             {/* Comments List */}
-            {commentsLoading ? (
-              <div className="py-6 text-center text-xs text-gray-400">Loading comments...</div>
-            ) : comments.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-xs">
-                No comments yet. Start the conversation!
-              </div>
-            ) : (
-              comments.map((comment) => {
-                const commentUser = comment.user || {};
-                const commentUsername = commentUser.username || commentUser.name || "user";
-                const isCommentAuthor = currentUserId && (commentUser._id === currentUserId || commentUser === currentUserId);
-                const canDelete = isCommentAuthor || isAuthor;
-
-                return (
-                  <div key={comment._id} className="flex items-start space-x-3 group">
-                    <Link
-                      to={`/profile/${commentUser._id || ""}`}
-                      onClick={onClose}
-                      className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
-                    >
-                      <Avatar
-                        src={commentUser.profilePic}
-                        alt={commentUsername}
-                        gender={commentUser.gender}
-                        username={commentUsername}
-                        className="w-full h-full object-cover"
-                      />
-                    </Link>
-                    <div className="flex-1 leading-snug">
-                      <p>
-                        <Link
-                          to={`/profile/${commentUser._id || ""}`}
-                          onClick={onClose}
-                          className="font-semibold mr-1.5 hover:underline"
-                        >
-                          {commentUsername}
-                        </Link>
-                        <span className="text-gray-900">{comment.content || comment.comment}</span>
-                      </p>
-                      <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
-                        <span>{formatTimeAgo(comment.createdAt)}</span>
-                        {canDelete && (
-                          <button
-                            onClick={() => handleDeleteComment(comment._id)}
-                            className="hover:text-red-500 font-medium transition opacity-0 group-hover:opacity-100"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            <CommentList
+              comments={comments}
+              commentsLoading={commentsLoading}
+              onReply={handleReply}
+              onCommentDeleted={handleCommentDeleted}
+            />
           </div>
 
           {/* Bottom Actions & Input */}
@@ -380,9 +385,14 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                   )}
                 </button>
 
-                <button className="text-gray-900 hover:text-gray-500 transition">
+                <div className="flex items-center space-x-1.5 text-gray-900">
                   <IoChatbubbleOutline className="text-[24px]" />
-                </button>
+                  {totalCommentsCount > 0 && (
+                    <span className="text-[13px] font-semibold text-gray-900">
+                      {totalCommentsCount}
+                    </span>
+                  )}
+                </div>
 
                 <button className="text-gray-900 hover:text-gray-500 transition">
                   <IoPaperPlaneOutline className="text-[24px]" />
@@ -413,14 +423,32 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
               )}
             </div>
 
+            {/* Replying banner */}
+            {replyingTo && (
+              <div className="flex items-center justify-between text-xs bg-blue-50/80 border-t border-blue-100 px-4 py-1.5 text-gray-700">
+                <span className="truncate">
+                  Replying to <span className="font-semibold text-[#0095F6]">@{replyingTo.username}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCancelReply}
+                  className="text-gray-400 hover:text-gray-700 p-0.5 transition"
+                  aria-label="Cancel reply"
+                >
+                  <IoClose className="text-base" />
+                </button>
+              </div>
+            )}
+
             {/* Inline Add Comment Input */}
             <div className="relative flex items-center justify-between px-4 py-2.5 border-t border-gray-100">
               <input
+                ref={commentInputRef}
                 type="text"
                 className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none py-1 mr-2"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
+                placeholder={replyingTo ? `Reply to @${replyingTo.username}...` : "Add a comment..."}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAddComment();
                 }}

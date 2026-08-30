@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import {
   IoHeartOutline,
@@ -8,6 +8,7 @@ import {
   IoBookmarkOutline,
   IoBookmarkSharp,
   IoEllipsisHorizontal,
+  IoClose,
 } from "react-icons/io5";
 import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -46,8 +47,10 @@ function formatTimeAgo(dateString) {
 }
 
 export function PostCard({ post, onPostDeleted }) {
+  const commentInputRef = useRef(null);
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null); // { commentId, username }
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [likeList, setLikeList] = useState([]);
@@ -113,16 +116,82 @@ export function PostCard({ post, onPostDeleted }) {
     }
   }, [likeList, currentUserId]);
 
+  const handleReply = ({ commentId, username }) => {
+    setReplyingTo({ commentId, username });
+    setCommentText(`@${username} `);
+    setShowComments(true);
+    setTimeout(() => {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+    }, 50);
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+    setCommentText("");
+  };
+
+  const handleCommentDeleted = (deletedCommentId, parentCommentId) => {
+    setComments((prevComments) => {
+      if (parentCommentId) {
+        return prevComments.map((c) => {
+          if (c._id === parentCommentId) {
+            return {
+              ...c,
+              replies: (c.replies || []).filter((r) => r._id !== deletedCommentId),
+            };
+          }
+          return c;
+        });
+      } else {
+        return prevComments
+          .filter((c) => c._id !== deletedCommentId)
+          .map((c) => ({
+            ...c,
+            replies: (c.replies || []).filter((r) => r._id !== deletedCommentId),
+          }));
+      }
+    });
+  };
+
   const handleAddComment = async () => {
     if (!commentText.trim()) return;
+    const textToAdd = commentText;
+    const parentId = replyingTo?.commentId || null;
+
+    setCommentText("");
+    setReplyingTo(null);
+    setShowComments(true);
+
     try {
-      const response = await commentService.addComment(post._id, commentText);
-      if (response.status === 201) {
-        getComments();
-        setCommentText("");
+      const response = await commentService.addComment(
+        post._id,
+        textToAdd,
+        parentId
+      );
+      if (response.status === 201 && response.data?.comment) {
+        const newComment = response.data.comment;
+        setComments((prevComments) => {
+          if (parentId) {
+            return prevComments.map((c) => {
+              if (c._id === parentId) {
+                const existingReplies = Array.isArray(c.replies) ? c.replies : [];
+                return {
+                  ...c,
+                  replies: [...existingReplies, newComment],
+                };
+              }
+              return c;
+            });
+          } else {
+            return [...prevComments, newComment];
+          }
+        });
       }
     } catch (error) {
       console.error("Error adding comment:", error);
+      toast.error("Failed to post comment");
     }
   };
 
@@ -183,6 +252,11 @@ export function PostCard({ post, onPostDeleted }) {
   const username = post?.user?.username || post?.user?.name || "user";
   const timeAgo = formatTimeAgo(post?.createdAt);
 
+  const totalCommentsCount = comments.reduce(
+    (acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0),
+    0
+  );
+
   return (
     <article className="w-full max-w-[480px] mx-auto bg-white border border-gray-200 rounded-2xl mb-8 select-none shadow-sm overflow-hidden">
       {/* Header with comfortable side padding */}
@@ -201,61 +275,69 @@ export function PostCard({ post, onPostDeleted }) {
             />
           </Link>
 
-          <div className="flex items-center space-x-1.5 leading-tight">
+          <div className="flex items-center space-x-2">
             <Link
               to={`/profile/${post?.user?._id || ""}`}
-              className="text-[13px] font-semibold text-gray-900 hover:opacity-75 transition"
+              className="font-semibold text-xs text-gray-900 hover:underline"
             >
               {username}
             </Link>
             {timeAgo && (
-              <span className="text-gray-400 text-xs">· {timeAgo}</span>
+              <>
+                <span className="text-gray-400 text-xs">•</span>
+                <span className="text-gray-500 text-xs">{timeAgo}</span>
+              </>
             )}
           </div>
         </div>
 
-        <div className="relative">
-          <button
-            onClick={() => setShowOptions(!showOptions)}
-            className="text-gray-700 hover:text-black p-1.5 rounded-full hover:bg-gray-50 transition"
-            aria-label="Post options"
-          >
-            <IoEllipsisHorizontal className="text-lg" />
-          </button>
-          {showOptions && isAuthor && (
-            <OptionsList onDelete={handleDeletePost} onEdit={handleEditPost} />
-          )}
-        </div>
+        <button
+          onClick={() => setShowOptions(!showOptions)}
+          className="text-gray-500 hover:text-gray-800 p-1"
+          aria-label="Options"
+        >
+          <IoEllipsisHorizontal className="text-lg" />
+        </button>
       </div>
 
-      {/* Media (Video or Image) */}
-      {post?.media && (
-        <div className="relative select-none bg-black flex items-center justify-center min-h-[340px] max-h-[620px] overflow-hidden cursor-pointer">
-          {post?.mediaType === "video" ||
-          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(post.media) ||
-          (typeof post.media === "string" && post.media.includes("/video/upload/")) ? (
-            <InstagramVideoPlayer
-              src={post.media}
-              onDoubleTap={handleDoubleTap}
-            />
-          ) : (
-            <img
-              className="w-full object-cover max-h-[620px]"
-              src={post.media}
-              alt="Post media"
-              onDoubleClick={handleDoubleTap}
-              onTouchEnd={handleImageTap}
-            />
-          )}
-
-          {/* Double tap heart animation */}
-          {showHeart && (
-            <div className="absolute top-1/2 left-1/2 pointer-events-none z-30">
-              <FaHeart className="text-white fill-white w-28 h-28 animate-heart-beat drop-shadow-[0_0_25px_rgba(0,0,0,0.6)]" />
-            </div>
-          )}
-        </div>
+      {showOptions && (
+        <OptionsList
+          isAuthor={isAuthor}
+          onDelete={handleDeletePost}
+          onEdit={handleEditPost}
+          onClose={() => setShowOptions(false)}
+        />
       )}
+
+      {/* Media (Video or Image) */}
+      <div
+        className="relative aspect-square w-full bg-black overflow-hidden flex items-center justify-center cursor-pointer"
+        onClick={handleImageTap}
+      >
+        {post?.mediaType === "video" ||
+        /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(post.media) ||
+        (typeof post.media === "string" && post.media.includes("/video/upload/")) ? (
+          <InstagramVideoPlayer
+            src={post.media}
+            className="w-full h-full"
+            autoPlay={false}
+            onDoubleTap={handleDoubleTap}
+          />
+        ) : (
+          <img
+            className="w-full h-full object-cover"
+            src={post.media}
+            alt="Post media"
+          />
+        )}
+
+        {/* Double tap heart animation */}
+        {showHeart && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <FaHeart className="text-white text-8xl drop-shadow-2xl animate-ping opacity-90 duration-300" />
+          </div>
+        )}
+      </div>
 
       {/* Actions Bar with left/right padding */}
       <div className="flex justify-between items-center px-4 pt-3 pb-1">
@@ -279,10 +361,15 @@ export function PostCard({ post, onPostDeleted }) {
 
           <button
             onClick={() => setShowComments(!showComments)}
-            className="flex items-center text-gray-900 hover:text-gray-500 focus:outline-none transition"
+            className="flex items-center space-x-1.5 text-gray-900 hover:text-gray-500 focus:outline-none transition"
             aria-label="Comments"
           >
             <IoChatbubbleOutline className="text-[25px]" />
+            {totalCommentsCount > 0 && (
+              <span className="text-[13px] font-semibold text-gray-900">
+                {totalCommentsCount}
+              </span>
+            )}
           </button>
 
           <button
@@ -348,35 +435,53 @@ export function PostCard({ post, onPostDeleted }) {
         )}
 
         {/* View all comments link */}
-        {comments.length > 0 && !showComments && (
+        {totalCommentsCount > 0 && !showComments && (
           <button
             onClick={() => setShowComments(true)}
             className="text-xs text-gray-400 font-medium hover:text-gray-600 transition block pt-0.5"
           >
-            View all {comments.length} comment{comments.length > 1 ? "s" : ""}
+            View all {totalCommentsCount} comment{totalCommentsCount > 1 ? "s" : ""}
           </button>
         )}
 
         {/* Comments drawer */}
         {showComments && (
-          <div className="mt-3 pt-3 border-t border-gray-100 max-h-48 overflow-y-auto space-y-2">
+          <div className="mt-3 pt-3 border-t border-gray-100 max-h-60 overflow-y-auto space-y-2">
             {commentsLoading ? (
               <p className="text-xs text-gray-400 text-center py-2">Loading comments...</p>
             ) : (
               <CommentList
                 comments={comments}
-                postId={post._id}
-                onCommentDeleted={getComments}
+                onReply={handleReply}
+                onCommentDeleted={handleCommentDeleted}
               />
             )}
+          </div>
+        )}
+
+        {/* Replying banner */}
+        {replyingTo && (
+          <div className="flex items-center justify-between text-xs bg-blue-50/80 border border-blue-100 px-3 py-1.5 rounded-lg text-gray-700 animate-in fade-in duration-150">
+            <span className="truncate">
+              Replying to <span className="font-semibold text-[#0095F6]">@{replyingTo.username}</span>
+            </span>
+            <button
+              type="button"
+              onClick={handleCancelReply}
+              className="text-gray-400 hover:text-gray-700 p-0.5 transition"
+              aria-label="Cancel reply"
+            >
+              <IoClose className="text-base" />
+            </button>
           </div>
         )}
 
         {/* Add comment input */}
         <div className="relative pt-2 flex items-center justify-between border-t border-gray-100">
           <input
+            ref={commentInputRef}
             type="text"
-            placeholder="Add a comment..."
+            placeholder={replyingTo ? `Reply to @${replyingTo.username}...` : "Add a comment..."}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => {
