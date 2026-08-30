@@ -6,6 +6,7 @@ import {
   deleteAccount,
   forgotPasswordOtp,
   getSuggestedUsers,
+  searchUsers,
   logout,
   resetPassword,
   signIn,
@@ -30,6 +31,9 @@ userRouter.post("/signin", signIn);
 
 // Logout user
 userRouter.get("/logout", auth, logout);
+
+// Search users
+userRouter.get("/search", auth, searchUsers);
 
 // Updating user
 userRouter.put("/update-profile", auth, updateUserProfile);

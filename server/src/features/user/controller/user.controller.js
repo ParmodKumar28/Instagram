@@ -10,6 +10,7 @@ import {
   findUserForPasswordResetDb,
   getSuggestedUsersDb,
   getUserDataDb,
+  searchUsersDb,
   signupDb,
   updateUserDb,
   userByEmailDb,
@@ -310,6 +311,21 @@ export const getSuggestedUsers = async (req, res, next) => {
   try {
     const currentUserId = req.userId || req.user?._id;
     const users = await getSuggestedUsersDb(currentUserId, 5);
+    return res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error.message));
+  }
+};
+
+// Search users by query
+export const searchUsers = async (req, res, next) => {
+  try {
+    const query = req.query.q || "";
+    const currentUserId = req.userId || req.user?._id;
+    const users = await searchUsersDb(query, currentUserId);
     return res.status(200).json({
       success: true,
       users,

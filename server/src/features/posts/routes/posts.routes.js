@@ -8,6 +8,7 @@ import {
   deletePost,
   getAllPosts,
   getPost,
+  getTaggedPosts,
   getUserPosts,
   updatePost,
   toggleSavePost,
@@ -33,6 +34,9 @@ postsRouter.post("/save/:postId", auth, toggleSavePost);
 
 // Get saved posts
 postsRouter.get("/saved/all", auth, getSavedPosts);
+
+// Getting tagged posts
+postsRouter.get("/tagged-posts/:userId", auth, getTaggedPosts);
 
 // Getting user posts
 postsRouter.get("/user-posts/:userId", auth, getUserPosts);

@@ -13,6 +13,7 @@ export const userService = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getSuggestedUsers: () => apiClient.get("/user/suggested-users"),
+  searchUsers: (query) => apiClient.get("/user/search", { params: { q: query } }),
   deleteAccount: () => apiClient.delete("/user/delete-account"),
 };
 

@@ -63,23 +63,22 @@ export const updatePostDb = async (postId, user, postData) => {
 export const getPostDb = async (postId) => {
   try {
     return await PostModel.findById(postId)
-      .populate("user", "name username profilePic")
+      .populate("user", "name username profilePic gender")
       .populate({
         path: "tags",
-        select: "name username profilePic",
-        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+        select: "name username profilePic gender",
+        model: "User",
       })
       .populate({
         path: "likes",
         select: "user",
-        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
       })
       .populate({
         path: "comments",
-        select: "user content likes",
+        select: "user content likes replies",
         populate: {
-          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
-          select: "name username profilePic",
+          path: "user",
+          select: "name username profilePic gender",
           model: "User",
         },
       });
@@ -92,23 +91,52 @@ export const getPostDb = async (postId) => {
 export const getUserPostsDb = async (user) => {
   try {
     return await PostModel.find({ user: user })
-      .populate("user", "name username profilePic")
+      .sort({ createdAt: -1 })
+      .populate("user", "name username profilePic gender")
       .populate({
         path: "tags",
-        select: "name username profilePic",
-        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+        select: "name username profilePic gender",
+        model: "User",
       })
       .populate({
         path: "likes",
         select: "user",
-        model: "User", // Specify the model if 'likes' is referencing documents from the 'User' collection
       })
       .populate({
         path: "comments",
-        select: "user content likes",
+        select: "user content likes replies",
         populate: {
-          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
-          select: "name username profilePic",
+          path: "user",
+          select: "name username profilePic gender",
+          model: "User",
+        },
+      });
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Getting tagged posts for a user
+export const getTaggedPostsDb = async (userId) => {
+  try {
+    return await PostModel.find({ tags: userId })
+      .sort({ createdAt: -1 })
+      .populate("user", "name username profilePic gender")
+      .populate({
+        path: "tags",
+        select: "name username profilePic gender",
+        model: "User",
+      })
+      .populate({
+        path: "likes",
+        select: "user",
+      })
+      .populate({
+        path: "comments",
+        select: "user content likes replies",
+        populate: {
+          path: "user",
+          select: "name username profilePic gender",
           model: "User",
         },
       });
@@ -121,28 +149,28 @@ export const getUserPostsDb = async (user) => {
 export const getAllPostsDb = async () => {
   try {
     return await PostModel.find({})
-      .sort({ createdAt: -1 }) // Sort in descending order to get latest posts first
-      .populate("user", "name username profilePic")
+      .sort({ createdAt: -1 })
+      .populate("user", "name username profilePic gender")
       .populate({
         path: "tags",
-        select: "name username profilePic",
-        model: "User", // Specify the model if 'tags' is referencing documents from the 'User' collection
+        select: "name username profilePic gender",
+        model: "User",
       })
       .populate({
         path: "likes",
         select: "user",
         populate: {
           path: "user",
-          select: "name username profilePic",
+          select: "name username profilePic gender",
           model: "User",
         },
       })
       .populate({
         path: "comments",
-        select: "user content likes",
+        select: "user content likes replies",
         populate: {
-          path: "user", // If 'comments' is an array of subdocuments with a 'user' field
-          select: "name username profilePic",
+          path: "user",
+          select: "name username profilePic gender",
           model: "User",
         },
       });

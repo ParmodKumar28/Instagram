@@ -9,6 +9,7 @@ import {
   IoBookmarkSharp,
   IoEllipsisHorizontal,
   IoClose,
+  IoPersonCircle,
 } from "react-icons/io5";
 import { FaHeart } from "react-icons/fa";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -43,6 +44,7 @@ export function PostCard({ post, onPostDeleted }) {
   const [isLiked, setIsLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showTags, setShowTags] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCaption, setEditedCaption] = useState(post?.caption || "");
   const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
@@ -343,8 +345,45 @@ export function PostCard({ post, onPostDeleted }) {
 
         {/* Double tap heart animation */}
         {showHeart && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <FaHeart className="text-white text-8xl drop-shadow-2xl animate-ping opacity-90 duration-300" />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+            <FaHeart className="text-[#FF3040] text-9xl drop-shadow-[0_0_35px_rgba(255,48,64,0.75)] animate-insta-heart-pop" />
+          </div>
+        )}
+
+        {/* Tagged users overlay button & pills */}
+        {post?.tags && post.tags.length > 0 && (
+          <div className="absolute bottom-3 left-3 z-20">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowTags((prev) => !prev);
+              }}
+              className="bg-black/70 hover:bg-black text-white p-1.5 rounded-full backdrop-blur-xs transition shadow-md cursor-pointer"
+              aria-label="View tagged users"
+            >
+              <IoPersonCircle className="text-xl" />
+            </button>
+
+            {/* Tag Pills Overlay */}
+            {showTags && (
+              <div className="flex flex-wrap gap-1.5 mt-2 max-w-xs animate-in fade-in zoom-in-95 duration-150">
+                {post.tags.map((tagUser) => {
+                  const tagId = tagUser?._id || tagUser;
+                  const tagUsername = tagUser?.username || tagUser?.name || "user";
+                  return (
+                    <Link
+                      key={tagId}
+                      to={`/profile/${tagId}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center space-x-1.5 bg-black/85 text-white text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-md hover:bg-black transition shadow-lg"
+                    >
+                      <span>@{tagUsername}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import {
   deletePostDb,
   getAllPostsDb,
   getPostDb,
+  getTaggedPostsDb,
   getUserPostsDb,
   updatePostDb,
   toggleSavePostDb,
@@ -28,6 +29,20 @@ export const createPost = async (req, res, next) => {
 
     // Assign the user ID to the post data
     postData.user = req.user._id;
+
+    // Parse tags if sent as JSON string or comma-separated
+    if (postData.tags) {
+      if (typeof postData.tags === "string") {
+        try {
+          postData.tags = JSON.parse(postData.tags);
+        } catch {
+          postData.tags = postData.tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+        }
+      }
+    }
 
     // If a file is uploaded, upload via uploadMedia (Cloudinary or Localhost based on config)
     if (req.file) {
@@ -91,6 +106,20 @@ export const updatePost = async (req, res, next) => {
     if (Object.keys(postData).length === 0) {
       return next(new ErrorHandler(400, "Provide fields you want to update!"));
     }
+
+    if (postData.tags) {
+      if (typeof postData.tags === "string") {
+        try {
+          postData.tags = JSON.parse(postData.tags);
+        } catch {
+          postData.tags = postData.tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+        }
+      }
+    }
+
     const updatedPost = await updatePostDb(postId, req.user._id, postData);
     if (!updatedPost) {
       return next(
@@ -120,7 +149,7 @@ export const getPost = async (req, res, next) => {
     }
     return res.status(200).json({
       success: true,
-      msg: "Post found successfully!",
+      msg: "Post found by id!",
       post: post,
     });
   } catch (error) {
@@ -133,12 +162,12 @@ export const getUserPosts = async (req, res, next) => {
   try {
     const userId = req.params.userId;
     if (!userId) {
-      return next(new ErrorHandler(400, "Enter user id please!"));
+      return next(new ErrorHandler(400, "Enter userId in the params!"));
     }
     const posts = await getUserPostsDb(userId);
     return res.status(200).json({
       success: true,
-      msg: "Post's found successfully!",
+      msg: "Posts found successfully!",
       posts: posts || [],
     });
   } catch (error) {
@@ -146,18 +175,32 @@ export const getUserPosts = async (req, res, next) => {
   }
 };
 
-// Getting all posts
+// Getting tagged posts for a user
+export const getTaggedPosts = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      return next(new ErrorHandler(400, "Enter userId in the params!"));
+    }
+    const posts = await getTaggedPostsDb(userId);
+    return res.status(200).json({
+      success: true,
+      msg: "Tagged posts found successfully!",
+      posts: posts || [],
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
+};
+
+// Getting all posts from the db
 export const getAllPosts = async (req, res, next) => {
   try {
     const posts = await getAllPostsDb();
-    if (posts.length === 0) {
-      return next(new ErrorHandler(400, "No post's found!"));
-      ss;
-    }
     return res.status(200).json({
       success: true,
-      msg: "Post's found successfully!",
-      posts: posts,
+      msg: "Posts found successfully!",
+      posts: posts || [],
     });
   } catch (error) {
     return next(new ErrorHandler(400, error));

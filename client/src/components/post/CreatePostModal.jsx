@@ -1,12 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { IoClose, IoArrowBack } from "react-icons/io5";
+import { IoClose, IoArrowBack, IoPersonOutline } from "react-icons/io5";
 import { BsImages, BsEmojiSmile } from "react-icons/bs";
 import { CiLocationOn } from "react-icons/ci";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { createPostAsync, fetchPostsAsync, fetchUserPostsAsync, postsSelector } from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
+import { userService } from "../../services";
 import Avatar from "../common/Avatar";
 import EmojiDrawer from "../common/EmojiDrawer";
 
@@ -21,9 +22,40 @@ export function CreatePostModal({ isOpen, onClose }) {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
+  const [taggedUsers, setTaggedUsers] = useState([]); // [{ _id, username, name, profilePic, gender }]
+  const [tagQuery, setTagQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchingTags, setIsSearchingTags] = useState(false);
+  const [showTagInput, setShowTagInput] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  useEffect(() => {
+    if (!tagQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingTags(true);
+      try {
+        const res = await userService.searchUsers(tagQuery);
+        if (res.data?.users) {
+          const filtered = res.data.users.filter(
+            (u) =>
+              u._id !== signedUser?._id &&
+              !taggedUsers.some((tagged) => tagged._id === u._id)
+          );
+          setSearchResults(filtered);
+        }
+      } catch (err) {
+        console.error("Failed to search users for tags:", err);
+      } finally {
+        setIsSearchingTags(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [tagQuery, signedUser?._id, taggedUsers]);
 
   if (!isOpen) return null;
 
@@ -33,12 +65,16 @@ export function CreatePostModal({ isOpen, onClose }) {
     setMediaPreview(null);
     setCaption("");
     setLocation("");
+    setTaggedUsers([]);
+    setTagQuery("");
+    setSearchResults([]);
+    setShowTagInput(false);
     setIsDragOver(false);
     setShowDiscardConfirm(false);
   };
 
   const handleClose = () => {
-    if (mediaFile || caption.trim()) {
+    if (mediaFile || caption.trim() || taggedUsers.length > 0) {
       setShowDiscardConfirm(true);
     } else {
       resetState();
@@ -69,6 +105,18 @@ export function CreatePostModal({ isOpen, onClose }) {
     }
   };
 
+  const handleAddTag = (user) => {
+    if (!taggedUsers.some((u) => u._id === user._id)) {
+      setTaggedUsers((prev) => [...prev, user]);
+    }
+    setTagQuery("");
+    setSearchResults([]);
+  };
+
+  const handleRemoveTag = (userId) => {
+    setTaggedUsers((prev) => prev.filter((u) => u._id !== userId));
+  };
+
   const handleSubmit = async () => {
     if (!mediaFile && !caption.trim() && !location.trim()) {
       return toast.error("Please add media or caption to create a post.");
@@ -77,6 +125,12 @@ export function CreatePostModal({ isOpen, onClose }) {
     const formData = new FormData();
     formData.append("caption", caption);
     formData.append("location", location);
+    if (taggedUsers.length > 0) {
+      formData.append(
+        "tags",
+        JSON.stringify(taggedUsers.map((u) => u._id))
+      );
+    }
     if (mediaFile) {
       formData.append("media", mediaFile);
     }
@@ -272,6 +326,108 @@ export function CreatePostModal({ isOpen, onClose }) {
                     className="text-sm text-gray-900 placeholder-gray-400 focus:outline-none w-full mr-2"
                   />
                   <CiLocationOn className="text-gray-400 text-xl flex-shrink-0" />
+                </div>
+
+                {/* Tag People */}
+                <div className="px-4 py-3 border-b border-gray-100 relative">
+                  <div
+                    className="flex items-center justify-between cursor-pointer select-none"
+                    onClick={() => setShowTagInput((prev) => !prev)}
+                  >
+                    <span className="text-sm text-gray-900">
+                      Tag People {taggedUsers.length > 0 && `(${taggedUsers.length})`}
+                    </span>
+                    <IoPersonOutline className="text-gray-400 text-lg flex-shrink-0" />
+                  </div>
+
+                  {/* Tagged users chips */}
+                  {taggedUsers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {taggedUsers.map((user) => (
+                        <span
+                          key={user._id}
+                          className="inline-flex items-center space-x-1.5 bg-gray-100 text-gray-900 text-xs px-2.5 py-1 rounded-full border border-gray-200"
+                        >
+                          <Avatar
+                            src={user.profilePic}
+                            alt={user.username}
+                            gender={user.gender}
+                            username={user.username}
+                            className="w-4 h-4 rounded-full object-cover"
+                          />
+                          <span className="font-medium">@{user.username}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveTag(user._id);
+                            }}
+                            className="text-gray-400 hover:text-gray-700 ml-0.5"
+                          >
+                            <IoClose className="text-xs" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Search Tagged Users Input & Dropdown */}
+                  {showTagInput && (
+                    <div className="mt-2.5 space-y-1 relative">
+                      <input
+                        type="text"
+                        value={tagQuery}
+                        onChange={(e) => setTagQuery(e.target.value)}
+                        placeholder="Search by username..."
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#0095F6]"
+                        autoFocus
+                      />
+
+                      {isSearchingTags && (
+                        <div className="py-2 text-center text-xs text-gray-400">
+                          Searching...
+                        </div>
+                      )}
+
+                      {searchResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 max-h-48 overflow-y-auto divide-y divide-gray-50">
+                          {searchResults.map((user) => (
+                            <div
+                              key={user._id}
+                              onClick={() => handleAddTag(user)}
+                              className="flex items-center space-x-2.5 p-2 hover:bg-gray-50 cursor-pointer transition"
+                            >
+                              <Avatar
+                                src={user.profilePic}
+                                alt={user.username}
+                                gender={user.gender}
+                                username={user.username}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-semibold text-gray-900 truncate">
+                                  {user.username}
+                                </span>
+                                {user.name && (
+                                  <span className="text-[11px] text-gray-500 truncate">
+                                    {user.name}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {tagQuery.trim() &&
+                        !isSearchingTags &&
+                        searchResults.length === 0 && (
+                          <div className="py-2 text-center text-xs text-gray-400">
+                            No users found
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </div>
 

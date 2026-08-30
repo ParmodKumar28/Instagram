@@ -8,6 +8,7 @@ export const postService = {
   getAllPosts: () => apiClient.get("/post/all-posts"),
   getPostById: (postId) => apiClient.get(`/post/${postId}`),
   getUserPosts: (userId) => apiClient.get(`/post/user-posts/${userId}`),
+  getTaggedPosts: (userId) => apiClient.get(`/post/tagged-posts/${userId}`),
   updatePost: (postId, postData) =>
     apiClient.put(`/post/update-post/${postId}`, postData),
   deletePost: (postId) => apiClient.delete(`/post/delete-post/${postId}`),

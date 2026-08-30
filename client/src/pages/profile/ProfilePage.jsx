@@ -20,10 +20,12 @@ import {
   toggleFollowAsync,
   unfollowUserAsync,
 } from "../../redux/slices/followersSlice";
-import { IoSettingsOutline, IoLockClosedOutline, IoLinkOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoLockClosedOutline, IoLinkOutline, IoPersonCircleOutline } from "react-icons/io5";
 import { BsGrid3X3, BsBookmark, BsPersonSquare } from "react-icons/bs";
+import { Loader2 } from "lucide-react";
 import ProfileSkeleton from "../../components/common/skeletons/ProfileSkeleton";
 import Avatar from "../../components/common/Avatar";
+import { postService } from "../../services";
 
 export function ProfilePage() {
   const dispatch = useDispatch();
@@ -33,20 +35,19 @@ export function ProfilePage() {
   const { following, followStatus } = useSelector(followersSelector);
   const [activeTab, setActiveTab] = useState("posts");
   const [isProfilePicZoomed, setIsProfilePicZoomed] = useState(false);
+  const [taggedPosts, setTaggedPosts] = useState([]);
+  const [taggedLoading, setTaggedLoading] = useState(false);
 
-  const isOwnProfile = !userId || currentUserId === userId;
+  const isOwnProfile = !userId || userId === currentUserId;
   const user = isOwnProfile ? signedUser : profileUser;
 
   useEffect(() => {
     if (userId) {
-      dispatch(clearUserPosts());
       dispatch(clearProfileUser());
+      dispatch(clearUserPosts());
       dispatch(userDataAsync({ userId }));
       dispatch(fetchUserPostsAsync(userId));
-      if (currentUserId) {
-        dispatch(getFollowingAsync(currentUserId));
-        dispatch(getFollowStatusAsync(userId));
-      }
+      dispatch(getFollowStatusAsync(userId));
     }
   }, [dispatch, userId, currentUserId]);
 
@@ -55,6 +56,25 @@ export function ProfilePage() {
       dispatch(fetchSavedPostsAsync());
     }
   }, [dispatch, activeTab, isOwnProfile]);
+
+  useEffect(() => {
+    const targetId = userId || currentUserId;
+    if (activeTab === "tagged" && targetId) {
+      setTaggedLoading(true);
+      postService
+        .getTaggedPosts(targetId)
+        .then((res) => {
+          setTaggedPosts(res.data?.posts || []);
+        })
+        .catch((err) => {
+          console.error("Error fetching tagged posts:", err);
+          setTaggedPosts([]);
+        })
+        .finally(() => {
+          setTaggedLoading(false);
+        });
+    }
+  }, [activeTab, userId, currentUserId]);
   
   const isFollowed =
     followStatus === "accepted" ||
@@ -341,14 +361,24 @@ export function ProfilePage() {
               )
             )}
 
-            {activeTab === "tagged" && (
-              <div className="text-center py-16 bg-white border border-gray-100 rounded-xl">
-                <p className="text-sm font-semibold text-gray-800">Photos of you</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  When people tag you in photos, they&apos;ll appear here.
-                </p>
-              </div>
-            )}
+            {activeTab === "tagged" &&
+              (taggedLoading ? (
+                <div className="py-20 flex justify-center items-center">
+                  <Loader2 className="w-7 h-7 animate-spin text-gray-400" />
+                </div>
+              ) : taggedPosts && taggedPosts.length > 0 ? (
+                <UserPostList posts={taggedPosts} isOwner={false} />
+              ) : (
+                <div className="py-20 text-center text-gray-500 select-none">
+                  <div className="w-16 h-16 rounded-full border-2 border-gray-300 mx-auto flex items-center justify-center mb-3">
+                    <IoPersonCircleOutline className="text-3xl text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Photos of you</h3>
+                  <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                    When people tag you in photos and videos, they&apos;ll appear here.
+                  </p>
+                </div>
+              ))}
           </div>
         </div>
       ) : (

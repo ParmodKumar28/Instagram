@@ -59,7 +59,22 @@ export const deleteUserDb = async (userId) => {
 // Getting suggested users from db
 export const getSuggestedUsersDb = async (currentUserId, limit = 5) => {
   return await UserModel.find({ _id: { $ne: currentUserId } })
-    .select("_id name username profilePic followers following")
+    .select("_id name username profilePic followers following gender")
     .limit(limit)
     .sort({ createdAt: -1 });
+};
+
+// Search users by username or name
+export const searchUsersDb = async (query, currentUserId, limit = 15) => {
+  if (!query || !query.trim()) return [];
+  const regex = new RegExp(query.trim(), "i");
+  const filter = {
+    $or: [{ username: regex }, { name: regex }],
+  };
+  if (currentUserId) {
+    filter._id = { $ne: currentUserId };
+  }
+  return await UserModel.find(filter)
+    .select("_id name username profilePic gender")
+    .limit(limit);
 };
