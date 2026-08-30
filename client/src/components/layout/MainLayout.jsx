@@ -11,10 +11,7 @@ import { fetchSavedPostsAsync } from "../../redux/slices/postsSlice";
 export function MainLayout() {
   const dispatch = useDispatch();
   const location = useLocation();
-  const isMessagesPage =
-    location.pathname.startsWith("/messages") ||
-    location.pathname.startsWith("/direct") ||
-    location.pathname.startsWith("/chat");
+  const isMessagesPage = location.pathname.startsWith("/messages");
 
   useEffect(() => {
     dispatch(userDataAsync());

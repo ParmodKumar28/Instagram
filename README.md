@@ -52,9 +52,9 @@ A modern, pixel-perfect, and feature-rich **Instagram Clone** built with **React
 ### 🛡️ Enterprise-Grade Security Architecture
 - **JWT Handshake Authentication**: Authenticated WebSocket connections and Bearer token API validation.
 - **Rate Limiting Protection**:
-  - `authLimiter`: 30 attempts / 15 mins on `/signin`, `/signup`, and `/forgotPassword` against brute-force attacks.
-  - `contentCreationLimiter`: 100 requests / 15 mins on posts, comments, stories, and messages to prevent spam.
-  - `generalApiLimiter`: 1200 requests / 15 mins global baseline against scraping and DoS.
+  - `authLimiter`: 100 attempts / 15 mins on `/signin`, `/signup`, and `/forgotPassword` against brute-force attacks.
+  - `contentCreationLimiter`: 300 requests / 15 mins on posts, comments, stories, and messages to prevent spam.
+  - `generalApiLimiter`: 3000 requests / 15 mins (~200 req/min) global baseline against scraping and DoS.
 - **Security Headers & CORS**: `helmet` HTTP headers (`X-Content-Type-Options`, `X-Frame-Options`) and production origin lock.
 - **IDOR Protection**: Strict ownership checks across posts, comments, stories, and messages.
 - **Automatic 401 Interceptor**: Clean frontend session expiry handling and redirect.
@@ -235,10 +235,10 @@ npm run dev
 ### 🔐 Authentication & Users (`/api/user`)
 | Method | Endpoint | Description | Rate Limit |
 |---|---|---|---|
-| `POST` | `/api/user/signup` | Register new account | 30 / 15m |
-| `POST` | `/api/user/signin` | Log in and receive JWT | 30 / 15m |
-| `POST` | `/api/user/forgotPassword` | Request password reset code | 30 / 15m |
-| `POST` | `/api/user/resetPassword` | Verify code and set new password | 30 / 15m |
+| `POST` | `/api/user/signup` | Register new account | 100 / 15m |
+| `POST` | `/api/user/signin` | Log in and receive JWT | 100 / 15m |
+| `POST` | `/api/user/forgotPassword` | Request password reset code | 100 / 15m |
+| `POST` | `/api/user/resetPassword` | Verify code and set new password | 100 / 15m |
 | `GET` | `/api/user/user-data` | Fetch logged-in user profile | Global |
 | `PUT` | `/api/user/update-user` | Update bio, profile pic, gender | Global |
 
@@ -247,7 +247,7 @@ npm run dev
 |---|---|---|---|
 | `GET` | `/api/chat/conversations` | Get user's conversation list | Global |
 | `GET` | `/api/chat/messages/:id` | Get message history & mark seen | Global |
-| `POST` | `/api/chat/send` | Send text or media message | 100 / 15m |
+| `POST` | `/api/chat/send` | Send text or media message | 300 / 15m |
 | `DELETE`| `/api/chat/message/:id` | Unsend / delete message | Global |
 
 ### 📸 Posts & Reels (`/api/post`)
@@ -255,7 +255,7 @@ npm run dev
 |---|---|---|---|
 | `GET` | `/api/post/all-posts` | Fetch feed posts (privacy filtered) | Global |
 | `GET` | `/api/post/reels` | Fetch video reels feed | Global |
-| `POST` | `/api/post/create-post` | Create new photo/video post | 100 / 15m |
+| `POST` | `/api/post/create-post` | Create new photo/video post | 300 / 15m |
 | `POST` | `/api/post/save/:id` | Bookmark / save post | Global |
 | `DELETE`| `/api/post/delete-post/:id` | Delete post (owner only) | Global |
 
@@ -263,9 +263,9 @@ npm run dev
 | Method | Endpoint | Description | Rate Limit |
 |---|---|---|---|
 | `GET` | `/api/story/feed` | Get active 24h stories from following | Global |
-| `POST` | `/api/story/create` | Upload new photo or video story | 100 / 15m |
+| `POST` | `/api/story/create` | Upload new photo or video story | 300 / 15m |
 | `POST` | `/api/story/like/:id` | Like / unlike story | Global |
-| `POST` | `/api/story/reply/:id` | Reply directly to story | 100 / 15m |
+| `POST` | `/api/story/reply/:id` | Reply directly to story | 300 / 15m |
 
 ---
 

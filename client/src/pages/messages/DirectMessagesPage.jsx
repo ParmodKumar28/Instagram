@@ -460,6 +460,10 @@ export function DirectMessagesPage() {
           ) : filteredConversations.length > 0 ? (
             filteredConversations.map((conv) => {
               const participant = conv.participant;
+              const uname = participant?.username || participant?.name || "User";
+              const lastMsgText =
+                conv.lastMessage?.text ||
+                (conv.lastMessage?.media ? "Sent an attachment" : "Started a chat");
               const isSelected = activeConversation?._id === conv._id;
               const isLastMsgMine =
                 (conv.lastMessage?.sender?._id || conv.lastMessage?.sender)?.toString() ===
