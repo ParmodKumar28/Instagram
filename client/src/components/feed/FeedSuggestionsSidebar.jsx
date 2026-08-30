@@ -87,7 +87,7 @@ export function FeedSuggestionsSidebar() {
         <div className="flex justify-between items-center mb-4">
           <span className="font-semibold text-gray-500 text-sm">Suggested for you</span>
           <Link
-            to="/suggested"
+            to="/discover"
             className="font-semibold text-gray-900 text-xs hover:text-gray-500 transition"
           >
             See all

@@ -48,6 +48,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: withSuspense(<HomePage />) },
       { path: "explore", element: withSuspense(<ExplorePage />) },
+      { path: "discover", element: withSuspense(<ExplorePage />) },
+      { path: "suggested", element: withSuspense(<ExplorePage />) },
+      { path: "explore/people", element: withSuspense(<ExplorePage />) },
+      { path: "people", element: withSuspense(<ExplorePage />) },
       { path: "search", element: withSuspense(<ExplorePage />) },
       { path: "reels", element: withSuspense(<ReelsPage />) },
       { path: "messages", element: withSuspense(<DirectMessagesPage />) },
