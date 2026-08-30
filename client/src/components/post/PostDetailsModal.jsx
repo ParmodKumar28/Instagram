@@ -167,22 +167,52 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const lastTapRef = useRef(0);
+
   const handleToggleLike = async () => {
+    const nextLiked = !isLiked;
+    setIsLiked(nextLiked);
+    setLikeList((prev) => {
+      if (nextLiked) {
+        return [...prev, { user: signedUser || { _id: currentUserId } }];
+      } else {
+        return prev.filter(
+          (l) => (l.user?._id || l.user)?.toString() !== currentUserId?.toString()
+        );
+      }
+    });
+
     try {
       const response = await likeService.toggleLike(post._id, "Post");
       if (response.status === 200) {
-        setIsLiked(!isLiked);
         fetchLikes();
       }
     } catch (error) {
       console.error("Error toggling like:", error);
+      setIsLiked(!nextLiked);
+      fetchLikes();
     }
   };
 
-  const handleDoubleTap = () => {
-    if (!isLiked) handleToggleLike();
+  const handleDoubleTap = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 900);
+
+    if (!isLiked) {
+      handleToggleLike();
+    }
+  };
+
+  const handleTouchTap = (e) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 350;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      handleDoubleTap(e);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   const handleReply = ({ commentId, username }) => {
@@ -359,6 +389,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
         {/* Left Side: Media */}
         <div
           className="md:w-3/5 bg-black flex items-center justify-center relative min-h-[300px] md:min-h-[500px] select-none cursor-pointer"
+          onClick={handleTouchTap}
           onDoubleClick={handleDoubleTap}
         >
           {isVideoMedia(currentPostData.media, currentPostData.mediaType) ? (
@@ -372,7 +403,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
             <img
               src={currentPostData.media}
               alt="Post"
-              className="w-full h-full max-h-[85vh] object-contain"
+              className="w-full h-full max-h-[85vh] object-contain pointer-events-none"
             />
           )}
 

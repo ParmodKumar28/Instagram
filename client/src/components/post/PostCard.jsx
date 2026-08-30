@@ -59,7 +59,7 @@ export function PostCard({ post, onPostDeleted }) {
   const [showEditTagInput, setShowEditTagInput] = useState(false);
   const [showEditEmojiPicker, setShowEditEmojiPicker] = useState(false);
   const [isSavingPost, setIsSavingPost] = useState(false);
-  const [lastTap, setLastTap] = useState(0);
+  const lastTapRef = useRef(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const dispatch = useDispatch();
@@ -241,14 +241,27 @@ export function PostCard({ post, onPostDeleted }) {
   };
 
   const handleToggleLike = async () => {
+    const nextLiked = !isLiked;
+    setIsLiked(nextLiked);
+    setLikeList((prev) => {
+      if (nextLiked) {
+        return [...prev, { user: signedUser || { _id: currentUserId } }];
+      } else {
+        return prev.filter(
+          (l) => (l.user?._id || l.user)?.toString() !== currentUserId?.toString()
+        );
+      }
+    });
+
     try {
       const response = await likeService.toggleLike(post._id, "Post");
       if (response.status === 200) {
-        setIsLiked(!isLiked);
         fetchLikes();
       }
     } catch (error) {
       console.error("Error toggling like:", error);
+      setIsLiked(!nextLiked);
+      fetchLikes();
     }
   };
 
@@ -265,17 +278,18 @@ export function PostCard({ post, onPostDeleted }) {
   const handleImageTap = (e) => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 350;
-    if (now - lastTap < DOUBLE_TAP_DELAY) {
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
       handleDoubleTap(e);
-      setLastTap(0);
+      lastTapRef.current = 0;
     } else {
-      setLastTap(now);
+      lastTapRef.current = now;
     }
   };
 
   const handleDoubleClick = (e) => {
-    e.stopPropagation();
+    if (e && e.stopPropagation) e.stopPropagation();
     handleDoubleTap(e);
+    lastTapRef.current = 0;
   };
 
   const handleDeletePost = async () => {
@@ -442,11 +456,9 @@ export function PostCard({ post, onPostDeleted }) {
           />
         ) : (
           <img
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none"
             src={currentPost?.media}
             alt="Post media"
-            onClick={handleImageTap}
-            onDoubleClick={handleDoubleClick}
           />
         )}
 
