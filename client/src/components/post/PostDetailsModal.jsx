@@ -16,29 +16,13 @@ import { BsEmojiSmile } from "react-icons/bs";
 import { commentService, likeService, postService } from "../../services";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { deletePostAsync, toggleSavePostAsync, postsSelector } from "../../redux/slices/postsSlice";
+import { formatTimeAgo, isVideoMedia } from "../../utils";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import Avatar from "../common/Avatar";
 import CommentList from "./CommentList";
 import EmojiDrawer from "../common/EmojiDrawer";
 import toast from "react-hot-toast";
-
-function formatTimeAgo(dateString) {
-  if (!dateString) return "just now";
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-
-  if (seconds < 60) return `${Math.max(1, seconds)}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d`;
-  const weeks = Math.floor(days / 7);
-  return `${weeks}w`;
-}
 
 export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) {
   const commentInputRef = useRef(null);
@@ -260,9 +244,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
           className="md:w-3/5 bg-black flex items-center justify-center relative min-h-[300px] md:min-h-[500px] select-none cursor-pointer"
           onDoubleClick={handleDoubleTap}
         >
-          {currentPostData.mediaType === "video" ||
-          /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(currentPostData.media) ||
-          (typeof currentPostData.media === "string" && currentPostData.media.includes("/video/upload/")) ? (
+          {isVideoMedia(currentPostData.media, currentPostData.mediaType) ? (
             <InstagramVideoPlayer
               src={currentPostData.media}
               className="w-full h-full max-h-[85vh] object-contain"

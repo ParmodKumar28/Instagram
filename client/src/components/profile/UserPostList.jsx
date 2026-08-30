@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaHeart, FaComment } from "react-icons/fa";
 import { IoFilmOutline } from "react-icons/io5";
+import { isVideoMedia } from "../../utils";
 import PostDetailsModal from "../post/PostDetailsModal";
 
 export function UserPostList({ posts = [] }) {
@@ -25,10 +26,7 @@ export function UserPostList({ posts = [] }) {
     <>
       <div className="grid grid-cols-3 gap-1 sm:gap-6 md:gap-7 w-full select-none">
         {posts.map((post) => {
-          const isVideo =
-            post?.mediaType === "video" ||
-            /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(post?.media || "") ||
-            (typeof post?.media === "string" && post.media.includes("/video/upload/"));
+          const isVideo = isVideoMedia(post?.media, post?.mediaType);
 
           return (
             <div

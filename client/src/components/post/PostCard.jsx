@@ -23,28 +23,12 @@ import {
 } from "../../redux/slices/postsSlice";
 import { usersSelector } from "../../redux/slices/usersSlice";
 import { commentService, likeService } from "../../services";
+import { formatTimeAgo, isVideoMedia } from "../../utils";
 import CommentList from "./CommentList";
 import LikeList from "./LikeList";
 import OptionsList from "./OptionsList";
 import InstagramVideoPlayer from "./InstagramVideoPlayer";
 import EmojiDrawer from "../common/EmojiDrawer";
-
-function formatTimeAgo(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-
-  if (seconds < 60) return `${Math.max(1, seconds)}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d`;
-  const weeks = Math.floor(days / 7);
-  return `${weeks}w`;
-}
 
 export function PostCard({ post, onPostDeleted }) {
   const commentInputRef = useRef(null);
@@ -315,9 +299,7 @@ export function PostCard({ post, onPostDeleted }) {
         className="relative aspect-square w-full bg-black overflow-hidden flex items-center justify-center cursor-pointer"
         onClick={handleImageTap}
       >
-        {post?.mediaType === "video" ||
-        /\.(mp4|webm|ogg|mov|m4v|avi)(\?.*)?$/i.test(post.media) ||
-        (typeof post.media === "string" && post.media.includes("/video/upload/")) ? (
+        {isVideoMedia(post?.media, post?.mediaType) ? (
           <InstagramVideoPlayer
             src={post.media}
             className="w-full h-full"
