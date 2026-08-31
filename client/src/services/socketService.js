@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { SOCKET_URL } from "../redux/baseUrl";
 
 let socket = null;
 
@@ -21,15 +22,22 @@ export const connectSocket = (userId) => {
     return socket;
   }
 
-  // Use relative path or proxy to connect cleanly
-  socket = io(window.location.origin, {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+
+  // Determine socket endpoint
+  const targetUrl = SOCKET_URL || (typeof window !== "undefined" ? window.location.origin : "");
+
+  socket = io(targetUrl, {
     path: "/socket.io",
     auth: {
       token,
       userId,
     },
     withCredentials: true,
-    transports: ["websocket", "polling"],
+    transports: ["polling", "websocket"],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -42,6 +50,11 @@ export const connectSocket = (userId) => {
 
   socket.on("reconnect", () => {
     socket.emit("register_user", { userId });
+  });
+
+  socket.on("connect_error", (err) => {
+    // Graceful log for mobile / network switches
+    console.debug("Socket.IO notice:", err?.message || err);
   });
 
   return socket;
