@@ -77,6 +77,93 @@ function renderMessageContent(text, isMine) {
   });
 }
 
+// Mobile Draggable Floating Action Button Component
+function MobileDraggableChatFAB({ totalUnreadCount, onOpen }) {
+  const [position, setPosition] = useState(() => {
+    const initialX = typeof window !== "undefined" ? window.innerWidth - 64 : 300;
+    const initialY = typeof window !== "undefined" ? window.innerHeight - 124 : 600;
+    return { x: initialX, y: initialY };
+  });
+
+  const isDraggingRef = useRef(false);
+  const dragStartPosRef = useRef({ x: 0, y: 0 });
+  const elementStartPosRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition((prev) => {
+        const maxX = window.innerWidth - 58;
+        const maxY = window.innerHeight - 116;
+        return {
+          x: Math.min(Math.max(10, prev.x), maxX),
+          y: Math.min(Math.max(56, prev.y), maxY),
+        };
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    isDraggingRef.current = false;
+    dragStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+    elementStartPosRef.current = { ...position };
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    const dx = touch.clientX - dragStartPosRef.current.x;
+    const dy = touch.clientY - dragStartPosRef.current.y;
+
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      isDraggingRef.current = true;
+    }
+
+    if (isDraggingRef.current) {
+      if (e.cancelable) e.preventDefault();
+      const maxX = window.innerWidth - 58;
+      const maxY = window.innerHeight - 116;
+      const newX = Math.min(Math.max(10, elementStartPosRef.current.x + dx), maxX);
+      const newY = Math.min(Math.max(56, elementStartPosRef.current.y + dy), maxY);
+      setPosition({ x: newX, y: newY });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDraggingRef.current) {
+      onOpen();
+    }
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 60);
+  };
+
+  return (
+    <div
+      style={{
+        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        touchAction: "none",
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="md:hidden fixed top-0 left-0 z-40 w-12 h-12 rounded-full bg-white/95 backdrop-blur-xl border border-gray-200/90 shadow-[0_4px_24px_rgba(0,0,0,0.22)] flex items-center justify-center cursor-grab active:cursor-grabbing active:scale-95 transition-transform duration-75 select-none"
+      title="Drag anywhere or tap to Open Messages"
+      aria-label="Open Messages"
+    >
+      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center text-white shadow-xs pointer-events-none">
+        <PiPaperPlaneTiltFill className="text-base translate-x-[0.5px] -translate-y-[0.5px]" />
+      </div>
+      {totalUnreadCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-[#FF3040] text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1 flex items-center justify-center ring-2 ring-white shadow-sm animate-pulse pointer-events-none">
+          {totalUnreadCount}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function QuickChatDrawer() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -359,65 +446,83 @@ export function QuickChatDrawer() {
   return (
     <>
       {/* ========================================================
-          COLLAPSED STATE: Sleek Floating Chip / Pill Widget (Desktop Only)
+          COLLAPSED STATE: 
+          1. Mobile: Floating Circular FAB above bottom footer
+          2. Desktop: Floating Chip / Pill Widget
          ======================================================== */}
       {!isExpanded && (
-        <div
-          onClick={() => setIsExpanded(true)}
-          className="hidden md:flex fixed bottom-5 right-6 sm:right-8 z-40 bg-white/95 backdrop-blur-md border border-gray-200/90 hover:border-gray-400 shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)] rounded-full px-4 py-2.5 items-center space-x-3 cursor-pointer transition-all duration-200 select-none group active:scale-95"
-          title="Open Messages"
-        >
-          {/* Direct Paper Airplane Icon with optional red notification dot */}
-          <div className="relative flex items-center">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
-              <PiPaperPlaneTiltFill className="text-sm translate-x-[0.5px] -translate-y-[0.5px]" />
-            </div>
-            {totalUnreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#FF3040] text-white text-[9px] font-bold rounded-full h-3.5 min-w-3.5 px-1 flex items-center justify-center ring-2 ring-white animate-pulse">
-                {totalUnreadCount}
-              </span>
-            )}
-          </div>
+        <>
+          {/* Mobile Draggable Floating Action Button (Moveable anywhere on screen) */}
+          <MobileDraggableChatFAB
+            totalUnreadCount={totalUnreadCount}
+            onOpen={() => setIsExpanded(true)}
+          />
 
-          <span className="font-bold text-xs sm:text-sm text-gray-900 tracking-tight">
-            Messages
-          </span>
-
-          {/* User Avatar + subtle Chevron */}
-          <div className="flex items-center space-x-1.5 pl-1 border-l border-gray-200/80">
-            <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200">
-              <Avatar
-                src={signedUser?.profilePic}
-                alt={signedUser?.username}
-                gender={signedUser?.gender}
-                username={signedUser?.username}
-                className="w-full h-full object-cover"
-              />
+          {/* Desktop Floating Pill Widget */}
+          <div
+            onClick={() => setIsExpanded(true)}
+            className="hidden md:flex fixed bottom-5 right-6 sm:right-8 z-40 bg-white/95 backdrop-blur-md border border-gray-200/90 hover:border-gray-400 shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.18)] rounded-full px-4 py-2.5 items-center space-x-3 cursor-pointer transition-all duration-200 select-none group active:scale-95"
+            title="Open Messages"
+          >
+            {/* Direct Paper Airplane Icon with optional red notification dot */}
+            <div className="relative flex items-center">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+                <PiPaperPlaneTiltFill className="text-sm translate-x-[0.5px] -translate-y-[0.5px]" />
+              </div>
+              {totalUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#FF3040] text-white text-[9px] font-bold rounded-full h-3.5 min-w-3.5 px-1 flex items-center justify-center ring-2 ring-white animate-pulse">
+                  {totalUnreadCount}
+                </span>
+              )}
             </div>
-            <IoChevronUp className="text-xs text-gray-400 group-hover:text-black transition" />
+
+            <span className="font-bold text-xs sm:text-sm text-gray-900 tracking-tight">
+              Messages
+            </span>
+
+            {/* User Avatar + subtle Chevron */}
+            <div className="flex items-center space-x-1.5 pl-1 border-l border-gray-200/80">
+              <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200">
+                <Avatar
+                  src={signedUser?.profilePic}
+                  alt={signedUser?.username}
+                  gender={signedUser?.gender}
+                  username={signedUser?.username}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <IoChevronUp className="text-xs text-gray-400 group-hover:text-black transition" />
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* ========================================================
-          EXPANDED STATE: Official Instagram Floating Messenger Dock (Desktop Only)
+          EXPANDED STATE: Floating Messenger Dock (Desktop Popover & Mobile Bottom Sheet)
          ======================================================== */}
       {isExpanded && (
-        <div className="hidden md:flex fixed bottom-0 right-4 sm:right-10 z-40 w-[350px] sm:w-[380px] h-[520px] max-h-[82vh] bg-white rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.18)] border border-gray-300 flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 select-none">
-          {/* VIEW 1: Active Chat Inside Dock */}
-          {selectedChat ? (
-            <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-              {/* Header */}
-              <div className="flex items-center justify-between px-3.5 py-3 border-b border-gray-200 bg-white">
-                <div className="flex items-center space-x-2.5 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedChat(null)}
-                    className="p-1 text-gray-700 hover:text-black rounded-full transition cursor-pointer"
-                    title="Back to all messages"
-                  >
-                    <IoChevronBack className="text-xl" />
-                  </button>
+        <>
+          {/* Mobile Backdrop Overlay */}
+          <div
+            onClick={() => setIsExpanded(false)}
+            className="md:hidden fixed inset-0 bg-black/40 z-[55] backdrop-blur-[1px] animate-in fade-in duration-150"
+          />
+
+          <div className="flex fixed bottom-0 right-0 sm:right-10 z-[60] w-full sm:w-[380px] h-[85vh] sm:h-[520px] max-h-[85vh] bg-white rounded-t-2xl sm:rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.18)] border border-gray-300 flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 select-none">
+            {/* VIEW 1: Active Chat Inside Dock */}
+            {selectedChat ? (
+              <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
+                {/* Header */}
+                <div className="flex items-center justify-between px-3.5 py-3 border-b border-gray-200 bg-white">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedChat(null)}
+                      className="p-1 text-gray-700 hover:text-black rounded-full transition cursor-pointer"
+                      title="Back to all messages"
+                    >
+                      <IoChevronBack className="text-xl" />
+                    </button>
 
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                     <Avatar
@@ -930,7 +1035,8 @@ export function QuickChatDrawer() {
             </div>
           )}
         </div>
-      )}
+      </>
+    )}
 
       {/* Story Viewer Modal */}
       {activeStoryGroup && (

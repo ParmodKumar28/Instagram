@@ -149,19 +149,57 @@ export function ReelsPage() {
 
   if (loading) {
     return (
-      <div className="relative w-full h-full min-h-screen bg-[#fafbfc] flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative w-full h-[calc(100dvh-48px)] md:h-screen bg-[#fafbfc] flex items-center justify-center overflow-hidden p-0 md:p-4 select-none">
         {/* Subtle Ambient Glow */}
         <div
-          className="absolute w-[450px] h-[450px] rounded-full blur-[100px] opacity-25 pointer-events-none"
+          className="absolute w-[500px] h-[500px] rounded-full blur-[120px] opacity-25 pointer-events-none"
           style={{
-            background: "radial-gradient(circle, #DD2A7B 0%, #833AB4 50%, #405DE6 100%)",
+            background: "radial-gradient(circle, #FD1D1D 0%, #833AB4 50%, #5851DB 100%)",
           }}
         />
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-12 h-12 border-3 border-gray-200 border-t-[#DD2A7B] rounded-full animate-spin mb-4 shadow-sm" />
-          <p className="text-gray-600 text-xs font-semibold tracking-wide">
-            Loading Reels...
-          </p>
+
+        {/* Reels Skeleton Card */}
+        <div className="relative w-full h-[calc(100dvh-48px)] md:w-[410px] md:h-[720px] md:max-h-[86vh] rounded-none md:rounded-3xl bg-gray-900 overflow-hidden shadow-2xl flex flex-col justify-between p-4 sm:p-5 animate-pulse border md:border-gray-800">
+          {/* Shimmer sweep overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-gray-900 via-gray-800/90 to-gray-900 opacity-95 pointer-events-none" />
+
+          {/* Top bar skeleton */}
+          <div className="relative z-10 flex items-center justify-between pt-1">
+            <div className="h-6 w-20 bg-gray-700/60 rounded-md" />
+            <div className="flex space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gray-700/60" />
+              <div className="w-8 h-8 rounded-full bg-gray-700/60" />
+            </div>
+          </div>
+
+          {/* Center Play Icon Placeholder */}
+          <div className="relative z-10 self-center w-14 h-14 rounded-full bg-gray-700/30 flex items-center justify-center border border-white/5" />
+
+          {/* Bottom Content & Actions Skeleton */}
+          <div className="relative z-10 flex items-end justify-between pb-3">
+            {/* Left author info & caption skeleton */}
+            <div className="space-y-3 flex-1 max-w-[70%]">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-full bg-gray-700/80" />
+                <div className="h-4 w-28 bg-gray-700/80 rounded-md" />
+                <div className="h-6 w-16 bg-gray-700/50 rounded-lg" />
+              </div>
+              <div className="space-y-1.5 pt-0.5">
+                <div className="h-3 w-44 bg-gray-700/70 rounded-md" />
+                <div className="h-3 w-32 bg-gray-700/50 rounded-md" />
+              </div>
+              <div className="h-4 w-36 bg-gray-700/60 rounded-full mt-1.5" />
+            </div>
+
+            {/* Right action icons skeleton */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-10 h-10 rounded-full bg-gray-700/80" />
+              <div className="w-10 h-10 rounded-full bg-gray-700/80" />
+              <div className="w-10 h-10 rounded-full bg-gray-700/80" />
+              <div className="w-10 h-10 rounded-full bg-gray-700/80" />
+              <div className="w-8 h-8 rounded-full bg-gray-700/60" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -414,10 +452,20 @@ function SingleReelCard({
     }
   }, [showComments, fetchComments]);
 
+  // Sync muted state directly with DOM node
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
   // Play / Pause video based on active scroll status
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    video.playsInline = true;
+    video.muted = isMuted;
 
     if (isActive) {
       video.currentTime = 0;
@@ -425,13 +473,19 @@ function SingleReelCard({
       if (playPromise !== undefined) {
         playPromise
           .then(() => setIsPlaying(true))
-          .catch(() => setIsPlaying(false));
+          .catch((err) => {
+            console.warn("Autoplay was prevented, attempting muted playback:", err);
+            video.muted = true;
+            video.play()
+              .then(() => setIsPlaying(true))
+              .catch(() => setIsPlaying(false));
+          });
       }
     } else {
       video.pause();
       setIsPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, isMuted]);
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
@@ -444,8 +498,14 @@ function SingleReelCard({
     if (!video) return;
 
     if (video.paused) {
-      video.play();
-      setIsPlaying(true);
+      const p = video.play();
+      if (p !== undefined) {
+        p.then(() => setIsPlaying(true))
+          .catch(() => {
+            video.muted = true;
+            video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+          });
+      }
     } else {
       video.pause();
       setIsPlaying(false);
@@ -636,6 +696,8 @@ function SingleReelCard({
           className="w-full h-full object-cover cursor-pointer"
           loop
           playsInline
+          webkit-playsinline="true"
+          preload="auto"
           muted={isMuted}
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoClick}

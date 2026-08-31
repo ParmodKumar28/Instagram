@@ -313,8 +313,31 @@ export function NotificationsDrawer({ isOpen, onClose }) {
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-none">
-            {/* Sub-view: Detailed Follow Requests List */}
-            {viewingAllRequests ? (
+            {/* Loading Skeleton */}
+            {loading ? (
+              <div className="space-y-4 py-1 animate-pulse">
+                <div className="h-4 w-20 bg-gray-200 rounded-md" />
+                {Array.from({ length: 7 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-xl"
+                  >
+                    <div className="flex items-center space-x-3 flex-1 min-w-0 pr-3">
+                      <div className="w-11 h-11 rounded-full bg-gray-200 flex-shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-3.5 bg-gray-200 rounded-md w-3/4" />
+                        <div className="h-2.5 bg-gray-100 rounded-md w-1/3" />
+                      </div>
+                    </div>
+                    {idx % 2 === 0 ? (
+                      <div className="w-11 h-11 rounded-lg bg-gray-200 flex-shrink-0" />
+                    ) : (
+                      <div className="w-20 h-7 rounded-lg bg-gray-200 flex-shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : viewingAllRequests ? (
               <div>
                 {requests.length === 0 ? (
                   <div className="py-12 text-center text-gray-400 text-xs">
