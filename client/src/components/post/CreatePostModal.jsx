@@ -167,7 +167,7 @@ export function CreatePostModal({ isOpen, onClose }) {
       <div
         className={`bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all duration-300 select-none relative ${
           step === "edit"
-            ? "w-full max-w-[850px] h-[92vh] sm:h-[580px] max-h-[92vh]"
+            ? "w-full max-w-[850px] h-[92dvh] sm:h-[580px] max-h-[92dvh]"
             : "w-full max-w-[480px] h-[400px] sm:h-[480px]"
         }`}
         onClick={(e) => e.stopPropagation()}

@@ -386,7 +386,7 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
       {/* Modal Container */}
       <div
-        className="bg-white rounded-none sm:rounded-2xl overflow-hidden max-w-5xl w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col md:flex-row shadow-2xl relative"
+        className="bg-white rounded-none sm:rounded-2xl overflow-hidden max-w-5xl w-full h-[100dvh] sm:h-auto sm:max-h-[92dvh] flex flex-col md:flex-row shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile Header with Author & Close (Mobile Only) */}
