@@ -113,16 +113,17 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
 
   // Fetch full fresh post data from backend
   const fetchFullPost = useCallback(async () => {
-    if (!initialPost?._id) return;
+    const postId = initialPost?._id || post?._id;
+    if (!postId) return;
     try {
-      const response = await postService.getSinglePost(initialPost._id);
+      const response = await postService.getPostById(postId);
       if (response?.data?.post) {
         setPost(response.data.post);
       }
     } catch (error) {
       console.error("Error fetching full post details:", error);
     }
-  }, [initialPost?._id]);
+  }, [initialPost?._id, post?._id]);
 
   const fetchLikes = useCallback(async () => {
     if (!initialPost?._id) return;
@@ -363,10 +364,41 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   if (!isOpen || (!post && !initialPost)) return null;
 
   const currentPostData = post || initialPost;
-  const author = currentPostData.user || {};
-  const isAuthor = currentUserId && (author._id === currentUserId || author === currentUserId);
-  const username = author.username || author.name || "user";
-  const timeAgo = formatTimeAgo(currentPostData.createdAt);
+  const isPostAuthorSelf = Boolean(
+    currentUserId &&
+      (currentPostData?.user === currentUserId ||
+        currentPostData?.user === signedUser?._id ||
+        currentPostData?.user?._id === currentUserId ||
+        currentPostData?.user?._id === signedUser?._id ||
+        (!currentPostData?.user && initialPost?._id))
+  );
+
+  const author =
+    typeof currentPostData?.user === "object" && currentPostData?.user !== null
+      ? currentPostData.user
+      : isPostAuthorSelf
+      ? signedUser || {}
+      : {};
+
+  const authorId =
+    author._id ||
+    author.id ||
+    (typeof currentPostData?.user === "string" ? currentPostData.user : "") ||
+    "";
+
+  const isAuthor = Boolean(
+    currentUserId &&
+      (authorId === currentUserId?.toString() ||
+        author === currentUserId ||
+        isPostAuthorSelf)
+  );
+
+  const username =
+    author.username ||
+    author.name ||
+    (isPostAuthorSelf ? signedUser?.username || signedUser?.name : "") ||
+    "user";
+  const timeAgo = formatTimeAgo(currentPostData?.createdAt);
 
   const totalCommentsCount = comments.reduce(
     (acc, c) => acc + 1 + (Array.isArray(c.replies) ? c.replies.length : 0),
@@ -393,8 +425,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
         <div className="h-12 px-3.5 border-b border-gray-100 flex items-center justify-between flex-shrink-0 bg-white md:hidden">
           <div className="flex items-center space-x-2.5">
             <Link
-              to={`/profile/${author._id || ""}`}
-              onClick={onClose}
+              to={authorId ? `/profile/${authorId}` : "#"}
+              onClick={authorId ? onClose : undefined}
               className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0"
             >
               <Avatar
@@ -406,8 +438,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
               />
             </Link>
             <Link
-              to={`/profile/${author._id || ""}`}
-              onClick={onClose}
+              to={authorId ? `/profile/${authorId}` : "#"}
+              onClick={authorId ? onClose : undefined}
               className="text-xs font-semibold text-gray-900 hover:underline truncate max-w-[150px]"
             >
               {username}
@@ -507,8 +539,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
           <div className="hidden md:flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
             <div className="flex items-center space-x-3">
               <Link
-                to={`/profile/${author._id || ""}`}
-                onClick={onClose}
+                to={authorId ? `/profile/${authorId}` : "#"}
+                onClick={authorId ? onClose : undefined}
                 className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
               >
                 <Avatar
@@ -520,8 +552,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                 />
               </Link>
               <Link
-                to={`/profile/${author._id || ""}`}
-                onClick={onClose}
+                to={authorId ? `/profile/${authorId}` : "#"}
+                onClick={authorId ? onClose : undefined}
                 className="text-sm font-semibold text-gray-900 hover:underline"
               >
                 {username}
@@ -738,8 +770,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
               currentPostData?.caption && (
                 <div className="flex items-start space-x-3 pb-3 border-b border-gray-50">
                   <Link
-                    to={`/profile/${author._id || ""}`}
-                    onClick={onClose}
+                    to={authorId ? `/profile/${authorId}` : "#"}
+                    onClick={authorId ? onClose : undefined}
                     className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-0.5"
                   >
                     <Avatar
@@ -753,8 +785,8 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                   <div className="leading-snug flex-1">
                     <p>
                       <Link
-                        to={`/profile/${author._id || ""}`}
-                        onClick={onClose}
+                        to={authorId ? `/profile/${authorId}` : "#"}
+                        onClick={authorId ? onClose : undefined}
                         className="font-semibold mr-1.5 hover:underline"
                       >
                         {username}

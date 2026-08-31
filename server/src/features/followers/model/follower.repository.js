@@ -353,9 +353,9 @@ export const getActivityDb = async (userId) => {
       .limit(15);
 
     // 2. Posts authored by this user
-    const myPosts = await PostModel.find({ user: userObjectId }).select(
-      "_id media mediaType"
-    );
+    const myPosts = await PostModel.find({ user: userObjectId })
+      .select("_id user media mediaType caption createdAt")
+      .populate("user", "name username profilePic gender");
     const myPostIds = myPosts.map((p) => p._id);
     const postMap = new Map();
     myPosts.forEach((p) => postMap.set(p._id.toString(), p));
@@ -471,6 +471,8 @@ export const getActivityDb = async (userId) => {
           media: item.media,
           mediaType: item.mediaType,
           caption: item.caption,
+          user: item.user,
+          createdAt: item.createdAt,
         },
         createdAt: item.createdAt,
       })),
@@ -482,7 +484,14 @@ export const getActivityDb = async (userId) => {
           type: "liked_post",
           text: "liked your post.",
           post: post
-            ? { _id: post._id, media: post.media, mediaType: post.mediaType }
+            ? {
+                _id: post._id,
+                media: post.media,
+                mediaType: post.mediaType,
+                caption: post.caption,
+                user: post.user,
+                createdAt: post.createdAt,
+              }
             : null,
           createdAt: item.createdAt,
         };
@@ -497,7 +506,14 @@ export const getActivityDb = async (userId) => {
             (item.content?.length || 0) > 35 ? "..." : ""
           }"`,
           post: post
-            ? { _id: post._id, media: post.media, mediaType: post.mediaType }
+            ? {
+                _id: post._id,
+                media: post.media,
+                mediaType: post.mediaType,
+                caption: post.caption,
+                user: post.user,
+                createdAt: post.createdAt,
+              }
             : null,
           createdAt: item.createdAt,
         };

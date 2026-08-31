@@ -97,7 +97,11 @@ export function NotificationsDrawer({ isOpen, onClose }) {
 
   const handleOpenPost = (post) => {
     if (!post) return;
-    setSelectedPost(post);
+    const postWithUser = {
+      ...post,
+      user: post.user || signedUser,
+    };
+    setSelectedPost(postWithUser);
     setIsDrawerVisible(false);
   };
 
