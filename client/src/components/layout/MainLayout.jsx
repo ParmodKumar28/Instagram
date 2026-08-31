@@ -12,6 +12,7 @@ export function MainLayout() {
   const dispatch = useDispatch();
   const location = useLocation();
   const isMessagesPage = location.pathname.startsWith("/messages");
+  const isReelsPage = location.pathname === "/reels";
 
   useEffect(() => {
     dispatch(userDataAsync());
@@ -19,14 +20,20 @@ export function MainLayout() {
   }, [dispatch]);
 
   return (
-    <div className={`w-full bg-white flex flex-col md:flex-row ${isMessagesPage ? "h-screen overflow-hidden" : "min-h-screen"}`}>
+    <div
+      className={`w-full bg-[#fafafa] flex flex-col md:flex-row ${
+        isMessagesPage || isReelsPage
+          ? "h-[100dvh] max-h-[100dvh] overflow-hidden"
+          : "min-h-screen"
+      }`}
+    >
       {/* Desktop Left Navigation Rail */}
       <div className="hidden md:block flex-shrink-0">
         <LeftSidebar />
       </div>
 
-      {/* Mobile Top Header */}
-      {!isMessagesPage && (
+      {/* Mobile Top Header (Hidden on Messages and Reels for full immersion) */}
+      {!isMessagesPage && !isReelsPage && (
         <div className="md:hidden flex-shrink-0">
           <Header />
         </div>
@@ -34,10 +41,12 @@ export function MainLayout() {
 
       {/* Main Content View (Responsive margin and padding) */}
       <main
-        className={`flex-1 md:ml-[84px] bg-white ${
-          isMessagesPage
-            ? "h-screen max-h-screen overflow-hidden p-0"
-            : "min-h-screen pt-12 md:pt-0 pb-14 md:pb-0"
+        className={`flex-1 md:ml-[84px] ${
+          isReelsPage
+            ? "bg-transparent h-[calc(100dvh-48px)] md:h-screen overflow-hidden p-0"
+            : isMessagesPage
+            ? "bg-white h-screen max-h-screen overflow-hidden p-0"
+            : "bg-transparent min-h-screen pt-12 md:pt-0 pb-14 md:pb-0"
         }`}
       >
         <Outlet />
