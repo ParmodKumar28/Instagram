@@ -151,13 +151,13 @@ export function CreatePostModal({ isOpen, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
       onClick={handleClose}
     >
       {/* Top right close button */}
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 text-white hover:text-gray-300 text-3xl focus:outline-none p-1 z-50"
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-gray-300 text-2xl sm:text-3xl focus:outline-none p-1 z-50"
         aria-label="Close modal"
       >
         <IoClose />
@@ -167,8 +167,8 @@ export function CreatePostModal({ isOpen, onClose }) {
       <div
         className={`bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all duration-300 select-none relative ${
           step === "edit"
-            ? "w-full max-w-[850px] h-[580px] max-h-[90vh]"
-            : "w-full max-w-[480px] h-[480px]"
+            ? "w-full max-w-[850px] h-[92vh] sm:h-[580px] max-h-[92vh]"
+            : "w-full max-w-[480px] h-[400px] sm:h-[480px]"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -211,7 +211,7 @@ export function CreatePostModal({ isOpen, onClose }) {
         {step === "select" ? (
           /* Step 1: Media Dropzone */
           <div
-            className={`flex-1 flex flex-col items-center justify-center p-8 text-center transition ${
+            className={`flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center transition ${
               isDragOver ? "bg-gray-50 border-2 border-dashed border-[#0095F6]" : ""
             }`}
             onDragOver={(e) => {
@@ -222,10 +222,10 @@ export function CreatePostModal({ isOpen, onClose }) {
             onDrop={handleDrop}
           >
             <div className="mb-4">
-              <BsImages className="text-6xl text-gray-800 stroke-[0.2]" />
+              <BsImages className="text-5xl sm:text-6xl text-gray-800 stroke-[0.2]" />
             </div>
 
-            <p className="text-xl text-gray-800 font-light mb-5">
+            <p className="text-lg sm:text-xl text-gray-800 font-light mb-5">
               Drag photos and videos here
             </p>
 
@@ -246,9 +246,9 @@ export function CreatePostModal({ isOpen, onClose }) {
           </div>
         ) : (
           /* Step 2: 2-Column Caption & Preview Layout */
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
             {/* Left: Media Viewport */}
-            <div className="w-full md:w-[60%] bg-black flex items-center justify-center relative overflow-hidden h-full">
+            <div className="w-full md:w-[58%] h-[240px] sm:h-[300px] md:h-full bg-black flex items-center justify-center relative overflow-hidden flex-shrink-0">
               {mediaFile?.type?.startsWith("video/") ? (
                 <video
                   src={mediaPreview}
@@ -265,10 +265,10 @@ export function CreatePostModal({ isOpen, onClose }) {
             </div>
 
             {/* Right: Caption & Settings Drawer */}
-            <div className="w-full md:w-[40%] bg-white flex flex-col justify-between border-l border-gray-100 overflow-y-auto">
+            <div className="w-full md:w-[42%] bg-white flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-100 overflow-y-auto flex-1 min-h-0">
               <div>
                 {/* Author row */}
-                <div className="flex items-center space-x-3 p-4">
+                <div className="flex items-center space-x-2.5 p-3 sm:p-4">
                   <Avatar
                     src={signedUser?.profilePic}
                     alt={signedUser?.username || "User"}

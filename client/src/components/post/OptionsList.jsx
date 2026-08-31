@@ -76,7 +76,7 @@ export function OptionsList({ isAuthor, post, onDelete, onEdit, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs animate-in fade-in duration-150 select-none"
       onClick={onClose}
     >
       <div
