@@ -564,7 +564,7 @@ export function EditProfilePage() {
                       <div className="flex-1">
                         <span className="block text-sm font-semibold text-gray-900">Public Account</span>
                         <span className="block text-xs text-gray-500 mt-0.5 leading-relaxed">
-                          Anyone on or off Instagram Clone can see your profile, posts, and reels.
+                          Anyone on or off Socialgram can see your profile, posts, and reels.
                         </span>
                       </div>
                     </label>

@@ -17,14 +17,14 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
     const mailOptions = {
       from: process.env.EMAIL,
       to: receiverMail,
-      subject: "Welcome to Instagram Clone :)",
+      subject: "Welcome to Socialgram :)",
       html: `
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Instagram Clone</title>
+    <title>Welcome to Socialgram</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,13 +59,13 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
 <body>
     <div class="container">
         <div>
-            <h1>Welcome to Instagram Clone!</h1>
+            <h1>Welcome to Socialgram!</h1>
             <p>Dear ${userName},</p>
-            <p>Thank you for signing up for Instagram Clone! We're excited to have you as a part of our community.</p>
-            <p>With Instagram Clone, you can share your photos and videos, connect with friends, and explore new content.</p>
+            <p>Thank you for signing up for Socialgram! We're excited to have you as a part of our community.</p>
+            <p>With Socialgram, you can share your photos and videos, connect with friends, and explore new content.</p>
             <p>If you have any questions or need assistance, feel free to reach out.</p>
             <p>Happy sharing!</p>
-            <p>Best regards,<br>Parmod Kumar • Instagram Clone</p>
+            <p>Best regards,<br>Parmod Kumar • Socialgram</p>
         </div>
     </div>
 </body>

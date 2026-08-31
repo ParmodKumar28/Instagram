@@ -1,8 +1,8 @@
 <div align="center">
 
-# 📸 Instagram Clone — Full-Stack Social Platform
+# 📸 Socialgram — Full-Stack Social Platform
 
-A modern, pixel-perfect, and feature-rich **Instagram Clone** built with **React 18**, **Vite**, **Redux Toolkit**, **Tailwind CSS**, **Node.js**, **Express**, **MongoDB**, and **Socket.IO**.
+A modern, pixel-perfect, and feature-rich full-stack social network built with **React 18**, **Vite**, **Redux Toolkit**, **Tailwind CSS**, **Node.js**, **Express**, **MongoDB**, and **Socket.IO**.
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)

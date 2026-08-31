@@ -124,15 +124,8 @@ export function SignupPage() {
                 </span>
               </div>
 
-              <p className="text-xs text-gray-500 text-center my-2 select-none">
-                People who use our service may have uploaded your contact information to Instagram Clone.{" "}
-                <span className="text-blue-900 cursor-pointer hover:underline">Learn more</span>
-              </p>
-
-              <p className="text-xs text-gray-500 text-center my-2">
-                By signing up, you agree to our{" "}
-                <span className="text-blue-900 cursor-pointer hover:underline">Terms, Privacy Policy</span> and{" "}
-                <span className="text-blue-900 cursor-pointer hover:underline">Cookies Policy.</span>
+              <p className="text-[11px] text-gray-400 text-center my-3 leading-relaxed">
+                By creating an account, you agree to use this platform for educational and demonstration purposes. Please do not submit sensitive personal credentials.
               </p>
 
               <button
@@ -159,34 +152,24 @@ export function SignupPage() {
             </p>
           </div>
 
-          {/* Download App */}
-          <div className="mx-auto my-2 w-[22rem] flex flex-col items-center gap-4">
+          {/* Download App (Visual Only) */}
+          <div className="mx-auto my-2 w-[22rem] flex flex-col items-center gap-4 select-none">
             <p className="text-center text-sm text-gray-600">Get The App</p>
             <div className="flex w-full gap-2 justify-center">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.instagram.android"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:opacity-80 transition"
-              >
+              <div className="hover:opacity-90 transition cursor-default">
                 <img
                   className="h-10 object-contain"
                   src={playstoreBadge}
                   alt="Get it on Google Play"
                 />
-              </a>
-              <a
-                href="https://apps.microsoft.com/detail/9nblggh5l9xt"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:opacity-80 transition"
-              >
+              </div>
+              <div className="hover:opacity-90 transition cursor-default">
                 <img
                   className="h-10 object-contain"
                   src={microsoftBadge}
                   alt="Get it from Microsoft"
                 />
-              </a>
+              </div>
             </div>
           </div>
         </div>
@@ -196,10 +179,10 @@ export function SignupPage() {
       <footer className="py-10 flex flex-col gap-2.5 items-center text-xs text-gray-500 w-auto px-4">
         <div className="flex gap-4 flex-wrap justify-center items-center text-gray-400">
           <span>English (UK)</span>
-          <span>© 2026 Instagram Clone by Parmod Kumar</span>
+          <span>© 2026 Socialgram by Parmod Kumar</span>
         </div>
         <p className="text-[11px] text-gray-400 text-center max-w-lg mt-1 leading-relaxed">
-          Educational Portfolio Project • Not affiliated with, sponsored by, or endorsed by Meta Platforms, Inc. All trademarks belong to their respective owners.
+          Educational Portfolio Project • Inspired by social platforms. Not affiliated with, sponsored by, or endorsed by Meta Platforms, Inc.
         </p>
       </footer>
     </>

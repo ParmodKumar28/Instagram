@@ -736,7 +736,7 @@ export function DirectMessagesPage() {
                   {activeParticipant?.name || activeUsername}
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {activeUsername} • Instagram
+                  {activeUsername} • Socialgram
                 </p>
                 <Link
                   to={`/profile/${activeParticipant?._id || ""}`}

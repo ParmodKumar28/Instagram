@@ -102,13 +102,13 @@ export const sendResetPasswordMail = async (
 <div class="container">
     <h1>Password Reset</h1>
     <p>Dear ${userName},</p>
-    <p>We received a request to reset your password for your account on Instagram Clone. Click the button below to reset your password:</p>
+    <p>We received a request to reset your password for your account on Socialgram. Click the button below to reset your password:</p>
     <a href=${resetPasswordUrl} class="btn">Reset Password</a>
     <h1 class="otp">OTP: ${token}</h1>
     <p>This OTP is only valid for 5 minutes.</p>
     <div class="footer">
         <p>If you did not request a password reset, please ignore this email. Your password will not be changed.</p>
-        <p>Thank you,<br>Parmod Kumar • Instagram Clone</p>
+        <p>Thank you,<br>Parmod Kumar • Socialgram</p>
     </div>
 </div>
 </body>

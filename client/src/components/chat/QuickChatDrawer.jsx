@@ -461,7 +461,7 @@ export function QuickChatDrawer() {
                     {participant?.name || participantName}
                   </h4>
                   <p className="text-[10px] text-gray-400">
-                    {participantName} • Instagram
+                    {participantName} • Socialgram
                   </p>
                 </div>
 

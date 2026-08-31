@@ -139,10 +139,10 @@ export function FeedSuggestionsSidebar() {
       {/* Footer & Educational Disclaimer */}
       <footer className="pt-3 border-t border-gray-100">
         <p className="text-[11px] text-gray-400 font-medium">
-          © 2026 INSTAGRAM CLONE BY PARMOD KUMAR
+          © 2026 SOCIALGRAM BY PARMOD KUMAR
         </p>
         <p className="text-[10px] text-gray-400 mt-1 leading-tight">
-          Educational Portfolio Project • Not affiliated with Meta Platforms, Inc.
+          Educational Portfolio Project • Inspired by Instagram
         </p>
       </footer>
     </aside>
