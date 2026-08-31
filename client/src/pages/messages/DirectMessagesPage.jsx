@@ -38,6 +38,49 @@ import { userService } from "../../services";
 import { formatTimeAgo } from "../../utils";
 import toast from "react-hot-toast";
 
+// Helper to check if message contains only emojis
+function isEmojiOnly(text) {
+  if (!text || typeof text !== "string") return false;
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  const nonEmoji = trimmed.replace(
+    /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier}|\p{Emoji_Component}|\uFE0F|\u200D|\s)/gu,
+    ""
+  );
+  return nonEmoji.length === 0;
+}
+
+// Helper to render message text with clickable URLs
+function renderMessageContent(text, isMine) {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      const href = part.startsWith("http") ? part : `https://${part}`;
+      return (
+        <a
+          key={index}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={`underline break-all font-medium transition ${
+            isMine
+              ? "text-white underline hover:text-white/80"
+              : "text-[#0095F6] hover:text-[#1877F2]"
+          }`}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export function DirectMessagesPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -63,7 +106,6 @@ export function DirectMessagesPage() {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeStoryGroup, setActiveStoryGroup] = useState(null);
-  const [activeTab, setActiveTab] = useState("primary"); // "primary" | "general"
 
   const messagesContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -413,32 +455,9 @@ export function DirectMessagesPage() {
           })}
         </div>
 
-        {/* Tab Selection: Messages / Requests */}
-        <div className="flex items-center justify-between px-5 pt-3 pb-2 text-xs font-semibold">
-          <div className="flex items-center space-x-6">
-            <button
-              type="button"
-              onClick={() => setActiveTab("primary")}
-              className={`pb-1 transition cursor-pointer ${
-                activeTab === "primary"
-                  ? "text-gray-900 border-b-2 border-black"
-                  : "text-gray-400 hover:text-gray-700"
-              }`}
-            >
-              Messages
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("general")}
-              className={`pb-1 transition cursor-pointer ${
-                activeTab === "general"
-                  ? "text-gray-900 border-b-2 border-black"
-                  : "text-gray-400 hover:text-gray-700"
-              }`}
-            >
-              Requests
-            </button>
-          </div>
+        {/* Messages Header Label */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-1 text-xs font-semibold text-gray-900">
+          <span>Messages</span>
         </div>
 
         {/* Search Conversations Input */}
@@ -762,51 +781,64 @@ export function DirectMessagesPage() {
                       currentUserId?.toString();
                     const isLatestSent = isMine && index === lastSentMessageIndex;
 
-                  return (
-                    <div
-                      key={msg._id || index}
-                      className={`flex flex-col group ${
-                        isMine ? "items-end" : "items-start"
-                      }`}
-                    >
+                    const onlyEmoji = !msg.media && isEmojiOnly(msg.text);
+
+                    return (
                       <div
-                        className={`relative flex items-center space-x-1.5 max-w-[75%] sm:max-w-[65%] ${
-                          isMine ? "flex-row-reverse space-x-reverse" : "flex-row"
+                        key={msg._id || index}
+                        className={`flex flex-col group ${
+                          isMine ? "items-end" : "items-start"
                         }`}
                       >
-                        {/* Message Bubble with Official Instagram Styling */}
                         <div
-                          className={`px-4 py-2.5 text-sm leading-relaxed break-words shadow-2xs ${
-                            isMine
-                              ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[22px] rounded-br-[4px]"
-                              : "bg-[#EFEFEF] text-gray-900 rounded-[22px] rounded-bl-[4px]"
+                          className={`relative flex items-center space-x-1.5 max-w-[80%] sm:max-w-[65%] ${
+                            isMine ? "flex-row-reverse space-x-reverse" : "flex-row"
                           }`}
                         >
-                          {/* Media preview */}
-                          {msg.media && (
-                            <div className="mb-2 rounded-xl overflow-hidden max-w-[280px]">
-                              {msg.mediaType === "video" ? (
-                                <video
-                                  src={msg.media}
-                                  controls
-                                  className="w-full rounded-xl object-cover"
-                                />
-                              ) : (
-                                <img
-                                  src={msg.media}
-                                  alt="Attachment"
-                                  className="w-full rounded-xl object-cover"
-                                />
+                          {onlyEmoji ? (
+                            /* Standalone Emojis - No Bubble Background */
+                            <div
+                              className={`leading-none select-text py-1 px-1 ${
+                                msg.text.trim().length <= 4 ? "text-5xl py-1.5" : "text-4xl"
+                              }`}
+                            >
+                              {msg.text}
+                            </div>
+                          ) : (
+                            /* Message Bubble with Official Instagram Styling */
+                            <div
+                              className={`px-4 py-2.5 text-sm leading-relaxed break-words shadow-2xs ${
+                                isMine
+                                  ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[22px] rounded-br-[4px]"
+                                  : "bg-[#EFEFEF] text-gray-900 rounded-[22px] rounded-bl-[4px]"
+                              }`}
+                            >
+                              {/* Media preview */}
+                              {msg.media && (
+                                <div className="mb-2 rounded-xl overflow-hidden max-w-[280px]">
+                                  {msg.mediaType === "video" ? (
+                                    <video
+                                      src={msg.media}
+                                      controls
+                                      className="w-full rounded-xl object-cover"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={msg.media}
+                                      alt="Attachment"
+                                      className="w-full rounded-xl object-cover"
+                                    />
+                                  )}
+                                </div>
+                              )}
+
+                              {msg.text && (
+                                <p className="whitespace-pre-wrap">
+                                  {renderMessageContent(msg.text, isMine)}
+                                </p>
                               )}
                             </div>
                           )}
-
-                          {msg.text && (
-                            <p className={msg.text === "❤️" ? "text-3xl py-1" : ""}>
-                              {msg.text}
-                            </p>
-                          )}
-                        </div>
 
                         {/* Unsend Action on hover for My Messages */}
                         {isMine && (
@@ -882,13 +914,13 @@ export function DirectMessagesPage() {
             )}
 
             {/* Instagram Rounded-Pill Message Input Bar */}
-            <div className="p-4 bg-white border-t border-gray-100">
+            <div className="p-2.5 sm:p-4 bg-white border-t border-gray-100 flex-shrink-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="relative border border-[#DBDBDB] rounded-full px-4 py-2.5 flex items-center space-x-3 focus-within:border-gray-400 transition"
+                className="relative border border-[#DBDBDB] rounded-full px-3 sm:px-4 py-2 sm:py-2.5 flex items-center space-x-2 sm:space-x-3 focus-within:border-gray-400 transition"
               >
                 {/* Emoji Picker Button */}
                 <button

@@ -34,6 +34,49 @@ import { userService } from "../../services";
 import { formatTimeAgo } from "../../utils";
 import toast from "react-hot-toast";
 
+// Helper to check if message contains only emojis
+function isEmojiOnly(text) {
+  if (!text || typeof text !== "string") return false;
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  const nonEmoji = trimmed.replace(
+    /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier}|\p{Emoji_Component}|\uFE0F|\u200D|\s)/gu,
+    ""
+  );
+  return nonEmoji.length === 0;
+}
+
+// Helper to render message text with clickable URLs
+function renderMessageContent(text, isMine) {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      const href = part.startsWith("http") ? part : `https://${part}`;
+      return (
+        <a
+          key={index}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={`underline break-all font-medium transition ${
+            isMine
+              ? "text-white underline hover:text-white/80"
+              : "text-[#0095F6] hover:text-[#1877F2]"
+          }`}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export function QuickChatDrawer() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -481,6 +524,8 @@ export function QuickChatDrawer() {
                         currentUserId?.toString();
                       const isLatestSent = isMine && index === lastSentMessageIndex;
 
+                      const onlyEmoji = !msg.media && isEmojiOnly(msg.text);
+
                       return (
                         <div
                           key={msg._id || index}
@@ -488,26 +533,36 @@ export function QuickChatDrawer() {
                             isMine ? "items-end" : "items-start"
                           }`}
                         >
-                          <div
-                            className={`px-3.5 py-2 text-xs leading-relaxed max-w-[80%] break-words shadow-2xs ${
-                              isMine
-                                ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[18px] rounded-br-[3px]"
-                                : "bg-[#EFEFEF] text-gray-900 rounded-[18px] rounded-bl-[3px]"
-                            }`}
-                          >
-                            {msg.media && (
-                              <img
-                                src={msg.media}
-                                alt="Attachment"
-                                className="mb-1 rounded-lg max-h-36 object-cover"
-                              />
-                            )}
-                            {msg.text && (
-                              <p className={msg.text === "❤️" ? "text-2xl" : ""}>
-                                {msg.text}
-                              </p>
-                            )}
-                          </div>
+                          {onlyEmoji ? (
+                            <div
+                              className={`leading-none select-text py-0.5 px-1 ${
+                                msg.text.trim().length <= 4 ? "text-4xl py-1" : "text-3xl"
+                              }`}
+                            >
+                              {msg.text}
+                            </div>
+                          ) : (
+                            <div
+                              className={`px-3.5 py-2 text-xs leading-relaxed max-w-[80%] break-words shadow-2xs ${
+                                isMine
+                                  ? "bg-gradient-to-r from-[#7000FF] via-[#A800E0] to-[#E1306C] text-white rounded-[18px] rounded-br-[3px]"
+                                  : "bg-[#EFEFEF] text-gray-900 rounded-[18px] rounded-bl-[3px]"
+                              }`}
+                            >
+                              {msg.media && (
+                                <img
+                                  src={msg.media}
+                                  alt="Attachment"
+                                  className="mb-1 rounded-lg max-h-36 object-cover"
+                                />
+                              )}
+                              {msg.text && (
+                                <p className="whitespace-pre-wrap">
+                                  {renderMessageContent(msg.text, isMine)}
+                                </p>
+                              )}
+                            </div>
+                          )}
                           <div className="text-[9px] text-gray-400 mt-0.5 px-1 flex items-center space-x-1">
                             <span>{formatTimeAgo(msg.createdAt)}</span>
                             {isLatestSent && msg.seen && (
