@@ -156,8 +156,8 @@ const userSchema = new mongoose.Schema(
       sparse: true, // Allow multiple documents to have a null value for this field
       validate: {
         validator: function (value) {
-          if (value === null || value === undefined) {
-            // Allow null and undefined values
+          if (value === null || value === undefined || value === "") {
+            // Allow null, undefined, and empty string values
             return true;
           }
 
@@ -176,7 +176,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       validate: {
         validator: function (value) {
-          return value instanceof Date && !isNaN(value);
+          if (value === null || value === undefined || value === "") {
+            return true;
+          }
+          const d = new Date(value);
+          return !isNaN(d.getTime());
         },
         message: "Invalid date of birth",
       },

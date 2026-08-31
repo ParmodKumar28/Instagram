@@ -106,7 +106,21 @@ export const logout = async (req, res, next) => {
 // Update profile user
 export const updateUserProfile = async (req, res, next) => {
   try {
-    const updatedData = req.body;
+    const updatedData = { ...req.body };
+
+    // Clean empty/null optional fields so they don't trigger validation or casting errors
+    if (updatedData.phone === "" || updatedData.phone === null) {
+      delete updatedData.phone;
+    }
+    if (updatedData.dateOfBirth === "" || updatedData.dateOfBirth === null) {
+      delete updatedData.dateOfBirth;
+    }
+    if (updatedData.website === "" || updatedData.website === null) {
+      delete updatedData.website;
+    }
+    if (updatedData.gender === "" || updatedData.gender === null) {
+      delete updatedData.gender;
+    }
 
     // Check if the updatedData object is empty
     if (Object.keys(updatedData).length === 0) {

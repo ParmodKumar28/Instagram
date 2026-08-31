@@ -117,8 +117,14 @@ export function EditProfilePage() {
       return;
     }
 
+    const payload = { ...formData };
+    if (!payload.phone) delete payload.phone;
+    if (!payload.dateOfBirth) delete payload.dateOfBirth;
+    if (!payload.website) delete payload.website;
+    if (!payload.gender) delete payload.gender;
+
     try {
-      await dispatch(updateProfileAsync(formData)).unwrap();
+      await dispatch(updateProfileAsync(payload)).unwrap();
     } catch (err) {
       console.error("Error updating profile:", err);
     }
@@ -193,36 +199,38 @@ export function EditProfilePage() {
   };
 
   return (
-    <div className="min-h-screen py-6 px-2">
+    <div className="min-h-screen py-4 sm:py-6 px-3 sm:px-4 pb-20 md:pb-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 flex items-center">
-          <Link to={userId ? `/profile/${userId}` : "/"} className="mr-3">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition"
-            >
-              <ChevronLeft size={20} className="text-gray-700" />
-            </motion.div>
-          </Link>
-          <h1 className="text-lg font-bold text-gray-800">Edit Profile</h1>
+        <div className="bg-white rounded-2xl shadow-xs border border-gray-200/80 p-3.5 sm:p-4 mb-4 sm:mb-6 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Link to={userId ? `/profile/${userId}` : "/"}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition cursor-pointer flex items-center justify-center"
+              >
+                <ChevronLeft size={20} className="text-gray-700" />
+              </motion.div>
+            </Link>
+            <h1 className="text-base sm:text-lg font-bold text-gray-900">Edit Profile</h1>
+          </div>
         </div>
 
         {/* Profile Picture Section */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+          className="bg-white rounded-2xl shadow-xs border border-gray-200/80 p-4 sm:p-6 mb-4 sm:mb-6"
         >
           <div className="flex items-center mb-4">
-            <Camera className="text-blue-500 mr-2" size={20} />
-            <h2 className="text-base font-bold text-gray-800">Profile Photo</h2>
+            <Camera className="text-[#0095F6] mr-2" size={20} />
+            <h2 className="text-sm sm:text-base font-bold text-gray-900">Profile Photo</h2>
           </div>
 
           <div className="flex flex-col items-center">
             <div className="relative mb-4 group">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center">
                 <Avatar
                   src={previewImage || signedUser?.profilePic}
                   alt="Profile Preview"
@@ -236,7 +244,7 @@ export function EditProfilePage() {
                 <button
                   type="button"
                   onClick={removeSelectedImage}
-                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full shadow"
+                  className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full shadow cursor-pointer"
                 >
                   <X size={14} />
                 </button>
@@ -244,7 +252,7 @@ export function EditProfilePage() {
 
               <label
                 htmlFor="profilePicInput"
-                className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-md transition"
+                className="absolute bottom-0 right-0 bg-[#0095F6] hover:bg-[#1877F2] text-white p-2 rounded-full cursor-pointer shadow-md transition"
               >
                 <Camera size={16} />
               </label>
@@ -259,13 +267,13 @@ export function EditProfilePage() {
 
             {profilePic && (
               <div className="text-center mb-2">
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-gray-500 mb-2 truncate max-w-[240px]">
                   Selected: {profilePic.name}
                 </p>
                 <button
                   onClick={handleProfilePicUpload}
                   disabled={uploadLoading}
-                  className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-full transition flex items-center space-x-1.5"
+                  className="bg-[#0095F6] hover:bg-[#1877F2] text-white text-xs font-semibold px-4 py-2 rounded-full transition flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
                 >
                   {uploadLoading ? (
                     <>
@@ -290,10 +298,10 @@ export function EditProfilePage() {
             )}
 
             {/* Avatar Selector Gallery */}
-            <div className="w-full mt-6 pt-5 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-3">
+            <div className="w-full mt-5 pt-4 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center space-x-1.5">
-                  <span>Choose Preset Avatar</span>
+                  <span>Preset Avatars</span>
                   <span className="text-[10px] text-gray-400 font-normal">
                     ({selectedAvatarCategory === "male"
                       ? MALE_AVATARS.length
@@ -304,7 +312,7 @@ export function EditProfilePage() {
                       : ALL_AVATARS.length})
                   </span>
                 </span>
-                <div className="flex space-x-1 bg-gray-100 p-0.5 rounded-lg text-xs">
+                <div className="flex space-x-1 bg-gray-100 p-0.5 rounded-lg text-xs self-start sm:self-auto">
                   {[
                     { id: "all", label: "All" },
                     { id: "male", label: "Male" },
@@ -315,9 +323,9 @@ export function EditProfilePage() {
                       key={id}
                       type="button"
                       onClick={() => setSelectedAvatarCategory(id)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-semibold transition ${
+                      className={`px-2.5 py-1 rounded-md text-xs font-semibold transition cursor-pointer ${
                         selectedAvatarCategory === id
-                          ? "bg-white text-blue-600 shadow-xs"
+                          ? "bg-white text-[#0095F6] shadow-xs"
                           : "text-gray-500 hover:text-gray-800"
                       }`}
                     >
@@ -327,7 +335,7 @@ export function EditProfilePage() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3.5 overflow-x-auto pb-3 pt-1 scrollbar-thin scrollbar-thumb-gray-200">
+              <div className="flex items-center space-x-3 overflow-x-auto pb-2 pt-1 scrollbar-none">
                 {(selectedAvatarCategory === "female"
                   ? FEMALE_AVATARS
                   : selectedAvatarCategory === "male"
@@ -343,11 +351,11 @@ export function EditProfilePage() {
                       type="button"
                       disabled={avatarLoading}
                       onClick={() => handleSelectAvatar(avatarUrl)}
-                      title={`Select preset ${selectedAvatarCategory === "female" ? "female" : selectedAvatarCategory === "male" ? "male" : ""} avatar #${idx + 1}`}
-                      className={`relative flex-shrink-0 w-12 h-12 rounded-full overflow-hidden transition-all duration-200 transform hover:scale-110 focus:outline-none ${
+                      title={`Select preset avatar #${idx + 1}`}
+                      className={`relative flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-200 transform hover:scale-105 focus:outline-none cursor-pointer ${
                         isSelected
-                          ? "ring-2 ring-blue-500 ring-offset-2 scale-105 shadow-md"
-                          : "opacity-85 hover:opacity-100 border border-gray-200 shadow-xs hover:shadow"
+                          ? "ring-2 ring-[#0095F6] ring-offset-2 scale-105 shadow-md"
+                          : "opacity-85 hover:opacity-100 border border-gray-200 shadow-2xs"
                       }`}
                     >
                       <img
@@ -357,7 +365,7 @@ export function EditProfilePage() {
                         loading="lazy"
                       />
                       {isSelected && (
-                        <div className="absolute inset-0 bg-blue-500/30 backdrop-blur-[0.5px] flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[#0095F6]/30 backdrop-blur-[0.5px] flex items-center justify-center">
                           <Check size={16} className="text-white drop-shadow font-bold" />
                         </div>
                       )}
@@ -370,33 +378,36 @@ export function EditProfilePage() {
         </motion.div>
 
         {/* Form Sections */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-          <div className="flex border-b border-gray-200">
+        <div className="bg-white rounded-2xl shadow-xs border border-gray-200/80 overflow-hidden mb-6">
+          <div className="flex border-b border-gray-100 bg-gray-50/50">
             <button
+              type="button"
               onClick={() => setActiveSection("basic")}
-              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition ${
+              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
                 activeSection === "basic"
-                  ? "text-blue-600 border-b-2 border-blue-600"
+                  ? "text-[#0095F6] border-b-2 border-[#0095F6] bg-white"
                   : "text-gray-400 hover:text-gray-700"
               }`}
             >
               Basic Info
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection("additional")}
-              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition ${
+              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
                 activeSection === "additional"
-                  ? "text-blue-600 border-b-2 border-blue-600"
+                  ? "text-[#0095F6] border-b-2 border-[#0095F6] bg-white"
                   : "text-gray-400 hover:text-gray-700"
               }`}
             >
               Additional
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection("privacy")}
-              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition ${
+              className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
                 activeSection === "privacy"
-                  ? "text-blue-600 border-b-2 border-blue-600"
+                  ? "text-[#0095F6] border-b-2 border-[#0095F6] bg-white"
                   : "text-gray-400 hover:text-gray-700"
               }`}
             >
@@ -404,11 +415,11 @@ export function EditProfilePage() {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
             {activeSection === "basic" && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="name" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -416,7 +427,7 @@ export function EditProfilePage() {
                     id="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
                     placeholder="Full name"
                   />
                   {formErrors.name && (
@@ -425,7 +436,7 @@ export function EditProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="email" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Email <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -433,7 +444,7 @@ export function EditProfilePage() {
                     id="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
                     placeholder="Email"
                   />
                   {formErrors.email && (
@@ -442,7 +453,7 @@ export function EditProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="username" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="username" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Username <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -450,7 +461,7 @@ export function EditProfilePage() {
                     id="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
                     placeholder="Username"
                   />
                   {formErrors.username && (
@@ -459,7 +470,7 @@ export function EditProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="bio" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="bio" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Bio
                   </label>
                   <textarea
@@ -467,9 +478,13 @@ export function EditProfilePage() {
                     value={formData.bio}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    maxLength={150}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none resize-none transition"
                     placeholder="Write something about yourself..."
                   />
+                  <div className="text-right text-[11px] text-gray-400 mt-0.5">
+                    {formData.bio.length}/150
+                  </div>
                 </div>
               </div>
             )}
@@ -477,7 +492,7 @@ export function EditProfilePage() {
             {activeSection === "additional" && (
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="phone" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="phone" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Phone Number
                   </label>
                   <input
@@ -485,13 +500,13 @@ export function EditProfilePage() {
                     id="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Phone number"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
+                    placeholder="10-digit mobile number"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="website" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="website" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Website
                   </label>
                   <input
@@ -499,13 +514,13 @@ export function EditProfilePage() {
                     id="website"
                     value={formData.website}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
                     placeholder="https://example.com"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="dateOfBirth" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="dateOfBirth" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Date of Birth
                   </label>
                   <input
@@ -513,25 +528,24 @@ export function EditProfilePage() {
                     id="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="gender" className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                  <label htmlFor="gender" className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
                     Gender
                   </label>
                   <select
                     id="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:ring-1 focus:ring-[#0095F6] focus:border-[#0095F6] focus:outline-none transition bg-white"
                   >
                     <option value="">Select gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
-                    <option value="prefer-not-to-say">Prefer not to say</option>
                   </select>
                 </div>
               </div>
@@ -546,9 +560,9 @@ export function EditProfilePage() {
                   <div className="space-y-3">
                     <label
                       onClick={() => setFormData((prev) => ({ ...prev, accountType: "public" }))}
-                      className={`flex items-start space-x-3.5 p-3.5 border rounded-xl cursor-pointer transition ${
+                      className={`flex items-start space-x-3.5 p-3.5 sm:p-4 border rounded-xl cursor-pointer transition ${
                         formData.accountType === "public"
-                          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30"
+                          ? "border-[#0095F6] bg-blue-50/40 ring-1 ring-[#0095F6]/30"
                           : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
@@ -559,7 +573,7 @@ export function EditProfilePage() {
                         value="public"
                         checked={formData.accountType === "public"}
                         onChange={handleInputChange}
-                        className="mt-0.5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="mt-0.5 text-[#0095F6] focus:ring-[#0095F6] cursor-pointer"
                       />
                       <div className="flex-1">
                         <span className="block text-sm font-semibold text-gray-900">Public Account</span>
@@ -571,9 +585,9 @@ export function EditProfilePage() {
 
                     <label
                       onClick={() => setFormData((prev) => ({ ...prev, accountType: "private" }))}
-                      className={`flex items-start space-x-3.5 p-3.5 border rounded-xl cursor-pointer transition ${
+                      className={`flex items-start space-x-3.5 p-3.5 sm:p-4 border rounded-xl cursor-pointer transition ${
                         formData.accountType === "private"
-                          ? "border-blue-500 bg-blue-50/40 ring-1 ring-blue-500/30"
+                          ? "border-[#0095F6] bg-blue-50/40 ring-1 ring-[#0095F6]/30"
                           : "border-gray-200 hover:bg-gray-50"
                       }`}
                     >
@@ -584,7 +598,7 @@ export function EditProfilePage() {
                         value="private"
                         checked={formData.accountType === "private"}
                         onChange={handleInputChange}
-                        className="mt-0.5 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="mt-0.5 text-[#0095F6] focus:ring-[#0095F6] cursor-pointer"
                       />
                       <div className="flex-1">
                         <span className="block text-sm font-semibold text-gray-900">Private Account</span>
@@ -598,11 +612,11 @@ export function EditProfilePage() {
               </div>
             )}
 
-            <div className="pt-4 space-y-3">
+            <div className="pt-4 space-y-2.5">
               <button
                 type="submit"
                 disabled={profileLoading}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition shadow-sm flex justify-center items-center"
+                className="w-full bg-[#0095F6] hover:bg-[#1877F2] active:scale-[0.99] disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition shadow-xs flex justify-center items-center cursor-pointer"
               >
                 {profileLoading ? (
                   <>
@@ -617,7 +631,7 @@ export function EditProfilePage() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-4 rounded-lg text-sm transition flex justify-center items-center space-x-2 cursor-pointer"
+                className="w-full bg-gray-100 hover:bg-gray-200 active:scale-[0.99] text-gray-800 font-semibold py-2.5 px-4 rounded-xl text-sm transition flex justify-center items-center space-x-2 cursor-pointer"
               >
                 <LogOut size={16} />
                 <span>Log Out</span>
@@ -626,7 +640,7 @@ export function EditProfilePage() {
               <button
                 type="button"
                 onClick={handleDeleteProfile}
-                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2.5 px-4 rounded-lg text-sm transition border border-red-200 cursor-pointer"
+                className="w-full bg-red-50 hover:bg-red-100 active:scale-[0.99] text-red-600 font-semibold py-2.5 px-4 rounded-xl text-sm transition border border-red-200 cursor-pointer"
               >
                 Delete Account
               </button>
