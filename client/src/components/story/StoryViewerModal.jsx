@@ -215,7 +215,7 @@ export function StoryViewerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md select-none animate-in fade-in duration-200">
       {/* Previous User Navigation Arrow */}
       {userIndex > 0 && (
         <button
@@ -358,7 +358,7 @@ export function StoryViewerModal({
         )}
 
         {/* Bottom Interaction Area */}
-        <div className="relative z-30 px-3.5 sm:px-4 pb-5 sm:pb-4 pt-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex-shrink-0">
+        <div className="relative z-30 px-3.5 sm:px-4 pb-6 sm:pb-4 pt-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex-shrink-0">
           {isSelf ? (
             /* Author View: Viewers Count & Drawer Toggle */
             <div>

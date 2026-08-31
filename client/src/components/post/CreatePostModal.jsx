@@ -151,13 +151,13 @@ export function CreatePostModal({ isOpen, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] bg-black/65 flex items-center justify-center p-3 sm:p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
       onClick={handleClose}
     >
       {/* Top right close button */}
       <button
         onClick={handleClose}
-        className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-gray-300 text-2xl sm:text-3xl focus:outline-none p-1 z-50"
+        className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-gray-300 text-2xl sm:text-3xl focus:outline-none p-1 z-[100]"
         aria-label="Close modal"
       >
         <IoClose />
@@ -294,11 +294,16 @@ export function CreatePostModal({ isOpen, onClose }) {
                   <div className="relative flex justify-between items-center text-gray-400 text-xs py-2 border-b border-gray-100">
                     <button
                       type="button"
-                      onClick={() => setShowEmojiPicker((prev) => !prev)}
-                      className={`hover:text-gray-700 p-0.5 text-lg transition ${
+                      data-emoji-trigger="true"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEmojiPicker((prev) => !prev);
+                      }}
+                      className={`hover:text-gray-700 p-0.5 text-lg transition cursor-pointer ${
                         showEmojiPicker ? "text-[#0095F6]" : ""
                       }`}
                       aria-label="Add emoji"
+                      title="Add emoji"
                     >
                       <BsEmojiSmile />
                     </button>

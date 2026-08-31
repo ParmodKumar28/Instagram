@@ -629,12 +629,14 @@ export function QuickChatDrawer() {
                 >
                   <button
                     type="button"
+                    data-emoji-trigger="true"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowEmoji((prev) => !prev);
                     }}
                     className="text-gray-800 hover:text-black text-xl cursor-pointer"
                     title="Emoji"
+                    aria-label="Add emoji"
                   >
                     <BsEmojiSmile />
                   </button>

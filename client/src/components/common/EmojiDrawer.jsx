@@ -11,7 +11,7 @@ export function EmojiDrawer({
   onEmojiSelect,
   position = "top", // "top" | "bottom" | "top-right" | "top-left" | "bottom-right" | "bottom-left"
   width = 320,
-  height = 380,
+  height = 360,
   className = "",
   theme = Theme.LIGHT,
 }) {
@@ -21,9 +21,21 @@ export function EmojiDrawer({
     if (!isOpen) return;
 
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        onClose?.();
+      // If clicking inside the emoji drawer, don't close
+      if (containerRef.current && containerRef.current.contains(event.target)) {
+        return;
       }
+
+      // If clicking on an emoji toggle trigger button, let the button's own toggle handler handle it
+      if (
+        event.target.closest?.("[data-emoji-trigger='true']") ||
+        event.target.closest?.("button[title*='emoji' i]") ||
+        event.target.closest?.("button[aria-label*='emoji' i]")
+      ) {
+        return;
+      }
+
+      onClose?.();
     };
 
     const handleKeyDown = (event) => {
@@ -33,23 +45,26 @@ export function EmojiDrawer({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
+  // Responsive position classes with mobile edge containment
   const positionClasses = {
-    top: "bottom-full mb-2 left-0",
-    "top-right": "bottom-full mb-2 right-0",
-    "top-left": "bottom-full mb-2 left-0",
-    bottom: "top-full mt-2 left-0",
-    "bottom-right": "top-full mt-2 right-0",
-    "bottom-left": "top-full mt-2 left-0",
+    top: "bottom-full mb-2 left-0 sm:left-0",
+    "top-right": "bottom-full mb-2 right-0 max-sm:left-0 max-sm:right-auto sm:right-0",
+    "top-left": "bottom-full mb-2 left-0 sm:left-0",
+    bottom: "top-full mt-2 left-0 sm:left-0",
+    "bottom-right": "top-full mt-2 right-0 max-sm:left-0 max-sm:right-auto sm:right-0",
+    "bottom-left": "top-full mt-2 left-0 sm:left-0",
   };
 
   const currentPositionClass = positionClasses[position] || positionClasses.top;
@@ -57,8 +72,11 @@ export function EmojiDrawer({
   return (
     <div
       ref={containerRef}
-      className={`absolute z-[100] shadow-2xl rounded-2xl overflow-hidden border border-gray-200 bg-white ${currentPositionClass} ${className}`}
-      style={{ width, height }}
+      className={`absolute z-[100] shadow-[0_12px_40px_rgba(0,0,0,0.18)] rounded-2xl overflow-hidden border border-gray-200/90 bg-white max-w-[calc(100vw-24px)] animate-in fade-in zoom-in-95 duration-150 ${currentPositionClass} ${className}`}
+      style={{
+        width: typeof width === "number" ? Math.min(width, 360) : width,
+        height: typeof height === "number" ? Math.min(height, 380) : height,
+      }}
       onClick={(e) => e.stopPropagation()}
     >
       <EmojiPicker

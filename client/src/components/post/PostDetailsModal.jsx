@@ -374,11 +374,11 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-200" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-200" onClick={onClose}>
       {/* Close button at top-right outside modal (Tablet / Desktop) */}
       <button
         onClick={onClose}
-        className="hidden sm:block absolute top-4 right-4 text-white hover:text-gray-300 text-3xl z-50 p-2 focus:outline-none transition cursor-pointer"
+        className="hidden sm:block absolute top-4 right-4 text-white hover:text-gray-300 text-3xl z-[100] p-2 focus:outline-none transition cursor-pointer"
         aria-label="Close modal"
       >
         <IoClose />
@@ -575,11 +575,16 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
                     <div className="relative">
                       <button
                         type="button"
-                        onClick={() => setShowEditEmojiPicker((prev) => !prev)}
+                        data-emoji-trigger="true"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowEditEmojiPicker((prev) => !prev);
+                        }}
                         className={`text-gray-400 hover:text-gray-600 text-base p-1.5 rounded-md transition hover:bg-gray-100 cursor-pointer ${
                           showEditEmojiPicker ? "text-[#0095F6]" : ""
                         }`}
                         aria-label="Add emoji to caption"
+                        title="Add emoji"
                       >
                         <BsEmojiSmile />
                       </button>
@@ -871,11 +876,16 @@ export function PostDetailsModal({ post: initialPost, isOpen = true, onClose }) 
               <div className="flex items-center space-x-2.5">
                 <button
                   type="button"
-                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  data-emoji-trigger="true"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEmojiPicker((prev) => !prev);
+                  }}
                   className={`text-gray-400 hover:text-gray-600 text-lg cursor-pointer p-0.5 transition ${
                     showEmojiPicker ? "text-[#0095F6]" : ""
                   }`}
                   aria-label="Add emoji"
+                  title="Add emoji"
                 >
                   <BsEmojiSmile />
                 </button>

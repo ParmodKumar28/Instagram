@@ -974,6 +974,7 @@ function SingleReelCard({
               />
               <button
                 type="button"
+                data-emoji-trigger="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowEmoji((prev) => !prev);

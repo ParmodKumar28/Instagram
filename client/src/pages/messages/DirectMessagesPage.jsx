@@ -925,12 +925,14 @@ export function DirectMessagesPage() {
                 {/* Emoji Picker Button */}
                 <button
                   type="button"
+                  data-emoji-trigger="true"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowEmoji((prev) => !prev);
                   }}
                   className="text-gray-800 hover:text-black text-2xl cursor-pointer transition active:scale-90 flex-shrink-0"
                   title="Add emoji"
+                  aria-label="Add emoji"
                 >
                   <BsEmojiSmile />
                 </button>

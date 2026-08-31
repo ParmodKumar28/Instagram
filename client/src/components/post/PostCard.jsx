@@ -834,11 +834,16 @@ export function PostCard({ post, onPostDeleted }) {
           <div className="flex items-center space-x-2">
             <button
               type="button"
-              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              data-emoji-trigger="true"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEmojiPicker((prev) => !prev);
+              }}
               className={`text-gray-400 hover:text-gray-600 text-sm cursor-pointer p-0.5 transition ${
                 showEmojiPicker ? "text-[#0095F6]" : ""
               }`}
               aria-label="Add emoji"
+              title="Add emoji"
             >
               <BsEmojiSmile />
             </button>
