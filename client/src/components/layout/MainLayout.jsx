@@ -45,7 +45,7 @@ export function MainLayout() {
           isReelsPage
             ? "bg-transparent h-[calc(100dvh-48px)] md:h-screen overflow-hidden p-0"
             : isMessagesPage
-            ? "bg-white h-screen max-h-screen overflow-hidden p-0"
+            ? "bg-white h-[100dvh] max-h-[100dvh] overflow-hidden p-0"
             : "bg-transparent min-h-screen pt-12 md:pt-0 pb-14 md:pb-0"
         }`}
       >

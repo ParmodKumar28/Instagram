@@ -230,7 +230,7 @@ export function StoryViewerModal({
 
       {/* Main Story Stage Container */}
       <div
-        className="relative w-full h-full max-h-[100vh] sm:max-h-[92vh] max-w-[430px] aspect-[9/16] bg-black sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between"
+        className="relative w-full h-[100dvh] sm:h-[92vh] sm:max-h-[92vh] max-w-[430px] sm:aspect-[9/16] bg-black sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between"
         onMouseDown={() => setIsPaused(true)}
         onMouseUp={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
@@ -358,7 +358,7 @@ export function StoryViewerModal({
         )}
 
         {/* Bottom Interaction Area */}
-        <div className="relative z-30 px-3 pb-4 pt-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div className="relative z-30 px-3.5 sm:px-4 pb-5 sm:pb-4 pt-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex-shrink-0">
           {isSelf ? (
             /* Author View: Viewers Count & Drawer Toggle */
             <div>
@@ -368,7 +368,7 @@ export function StoryViewerModal({
                   e.stopPropagation();
                   setShowViewers((prev) => !prev);
                 }}
-                className="flex items-center space-x-2 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-4 py-2 rounded-full border border-white/20 transition cursor-pointer"
+                className="flex items-center space-x-2 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-white/20 transition cursor-pointer"
               >
                 <IoEyeOutline className="text-base text-white/80" />
                 <span>{currentStory.viewers?.length || 0} Views</span>
@@ -376,13 +376,13 @@ export function StoryViewerModal({
             </div>
           ) : (
             /* Viewer View: Reply & Heart Reaction */
-            <div className="flex items-center space-x-2.5">
+            <div className="flex items-center space-x-3">
               <form
                 onSubmit={(e) => {
                   e.stopPropagation();
                   handleSendReply(e);
                 }}
-                className="flex-1 flex items-center bg-black/40 backdrop-blur-md border border-white/30 rounded-full px-3.5 py-1.5 focus-within:border-white transition"
+                className="flex-1 flex items-center bg-black/40 backdrop-blur-md border border-white/30 rounded-full px-4 py-2 focus-within:border-white transition min-h-[42px]"
               >
                 <input
                   type="text"
@@ -394,13 +394,13 @@ export function StoryViewerModal({
                   onFocus={() => setIsPaused(true)}
                   onBlur={() => setIsPaused(false)}
                   placeholder={`Reply to ${currentGroup?.user?.username || "user"}...`}
-                  className="w-full bg-transparent text-white placeholder-white/60 text-xs outline-none"
+                  className="w-full bg-transparent text-white placeholder-white/70 text-xs sm:text-sm outline-none"
                   onClick={(e) => e.stopPropagation()}
                 />
                 {replyText.trim() && (
                   <button
                     type="submit"
-                    className="text-white hover:text-[#0095F6] ml-2 text-sm cursor-pointer"
+                    className="text-white hover:text-[#0095F6] ml-2 text-base cursor-pointer flex-shrink-0"
                   >
                     <IoSend />
                   </button>
@@ -413,13 +413,13 @@ export function StoryViewerModal({
                   e.stopPropagation();
                   handleSendReaction();
                 }}
-                className="text-white hover:scale-110 active:scale-95 transition p-1.5 cursor-pointer"
+                className="text-white hover:scale-110 active:scale-90 transition p-1.5 cursor-pointer flex-shrink-0 flex items-center justify-center"
                 aria-label="Like story"
               >
                 {hasLiked ? (
-                  <IoHeartSharp className="text-2xl text-red-500 animate-in zoom-in-75 duration-150" />
+                  <IoHeartSharp className="text-2xl sm:text-3xl text-red-500 animate-in zoom-in-75 duration-150" />
                 ) : (
-                  <IoHeartOutline className="text-2xl" />
+                  <IoHeartOutline className="text-2xl sm:text-3xl" />
                 )}
               </button>
             </div>

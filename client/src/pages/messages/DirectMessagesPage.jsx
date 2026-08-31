@@ -361,12 +361,12 @@ export function DirectMessagesPage() {
   );
 
   return (
-    <div className="w-full h-full h-screen max-h-screen bg-white flex overflow-hidden select-none">
+    <div className="w-full h-[100dvh] max-h-[100dvh] bg-white flex overflow-hidden select-none">
       {/* ========================================================
           LEFT COLUMN: Conversations Sidebar (Instagram Direct Inbox)
          ======================================================== */}
       <div
-        className={`w-full md:w-[350px] lg:w-[390px] border-r border-gray-200 flex flex-col bg-white flex-shrink-0 h-full ${
+        className={`w-full md:w-[350px] lg:w-[390px] border-r border-gray-200 flex flex-col bg-white flex-shrink-0 h-[100dvh] max-h-[100dvh] ${
           activeConversation ? "hidden md:flex" : "flex"
         }`}
       >
@@ -625,7 +625,7 @@ export function DirectMessagesPage() {
           RIGHT COLUMN: Active Chat Feed or Instagram Empty State
          ======================================================== */}
       <div
-        className={`flex-1 flex flex-col bg-white overflow-hidden h-full ${
+        className={`flex-1 flex flex-col bg-white overflow-hidden h-[100dvh] max-h-[100dvh] ${
           activeConversation ? "flex" : "hidden md:flex"
         }`}
       >
@@ -633,8 +633,8 @@ export function DirectMessagesPage() {
           /* Active Chat View */
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Top Bar Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-white">
-              <div className="flex items-center space-x-3.5">
+            <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3.5 border-b border-gray-200 bg-white flex-shrink-0 z-20">
+              <div className="flex items-center space-x-2 sm:space-x-3.5 min-w-0">
                 {/* Mobile Back Button */}
                 <button
                   type="button"
@@ -642,7 +642,7 @@ export function DirectMessagesPage() {
                     dispatch(setActiveConversation(null));
                     navigate("/messages");
                   }}
-                  className="md:hidden p-1 text-gray-800 hover:text-black mr-1 cursor-pointer"
+                  className="md:hidden p-1.5 -ml-1 text-gray-800 hover:text-black cursor-pointer rounded-full hover:bg-gray-100 transition flex items-center justify-center flex-shrink-0"
                   aria-label="Back to conversations"
                 >
                   <IoChevronBack className="text-2xl" />
@@ -914,13 +914,13 @@ export function DirectMessagesPage() {
             )}
 
             {/* Instagram Rounded-Pill Message Input Bar */}
-            <div className="p-2.5 sm:p-4 bg-white border-t border-gray-100 flex-shrink-0">
+            <div className="p-2 sm:p-3.5 pb-3 sm:pb-3.5 bg-white border-t border-gray-100 flex-shrink-0 z-20">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="relative border border-[#DBDBDB] rounded-full px-3 sm:px-4 py-2 sm:py-2.5 flex items-center space-x-2 sm:space-x-3 focus-within:border-gray-400 transition"
+                className="relative border border-[#DBDBDB] rounded-full px-3 sm:px-4 py-1.5 sm:py-2.5 flex items-center space-x-2 sm:space-x-3 focus-within:border-gray-400 transition min-h-[44px]"
               >
                 {/* Emoji Picker Button */}
                 <button
