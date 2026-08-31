@@ -137,8 +137,8 @@ export function SharePostModal({ post, isOpen, onClose }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Post by ${post?.user?.username || "Instagram user"}`,
-          text: post?.caption || "Check out this Instagram post!",
+          title: `Post by ${post?.user?.username || "Instagram Clone user"}`,
+          text: post?.caption || "Check out this post on Instagram Clone!",
           url: postUrl,
         });
       } catch (err) {

@@ -152,26 +152,14 @@ export function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-10 flex flex-col gap-2 items-center text-sm text-gray-500 w-auto">
-        <div className="flex gap-4 flex-wrap justify-center px-4">
-          <span className="cursor-pointer hover:underline">Meta</span>
-          <span className="cursor-pointer hover:underline">About</span>
-          <span className="cursor-pointer hover:underline">Blog</span>
-          <span className="cursor-pointer hover:underline">Jobs</span>
-          <span className="cursor-pointer hover:underline">Help</span>
-          <span className="cursor-pointer hover:underline">API</span>
-          <span className="cursor-pointer hover:underline">Privacy</span>
-          <span className="cursor-pointer hover:underline">Terms</span>
-          <span className="cursor-pointer hover:underline">Locations</span>
-          <span className="cursor-pointer hover:underline">Instagram Lite</span>
-          <span className="cursor-pointer hover:underline">Threads</span>
-          <span className="cursor-pointer hover:underline">Contact uploading and non-users</span>
-          <span className="cursor-pointer hover:underline">Meta Verified</span>
-        </div>
-        <div className="flex gap-4 flex-wrap justify-center">
+      <footer className="py-10 flex flex-col gap-2.5 items-center text-xs text-gray-500 w-auto px-4">
+        <div className="flex gap-4 flex-wrap justify-center items-center text-gray-400">
           <span>English (UK)</span>
-          <span>© 2026 Instagram from Meta</span>
+          <span>© 2026 Instagram Clone by Parmod Kumar</span>
         </div>
+        <p className="text-[11px] text-gray-400 text-center max-w-lg mt-1 leading-relaxed">
+          Educational Portfolio Project • Not affiliated with, sponsored by, or endorsed by Meta Platforms, Inc. All trademarks belong to their respective owners.
+        </p>
       </footer>
     </>
   );

@@ -12,7 +12,7 @@ export function NotFoundPage() {
           to="/"
           className="text-[#0095F6] hover:text-[#00376B] font-semibold transition inline-block ml-1"
         >
-          Go back to Instagram.
+          Go back to Instagram Clone.
         </Link>
       </p>
     </div>

@@ -17,14 +17,14 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
     const mailOptions = {
       from: process.env.EMAIL,
       to: receiverMail,
-      subject: "Welcome, on the Instagram app:)",
+      subject: "Welcome to Instagram Clone :)",
       html: `
     <!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Instagram</title>
+    <title>Welcome to Instagram Clone</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,17 +58,14 @@ export const sendWelcomeMail = async (receiverMail, userName) => {
 </head>
 <body>
     <div class="container">
-        <div style="text-align: center; padding-bottom: 20px;">
-            <img src="https://pbs.twimg.com/profile_images/1526231349354303489/3Bg-2ZsT_400x400.jpg" alt="Instagram" style="width: 150px;">
-        </div>
         <div>
-            <h1>Welcome to Instagram!</h1>
+            <h1>Welcome to Instagram Clone!</h1>
             <p>Dear ${userName},</p>
-            <p>Thank you for signing up for Instagram! We're excited to have you as a part of our community.</p>
-            <p>With Instagram, you can share your photos and videos, connect with friends and family, and explore new content from around the world.</p>
-            <p>If you have any questions or need assistance, feel free to reach out to us.</p>
+            <p>Thank you for signing up for Instagram Clone! We're excited to have you as a part of our community.</p>
+            <p>With Instagram Clone, you can share your photos and videos, connect with friends, and explore new content.</p>
+            <p>If you have any questions or need assistance, feel free to reach out.</p>
             <p>Happy sharing!</p>
-            <p>Best regards,<br>Parmod Yadav The Instagram Team</p>
+            <p>Best regards,<br>Parmod Kumar • Instagram Clone</p>
         </div>
     </div>
 </body>

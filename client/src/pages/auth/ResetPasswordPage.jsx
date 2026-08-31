@@ -39,7 +39,7 @@ export function ResetPasswordPage() {
           className="text-2xl font-bold text-gray-900"
           style={{ fontFamily: "Lobster Two, cursive" }}
         >
-          Instagram
+          Instagram Clone
         </Link>
         <div className="flex space-x-3">
           <Link
@@ -118,8 +118,9 @@ export function ResetPasswordPage() {
         </form>
       </div>
 
-      <footer className="mt-8 text-xs text-gray-400">
-        © 2026 Instagram from Meta
+      <footer className="mt-8 text-xs text-gray-400 text-center flex flex-col gap-1">
+        <span>© 2026 Instagram Clone by Parmod Kumar</span>
+        <span className="text-[10px]">Educational Portfolio Project</span>
       </footer>
     </div>
   );

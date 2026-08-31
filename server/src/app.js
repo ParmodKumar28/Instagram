@@ -122,7 +122,7 @@ cloudinary.config({
 
 // Default route
 app.get("/", (req, res, next) => {
-  res.send("Welcome To Instagram");
+  res.send("Welcome to Instagram Clone API");
 });
 
 // Routes

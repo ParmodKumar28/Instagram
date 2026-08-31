@@ -279,3 +279,12 @@ npm run dev
 ## 📄 License
 
 This project is licensed under the ISC License.
+
+---
+
+## ⚠️ Disclaimer
+
+This project is an open-source clone of Instagram built purely for **educational, non-commercial, and portfolio purposes**. 
+
+All graphical assets, trademarks, logos, and brand names belong to **Meta Platforms, Inc.** This project is not affiliated with, sponsored by, or endorsed by Meta Platforms, Inc. or Instagram.
+
