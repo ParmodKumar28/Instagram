@@ -176,6 +176,17 @@ export function StoryViewerModal({
     }
   };
 
+  // Sync video play/pause with isPaused and showViewers
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isPaused || showViewers) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  }, [isPaused, showViewers]);
+
   const handleSendReaction = async () => {
     try {
       const res = await dispatch(likeStoryAsync(currentStory._id)).unwrap();
@@ -195,6 +206,7 @@ export function StoryViewerModal({
     if (!replyText.trim()) return;
     const text = replyText.trim();
     setReplyText("");
+    setIsPaused(false);
     try {
       await dispatch(replyStoryAsync({ storyId: currentStory._id, text })).unwrap();
     } catch (err) {
@@ -204,16 +216,6 @@ export function StoryViewerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md select-none animate-in fade-in duration-200">
-      {/* Top Close Button for Viewer */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 rounded-full z-50 transition cursor-pointer"
-        aria-label="Close story viewer"
-      >
-        <IoClose className="text-3xl" />
-      </button>
-
       {/* Previous User Navigation Arrow */}
       {userIndex > 0 && (
         <button
@@ -385,7 +387,12 @@ export function StoryViewerModal({
                 <input
                   type="text"
                   value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
+                  onChange={(e) => {
+                    setReplyText(e.target.value);
+                    setIsPaused(true);
+                  }}
+                  onFocus={() => setIsPaused(true)}
+                  onBlur={() => setIsPaused(false)}
                   placeholder={`Reply to ${currentGroup?.user?.username || "user"}...`}
                   className="w-full bg-transparent text-white placeholder-white/60 text-xs outline-none"
                   onClick={(e) => e.stopPropagation()}
